@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en" class="no-js">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex, nofollow">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hero dev</title>
+<link rel="icon" href="../../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Newsreader:ital,opsz,wght@0,6..72,400..600;1,6..72,400..500&display=swap">
+<link rel="stylesheet" href="../../assets/css/site.css">
+<style>
+  /* PROPOSED (not in site.css yet): portrait source needs a 4:5 box, else object-fit:cover crops it to 16:9 */
+  body.fix #hero-video { }
+  @media (max-width: 600px) { body.fix #hero-video { --ar: 4 / 5; } }
+  #dbg { font: 12px monospace; color: #900; }
+</style>
+<script>window.__err=[];window.onerror=function(m){window.__err.push(String(m));};</script>
+<script>document.documentElement.classList.remove("no-js");</script>
+</head>
+<body class="fix">
+<main id="main">
+<!-- ============ HERO ============ -->
+<section class="hero" aria-labelledby="title">
+  <div class="wide">
+    <div class="kicker" data-label>arXiv 2608.13966</div>
+    <h1 id="title"><span class="name">QUASAR</span><span class="sub">Lowering the Loss Floor of Quantization-Aware Training with Loss-Aware Reconstruction</span></h1>
+    <p class="authors" data-label>
+      <span class="a">Vincent Counathe<sup>1,2</sup></span>
+      <span class="a">Ben Athiwaratkun<sup>2</sup></span>
+      <span class="a">Christopher De Sa<sup>1,2</sup></span>
+      <span class="a">Tianyi Zhang<sup>2</sup></span>
+    </p>
+    <p class="affils" data-label><span><sup>1</sup>Cornell University</span><span><sup>2</sup>Together AI</span></p>
+    <nav class="links" aria-label="Paper links" data-label>
+      <a class="btn" href="https://arxiv.org/abs/2608.13966"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><path d="M4 1.5h5.5L13 5v9.5H4z"/><path d="M9.5 1.5V5H13M6.5 8h4M6.5 10.5h4"/></svg>Paper</a>
+      <a class="btn" href="https://arxiv.org/pdf/2608.13966"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><path d="M8 2v8M4.5 6.5 8 10l3.5-3.5M3 13.5h10"/></svg>PDF</a>
+      <a class="btn soon" id="code-btn" href="https://github.com/vincentcounathe/quasar-qat"><svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 .2a8 8 0 0 0-2.53 15.59c.4.07.55-.17.55-.38v-1.33c-2.23.48-2.7-1.07-2.7-1.07-.36-.92-.89-1.17-.89-1.17-.73-.5.06-.49.06-.49.8.06 1.23.83 1.23.83.71 1.22 1.87.87 2.33.66.07-.52.28-.87.5-1.07-1.78-.2-3.65-.89-3.65-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.6 7.6 0 0 1 4 0c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.28.82 2.15 0 3.07-1.87 3.75-3.66 3.95.29.25.54.73.54 1.48v2.2c0 .21.15.46.55.38A8 8 0 0 0 8 .2"/></svg>Code</a>
+      <a class="btn" href="https://huggingface.co/collections/QUASAR-QAT/all-quasar-models-6aab09fd2913ec22df0d5f15"><span aria-hidden="true">🤗</span>Models</a>
+      <a class="btn" href="#cite"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><path d="M3 4.5h4v4H5l-1.5 3M9 4.5h4v4h-2l-1.5 3"/></svg>BibTeX</a>
+    </nav>
+    <p class="lede">We introduce QUASAR, a QAT method that brings lightweight, loss-aware reconstruction into the training loop.</p>
+
+    <figure class="plate hero-media">
+      <div class="viz" id="hero-viz">
+        <video id="hero-video" autoplay muted loop playsinline preload="auto" poster="../../assets/video/hero.jpg" width="1280" height="720" aria-label="Animation: standard QAT and QUASAR train on the same loss surface. Each step reconstructs r from w, takes the gradient at r, and applies it to w. QUASAR's trajectory reaches the minimum; standard QAT's bounces around it.">
+          <source src="../../assets/video/hero-portrait.mp4" type="video/mp4" media="(max-width: 600px)">
+          <source src="../../assets/video/hero.mp4" type="video/mp4">
+        </video>
+      </div>
+      <figcaption><span class="tag illus" data-label>illustrative</span> <b>The structural mismatch of gradients in standard QAT versus QUASAR.</b> Under the STE, both methods evaluate the gradient at the reconstructed weights <i>r</i> and apply it to the latent weights <i>w</i>. QUASAR minimizes the loss-aware reconstruction error, making the gradient at <i>r</i> a more faithful proxy for the gradient at <i>w</i>.</figcaption>
+    </figure>
+  </div>
+</section>
+
+
+</main>
+<div id="dbg"></div>
+<script src="../../assets/js/site.js"></script>
+<script>
+  const v = document.getElementById("hero-video");
+  const t = parseFloat(new URLSearchParams(location.search).get("t") || "-1");
+  if (new URLSearchParams(location.search).get("nofix")) document.body.classList.remove("fix");
+  v.addEventListener("loadeddata", () => {
+    if (t >= 0) { v.pause(); v.currentTime = t; }
+    document.getElementById("dbg").textContent = "src=" + v.currentSrc.split("/").pop() + " " + v.videoWidth + "x" + v.videoHeight + " box=" + v.clientWidth + "x" + v.clientHeight + " err=" + window.__err.join("|");
+  });
+  setTimeout(() => { if (!document.getElementById("dbg").textContent) document.getElementById("dbg").textContent = "no loadeddata; readyState=" + v.readyState + " err=" + window.__err.join("|") + " docW=" + document.documentElement.scrollWidth; }, 5000);
+</script>
+</body>
+</html>

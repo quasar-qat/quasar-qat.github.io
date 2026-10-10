@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en" class="no-js">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex, nofollow">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Training Loop Dev</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Newsreader:ital,opsz,wght@0,6..72,400..600;1,6..72,400..500&display=swap">
+<link rel="stylesheet" href="../../assets/css/site.css">
+<link rel="stylesheet" href="../../assets/css/fig-loop.css">
+<style>
+  #errors { font: 12px/1.4 var(--mono); color: #a13040; white-space: pre-wrap; }
+  .dev-pad { padding: 24px 0 48px; }
+</style>
+<script>
+  document.documentElement.classList.remove("no-js");
+  // ?state=std|q pins the state; ?auto=0 disables auto-alternation; ?theme=dark
+  (function () {
+    const p = new URLSearchParams(location.search);
+    if (p.get("theme")) document.documentElement.setAttribute("data-theme", p.get("theme"));
+    window.FL_DEV = { state: p.get("state"), auto: p.get("auto") };
+    window.onerror = function (msg, src, line, col) {
+      const n = document.getElementById("errors");
+      if (n) n.textContent += "ERROR " + msg + " @" + src + ":" + line + ":" + col + "\n";
+    };
+  })();
+</script>
+</head>
+<body>
+<main class="dev-pad">
+  <section class="block" id="method">
+    <div class="fig">
+      <figure class="plate">
+        <div class="viz">
+          <div class="viz-head"><span class="viz-kicker" data-label>Fig. 2 · <b>the training loop</b></span></div>
+          <div class="viz-body"><div id="loop-diagram" class="loop-diagram"></div></div>
+        </div>
+        <figcaption id="cap-loop"><b>The training loops for standard QAT and QUASAR differ only in the reconstruction <span class="math">w ↦ q ↦ r</span>.</b> Standard QAT determines the quantization grid from each group's extreme weights; QUASAR searches over code assignments and fits the dequantizer to minimize loss-aware reconstruction error.</figcaption>
+      </figure>
+    </div>
+  </section>
+  <div class="fig"><pre id="errors"></pre></div>
+</main>
+<script>
+  (function () {
+    const d = window.FL_DEV, n = document.getElementById("loop-diagram");
+    if (d.state) n.dataset.state = d.state;
+    if (d.auto) n.dataset.auto = d.auto;
+  })();
+</script>
+<script src="../../assets/js/viz.js" defer></script>
+<script src="../../assets/js/fig-loop.js" defer></script>
+</body>
+</html>

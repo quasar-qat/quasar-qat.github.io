@@ -1,0 +1,129 @@
+/* ix-judge.css — interactive Figures 27-29 (assets/js/ix-judge.js).
+   Figure content always sits on the light card: every color here is a fixed light-theme value.
+   Type: 12px for every in-chart label, 14px for tooltip body text; Inter for labels, JetBrains Mono
+   (uppercase, .08em) for axis titles / small kickers, JetBrains Mono (as typed) for quoted model output. */
+
+.ixj { color: #1d1f22; }
+.chart.ixj .axis text { font-size: 12px; }
+.chart.ixj .axis-title { font: 500 12px var(--mono); letter-spacing: .08em; text-transform: uppercase; fill: #6b6f75; }
+.ixj .pills button { font-size: 12px; }
+.ixj .pills .sm, .ixj.narrow .pills .lg { display: none; }
+.ixj.narrow .pills .sm { display: inline; }
+
+/* ---- controls ---- */
+.ixj-controls { gap: 8px 18px; margin: 2px 0 10px; }
+.ixj-ctl { display: inline-flex; align-items: center; gap: 9px; min-width: 0; }
+.ixj-ctl .lab { font: 500 12px/1 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: #6b6f75; }
+
+/* ---- plot ---- */
+.ixj-plot { position: relative; width: 100%; border-radius: 8px; outline: none; -webkit-tap-highlight-color: transparent; }
+.ixj-plot:focus-visible { box-shadow: 0 0 0 2px #2e6f95; }
+.ixj-plot svg { display: block; overflow: visible; font-family: var(--sans); touch-action: pan-y pinch-zoom; }
+.ixj-grid { stroke: #ecebe7; stroke-width: 1; shape-rendering: crispEdges; }
+.ixj-zero { stroke: #1d1f22; stroke-width: 1; opacity: .7; shape-rendering: crispEdges; }
+.ixj-sep { stroke: #d9d5cc; stroke-width: 1; stroke-dasharray: 2 3; shape-rendering: crispEdges; }
+.ixj-band { fill: #f3f1ec; transition: opacity .15s ease; pointer-events: none; }
+.ixj-row { transition: opacity .18s ease; }
+.ixj-row.dim { opacity: .32; }
+.ixj-seg { stroke: #fdfdfd; stroke-width: 1; }
+.ixj-lab { fill: #1d1f22; font: 500 12px var(--sans); }
+.ixj-lab.on { font-weight: 650; }
+.ixj-lab.ref { fill: #7D6310; font-weight: 600; }
+.ixj-lab.q { fill: #A13040; font-weight: 700; }
+.ixj-val { font: 600 12px var(--sans); font-variant-numeric: tabular-nums; pointer-events: none; }
+.ixj-val.win { fill: #A13040; font-weight: 700; }
+.ixj-val.win.in { fill: #fff; }
+.ixj-val.loss { fill: #fff; font-weight: 500; }
+.ixj-net { fill: #1d1f22; font: 500 12px var(--sans); font-variant-numeric: tabular-nums; }
+.ixj-colh, .ixj-colh2 { fill: #6b6f75; font: 500 12px var(--mono); letter-spacing: .08em; }
+.ixj-colh { text-transform: uppercase; }
+.ixj-colh2 { font-family: var(--sans); letter-spacing: 0; }
+
+/* Figure 28 */
+.ixj-ptitle { fill: #1d1f22; font: 600 12px var(--sans); }
+.ixj-bar { shape-rendering: geometricPrecision; }
+.ixj-v { fill: #44484f; font: 500 12px var(--sans); font-variant-numeric: tabular-nums; transition: opacity .25s ease; }
+.ixj-v.q { fill: #A13040; font-weight: 700; }
+.ixj-cnt { fill: #6b6f75; font: 400 12px var(--sans); font-variant-numeric: tabular-nums; }
+.ixj-cnt.x { fill: #1d1f22; font-weight: 650; }
+.ixj-ciz { stroke: #cfccc5; stroke-width: 1; }
+.ixj-ref { stroke: #C9A227; stroke-width: 1.6; stroke-dasharray: 4 3; transition: opacity .3s ease; }
+.ixj-reft { fill: #7D6310; font: 600 12px var(--sans); }
+
+/* ---- key row ---- */
+.ixj-legend { display: flex; flex-wrap: wrap; gap: 6px 16px; margin: 0 0 8px; font: 500 12px/1.3 var(--sans); color: #44484f; }
+.ixj-li { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
+.ixj-li.q { color: #A13040; font-weight: 600; }
+.ixj-k { display: inline-block; flex: none; width: 10px; height: 10px; border-radius: 2px; }
+.ixj-k.dash { width: 14px; height: 0; border-radius: 0; border-top: 2px dashed; }
+
+/* ---- tooltip ---- */
+.ixj .vtip { font: 400 var(--fs-s, 13px)/1.45 var(--sans); max-width: 300px; }
+.ixj .vtip .tt { font: 600 12px/1.3 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: #6b6f75; display: flex; align-items: center; gap: 7px; }
+.ixj .vtip .ixj-tm { font: 500 12px/1.3 var(--sans); color: #6b6f75; margin: 6px 0 2px; }
+.ixj .vtip .ixj-tm:first-of-type { margin-top: 2px; }
+.ixj .vtip .row { align-items: baseline; }
+.ixj .vtip b { font-weight: 650; font-variant-numeric: tabular-nums; }
+.ixj .vtip .row.q b { color: #A13040; }
+.ixj-tn { display: inline-flex; align-items: center; gap: 7px; color: #44484f; white-space: nowrap; }
+.ixj-tn.q { color: #A13040; font-weight: 600; }
+.ixj-tc { color: #6b6f75; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.ixj-tg { display: grid; grid-template-columns: auto auto auto; gap: 1px 12px; align-items: baseline; margin-top: 4px; }
+.ixj-tg b, .ixj-tg .ixj-tc, .ixj-tg .ixj-th { text-align: right; }
+.ixj-th { font: 500 12px/1.3 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: #9a9da3; white-space: nowrap; }
+.ixj-tnet { display: flex; align-items: baseline; gap: 10px; margin-top: 6px; padding-top: 6px; border-top: 1px solid #ece8e0; }
+.ixj-tnet span:first-child { color: #44484f; flex: 1; }
+
+/* ---- Figure 29: responses ---- */
+.ixj-toggle {
+  appearance: none; display: inline-flex; align-items: center; gap: 8px; cursor: pointer; min-height: 32px;
+  padding: 7px 12px; border-radius: 999px; border: 1px solid #e3e0da; background: #f4f2ee; color: #44484f; font: 500 12px/1 var(--sans);
+}
+.ixj-toggle:hover { background: #e8e5df; }
+.ixj-toggle[aria-pressed="true"] { background: #1d1f22; border-color: #1d1f22; color: #fdfdfd; }
+.ixj-toggle:focus-visible, .ixj .pills button:focus-visible { outline: 2px solid #2e6f95; outline-offset: 2px; }
+.ixj-tk { width: 12px; height: 12px; border-radius: 3px; background: #e6e1d6; box-shadow: inset 0 0 0 1px #cfc7b7; }
+.ixj-toggle[aria-pressed="true"] .ixj-tk { background: #e6e1d6; box-shadow: none; }
+
+.ixj-prompt { display: flex; align-items: baseline; gap: 12px; padding: 12px 0 12px; border-top: 1px solid #ece8e0; }
+.ixj-pk, .ixj-grp { font: 500 12px/1.3 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: #6b6f75; }
+.ixj-pk { flex: none; width: 116px; }
+.ixj-pq { font: 400 var(--fs-s, 13px)/1.5 var(--sans); color: #1d1f22; quotes: "\201C" "\201D"; }
+.ixj-pq::before, .ixj-pq::after { color: #9a9da3; }
+
+.ixj-body { border-top: 1px solid #ece8e0; }
+.ixj-grp { padding: 14px 0 6px; border-top: 1px solid #ece8e0; }
+.ixj-r { display: grid; grid-template-columns: 116px minmax(0, 1fr); gap: 12px; align-items: baseline; padding: 7px 10px 7px 0; border-radius: 8px; position: relative; }
+.ixj-r + .ixj-r { border-top: 1px solid #f1eee8; }
+.ixj-r.ref { padding: 12px 10px 12px 0; }
+.ixj-r.q { background: #fbeef0; border-top-color: transparent; padding-left: 10px; margin-left: -10px; margin-top: 2px; }
+.ixj-r.q + .ixj-r, .ixj-r + .ixj-r.q { border-top-color: transparent; }
+.ixj-n { display: flex; align-items: center; gap: 7px; font: 500 12px/1.4 var(--sans); color: #1d1f22; white-space: nowrap; }
+.ixj-r.ref .ixj-n { color: #7D6310; font-weight: 600; }
+.ixj-r.q .ixj-n { color: #A13040; font-weight: 700; }
+.ixj-sw { flex: none; width: 9px; height: 9px; border-radius: 2px; }
+.ixj-t { font: 400 12px/1.7 var(--mono); color: #2b2e33; overflow-wrap: anywhere; word-break: normal; font-variant-ligatures: none; }
+.ixj-r.q .ixj-t { color: #1d1f22; }
+.ixj-t .w { transition: opacity .2s ease, background-color .2s ease, color .2s ease; border-radius: 2px; }
+.ixj-t.pre .w, .ixj-t.pre .ell { opacity: 0; transition: none; }
+.ixj-t .ell { color: #9a9da3; transition: opacity .2s ease .4s; }
+.rep .ixj-t .w { color: #a9adb3; }
+.rep .ixj-t .w.rp { color: #1d1f22; background: #e6e1d6; box-shadow: 0 0 0 1px #e6e1d6; }
+
+/* fetch failure: neutral data label in place of the chart */
+.ixj-fail { padding: 22px 0; text-align: center; font: 500 12px/1.4 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: #6b6f75; }
+
+@media (max-width: 600px) {
+  .ixj-controls { gap: 8px 12px; }
+  .ixj-ctl .pills button, .ixj-toggle { padding: 7px 10px; }
+  .ixj-prompt { flex-direction: column; gap: 4px; }
+  .ixj-r { grid-template-columns: minmax(0, 1fr); gap: 2px; padding: 9px 4px 9px 0; }
+  .ixj-r.q { padding: 9px 10px; margin: 2px -10px 0; }
+  .ixj-pk { width: auto; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ixj-row, .ixj-band, .ixj-v, .ixj-ref, .ixj-t .w, .ixj-t .ell { transition: none !important; }
+}
+@media print {
+  .ixj-t.pre .w, .ixj-t.pre .ell { opacity: 1 !important; }
+}

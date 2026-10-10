@@ -1,0 +1,104 @@
+/* ix-theory1.css — appendix theory scatters (assets/js/ix-theory1.js): Fig. 10, Fig. 14, Fig. 15.
+   Figure content sits on the light card in both themes, so every color here is a fixed light value.
+   Type: 12px for ticks, labels, axis titles, legends, pills and slider stops; 14px for tooltip bodies and
+   for math glyphs (Newsreader italic) set inside 12px titles. Inter for labels, JetBrains Mono uppercase for
+   axis titles and control labels. */
+
+.t1 { color: #1d1f22; }
+
+/* ---- shared chart classes, pinned to the scale ---- */
+.chart.t1 .axis text { font-size: 12px; fill: #6b6f75; }
+.chart.t1 .axis-title { font: 600 12px var(--mono); letter-spacing: .08em; text-transform: uppercase; fill: #6b6f75; }
+.t1 .t1-m { font-family: var(--serif); font-style: italic; font-weight: 500; font-size: var(--fs-s, 13px); text-transform: none; letter-spacing: 0; }
+.t1 .t1-sub { font-family: var(--serif); font-style: italic; font-size: 12px; text-transform: none; letter-spacing: 0; }
+
+/* ---- controls ---- */
+.t1-controls { gap: 8px 18px; margin: 2px 0 8px; }
+.t1-ctl { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; min-width: 0; }
+.t1 .t1-ctl .pills { flex: 0 1 auto; min-width: 0; }
+.t1-ctl .lab { font: 600 12px/1 var(--mono); letter-spacing: .1em; text-transform: uppercase; color: #6b6f75; white-space: nowrap; }
+.t1-ctl .lab .t1-m { font-size: var(--fs-s, 13px); }
+.t1 .pills button { font-size: 12px; padding: 8px 10px; }
+.t1-ctl-sl { flex: 1 1 300px; gap: 2px 14px; }
+
+/* stepped slider (role=slider): rail + stops + labels; vertical swipes scroll the page */
+.t1-sl { position: relative; flex: 1 1 210px; min-width: 0; height: 42px; padding: 0 12px; cursor: pointer;
+  touch-action: pan-y pinch-zoom; -webkit-tap-highlight-color: transparent; outline: none; border-radius: 8px; user-select: none; -webkit-user-select: none; }
+.t1-sl:focus-visible { box-shadow: 0 0 0 2px #2e6f95; }
+.t1-sl-rail { position: absolute; left: 12px; right: 12px; top: 13px; height: 4px; border-radius: 2px; background: #e6e3dd; }
+.t1-sl-tick { position: absolute; top: -2px; width: 2px; height: 8px; margin-left: -1px; border-radius: 1px; background: #c9c6c0; }
+.t1-sl-knob { position: absolute; top: -6px; width: 16px; height: 16px; margin-left: -8px; border-radius: 50%;
+  background: #1d1f22; box-shadow: 0 0 0 3px #fdfdfd, 0 1px 4px rgba(29, 31, 34, .25); transition: left .18s cubic-bezier(.3, .7, .2, 1); }
+.t1-sl.drag .t1-sl-knob { transition: none; }
+.t1-sl-labs { position: absolute; left: 12px; right: 12px; top: 25px; height: 14px; }
+.t1-sl-labs span { position: absolute; transform: translateX(-50%); font: 500 12px/1 var(--sans); color: #6b6f75; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.t1-sl-labs span.on { color: #1d1f22; font-weight: 700; }
+@media (prefers-reduced-motion: reduce) { .t1-sl-knob { transition: none; } }
+
+/* ---- plot ---- */
+.t1-plot { position: relative; width: 100%; border-radius: 8px; outline: none; -webkit-tap-highlight-color: transparent; }
+.t1-plot:focus-visible { box-shadow: 0 0 0 2px #2e6f95; }
+.t1-plot svg { display: block; overflow: visible; font-family: var(--sans); touch-action: pan-y pinch-zoom; }
+.t1-ov { touch-action: pan-y pinch-zoom; }
+.t1-fit { fill: none; stroke-width: 1.3; stroke-dasharray: 5 4; }
+.t1-ann { fill: #44484f; font: 500 12px var(--sans); font-variant-numeric: tabular-nums; }
+.t1-ptitle { fill: #1d1f22; font: 600 12px var(--sans); }
+.t1-tag { font: 700 12px var(--sans); }
+.t1-stat { fill: #6b6f75; font: 500 12px var(--sans); font-variant-numeric: tabular-nums; }
+.t1-plab { fill: #2e6f95; font: 600 12px var(--sans); font-variant-numeric: tabular-nums; }
+.t1-halo { paint-order: stroke; stroke: #fdfdfd; stroke-width: 4px; stroke-linejoin: round; }
+.t1-ring { fill: none; stroke-width: 1.6; }
+.t1-hring { fill: none; stroke-width: 1.6; opacity: .6; }
+.t1-guide { fill: none; stroke-width: 1.2; stroke-dasharray: 1.5 3.5; stroke-linecap: round; }
+
+/* points: positioned by the outer <g transform>, the inner shape pops in once */
+.t1-pt { transition: opacity .25s ease; }
+.t1-pt > * { opacity: 0; transform: scale(.25); transform-box: fill-box; transform-origin: center;
+  transition: opacity .3s ease, transform .55s cubic-bezier(.3, 1.45, .5, 1), fill .25s ease; }
+.t1-in .t1-pt > * { opacity: 1; transform: none; }
+.t1-fade { transition: opacity .45s ease; }
+@media (prefers-reduced-motion: reduce) { .t1-pt, .t1-pt > *, .t1-fade { transition: none !important; } }
+
+/* ---- tooltip ---- */
+.t1 .vtip { font: 400 var(--fs-s, 13px)/1.45 var(--sans); }
+.t1 .vtip .tt { font: 600 12px/1.35 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: #6b6f75; margin-bottom: 4px; }
+.t1 .vtip .tt .t1-m { font-size: var(--fs-s, 13px); }
+.t1 .vtip .tt .t1-tq { color: #A13040; }
+.t1 .vtip .tt .t1-sm { display: block; font-weight: 500; }
+.t1 .vtip .tt .t1-code { text-transform: none; letter-spacing: 0; color: #1d1f22; }
+.t1 .vtip .t1-row { align-items: baseline; }
+.t1 .vtip .t1-row b { font-weight: 650; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.t1 .vtip .t1-n { color: #44484f; white-space: nowrap; }
+.t1 .vtip .t1-n .t1-m { font-size: var(--fs-s, 13px); }
+.t1 .vtip sub { font-size: 12px; line-height: 0; }
+.t1 .vtip .t1-k { display: inline-block; width: 12px; height: 3px; border-radius: 2px; margin-right: 7px; vertical-align: 3px; }
+
+/* ---- legend: static keys and toggle chips ---- */
+.t1-legend { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 4px; margin-top: 8px; font: 500 12px/1.3 var(--sans); color: #44484f; }
+.t1-li { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; padding: 0 8px 0 0; }
+.t1-li svg, .t1-chip svg { width: 18px; height: 12px; max-width: none; flex: none; overflow: visible; }
+.t1-li .t1-m { font-size: var(--fs-s, 13px); }
+.t1-chip { appearance: none; display: inline-flex; align-items: center; gap: 6px; min-height: 24px; padding: 2px 6px;
+  border: 0; border-radius: 6px; background: none; color: #44484f; cursor: pointer;
+  font: 500 12px/1 var(--sans); white-space: nowrap; transition: background .15s ease, border-color .15s ease, opacity .15s ease, box-shadow .15s ease; }
+.t1-chip:hover { background: #f4f2ee; }
+.t1-chip[aria-pressed="true"] { color: #1d1f22; text-decoration: underline; text-decoration-thickness: 1.5px; text-underline-offset: 4px; }
+.t1-chip:focus-visible { outline: 2px solid #2e6f95; outline-offset: 2px; }
+.t1-chip.q { color: #A13040; font-weight: 700; }
+.t1-legend.iso .t1-chip[aria-pressed="false"] { opacity: .45; }
+.t1-legend.iso .t1-chip[aria-pressed="false"]:hover { opacity: 1; }
+.t1-legend:has(.t1-lg) { gap: 6px 18px; margin-top: 10px; }
+.t1-stats { gap: 4px 4px; color: #6b6f75; }
+.t1-stats b { font-weight: 700; margin-right: 4px; }
+.t1-stats + .t1-legend { margin-top: 4px; }
+.t1-lg { display: flex; flex-wrap: wrap; gap: 6px; }
+
+/* fetch failure: neutral data label in place of the chart */
+.t1-fail { padding: 22px 0; text-align: center; font: 500 12px/1.4 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: #6b6f75; }
+
+@media (max-width: 600px) {
+  .t1-controls { gap: 6px 14px; }
+  .t1-ctl { gap: 7px; }
+  .t1 .t1-ctl .pills button { padding: 7px 8px; }
+  .t1-chip { padding: 4px 6px; }
+}

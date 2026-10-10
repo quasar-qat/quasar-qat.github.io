@@ -1,0 +1,62 @@
+/* fig-loop.css — Fig. 2, the training loop (assets/js/fig-loop.js).
+   Figure content sits on the light card, so every color here is a fixed light-theme value.
+   Sizes: 12 (notes, legend, pills) · 14 (phone box labels, backward label) · 18 (desktop box labels). */
+
+.fl-root { color: #1d1f22; }
+
+/* ---- control row: state pills (left) + legend (right) ---- */
+.fl-ctl { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px 16px; margin: 2px 0 18px; }
+.fl-ctl .pills button[data-v="q"][aria-checked="true"] { background: #a13040; }
+.fl-leg { display: inline-flex; gap: 16px; font: 500 var(--fs-xs, 12px)/1 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: #6b6f75; }
+.fl-leg span { display: inline-flex; align-items: center; gap: 7px; }
+.fl-sw { display: inline-block; width: 18px; height: 12px; box-sizing: border-box; }
+.fl-sw-t { background: #eef0f3; border: 1.5px solid #3d434c; border-radius: 3px; }
+.fl-sw-o { background: #fff; border: 1.5px solid #1d1f22; border-radius: 1px; }
+
+/* ---- diagram ---- */
+.fl-svg { width: 100%; }
+.fl-svg svg { display: block; margin: 0 auto; overflow: visible; }
+.fl text { fill: currentColor; font-optical-sizing: auto; }
+.fl-lab { color: #1d1f22; }
+.fl-w6 { font-weight: 600; }
+.fl-lab-ctx { color: #6b6f75; }
+.fl-lab-q { color: #a13040; }
+.fl-mapsto { fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; }
+
+.fl-box { stroke-width: 1.5; }
+.fl-op { fill: #fff; stroke: #1d1f22; }
+.fl-tensor { fill: #eef0f3; stroke: #3d434c; }
+.fl-ctx { fill: #f3f4f6; stroke: #a3a7ad; }
+.fl-salbox { fill: #fbeef0; stroke: #d1495b; }
+
+.fl-line { fill: none; stroke-width: 1.5; }
+.fl-line.fl-fwd { stroke: #1d1f22; }
+.fl-head.fl-fwd { fill: #1d1f22; }
+.fl-line.fl-ctxl { stroke: #8a8e94; }
+.fl-head.fl-ctxl { fill: #8a8e94; }
+.fl-line.fl-steel { stroke: #2e6f95; }
+.fl-head.fl-steel { fill: #2e6f95; }
+.fl-line.fl-dash { stroke-dasharray: 6 4.5; stroke-width: 1.6; }
+.fl-dot { fill: #1d1f22; }
+.fl-back { color: #2e6f95; }
+.fl-note { color: #a13040; }
+
+/* ---- the two states: only these properties change ---- */
+.fl-chg, .fl-lab-recon, .fl-lab-recw, .fl-keep, .fl-add, .fl-sal, .fl-fit {
+  transition: stroke .6s ease, stroke-width .6s ease, color .6s ease, font-weight .6s ease,
+              opacity .55s ease, transform .7s cubic-bezier(.3, .7, .2, 1);
+}
+.fl-keep { transform: translateY(var(--dy, 0)); }
+.fl-add, .fl-sal, .fl-fit { opacity: 0; }
+.fl-sal { transform: translateY(-6px); }
+
+.fl.is-q .fl-chg { stroke: #d1495b; stroke-width: 2; }
+.fl.is-q .fl-lab-recon, .fl.is-q .fl-lab-recw { color: #a13040; }
+.fl.is-q .fl-lab-recw { font-weight: 600; }
+.fl.is-q .fl-keep { transform: none; }
+.fl.is-q .fl-add, .fl.is-q .fl-fit { opacity: 1; transition-delay: .12s; }
+.fl.is-q .fl-sal { opacity: 1; transform: none; transition-delay: .2s; }
+
+@media (prefers-reduced-motion: reduce) {
+  .fl-chg, .fl-lab-recon, .fl-lab-recw, .fl-keep, .fl-add, .fl-sal, .fl-fit { transition: none; }
+}

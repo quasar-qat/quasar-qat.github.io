@@ -1,0 +1,41 @@
+{
+  "org": "https://huggingface.co/QUASAR-QAT",
+  "collection": "https://huggingface.co/collections/QUASAR-QAT/all-quasar-models-6aab09fd2913ec22df0d5f15",
+  "families": [
+    {"name": "Qwen3.5-4B", "base": "Qwen/Qwen3.5-4B", "models": [
+      {"repo": "QUASAR-QAT/Qwen3.5-4B-QUASAR-NVFP4", "format": "NVFP4", "runtime": "vLLM"},
+      {"repo": "QUASAR-QAT/Qwen3.5-4B-QUASAR-NVFP4-W4A4", "format": "NVFP4 W4A4", "runtime": "vLLM"},
+      {"repo": "QUASAR-QAT/Qwen3.5-4B-QUASAR-Q4_0-GGUF", "format": "GGUF Q4_0", "runtime": "llama.cpp"}]},
+    {"name": "Qwen3.8-27B", "base": "Qwen/Qwen3.8-27B", "models": [
+      {"repo": "QUASAR-QAT/Qwen3.8-27B-QUASAR-NVFP4", "format": "NVFP4", "runtime": "vLLM"}],
+     "hf_card": {
+       "source": "https://huggingface.co/QUASAR-QAT/Qwen3.8-27B-QUASAR-NVFP4",
+       "source_label": "Hugging Face model card",
+       "source_file": "tools/sources/qwen3.8-27b-quasar-nvfp4-card.md",
+       "fetched": "2026-10-08",
+       "revision": "d9af17e20644c5b9a6d66dff1d14f349e2e61b05",
+       "format": "NVFP4",
+       "tables": [
+        {"key": "public", "label": "public NVFP4 builds", "note": {"GPQA-D": "2 runs · n=396", "AIME'26": "3 repeats · n=90"}, "columns": ["Size", "NVFP4 linears", "GPQA-D", "AIME'26"], "rows": [
+          {"model": "QUASAR (this model)", "short": "QUASAR", "role": "quasar", "values": ["19.7 GB", "496/496", "90.91", "100.0"]},
+          {"model": "BF16 original", "short": "BF16", "role": "bf16", "url": "https://huggingface.co/Qwen/Qwen3.8-27B", "values": ["55.6 GB", "—", "91.41", "100.0"]},
+          {"model": "Unsloth NVFP4", "short": "Unsloth NVFP4", "role": "baseline", "url": "https://huggingface.co/unsloth/Qwen3.8-27B-NVFP4", "values": ["23.4 GB", "168/496", "89.39", "97.78"]},
+          {"model": "Inferact NVFP4", "short": "Inferact NVFP4", "role": "baseline", "url": "https://huggingface.co/Inferact/Qwen3.8-27B-NVFP4", "values": ["26.4 GB", "304/496", "87.63", "96.67"]}]},
+        {"key": "llmc", "label": "LLM Compressor NVFP4", "note": {}, "columns": ["MRCR", "MRCR 8-needle", "HMMT'26", "SuperGPQA", "LiveCodeBench", "RULER 32K", "RULER 64K", "RULER 128K"], "rows": [
+          {"model": "QUASAR (this model)", "short": "QUASAR", "role": "quasar", "values": ["79.1", "52.7", "73.4", "62.4", "79.2", "96.3", "96.2", "95.8"]},
+          {"model": "BF16 original", "short": "BF16", "role": "bf16", "url": "https://huggingface.co/Qwen/Qwen3.8-27B", "values": ["83.4", "58.5", "75.8", "63.0", "81.0", "96.7", "96.6", "95.9"]},
+          {"model": "GPTQ NVFP4 (LLM Compressor)", "card_model": "GPTQ NVFP4 (LLM Compressor, ours)", "short": "GPTQ NVFP4", "role": "baseline", "values": ["61.3", "35.5", "69.7", "58.9", "77.9", "96.0", "95.4", "95.3"]},
+          {"model": "RTN NVFP4 (LLM Compressor)", "card_model": "RTN NVFP4 (LLM Compressor, ours)", "short": "RTN NVFP4", "role": "baseline", "values": ["57.3", "32.8", "66.9", "58.6", "77.9", "96.2", "96.1", "95.3"]}]}
+       ]}},
+    {"name": "Gemma-4 E4B", "base": "google/gemma-4-E4B-it", "models": [
+      {"repo": "QUASAR-QAT/gemma-4-E4B-it-QUASAR-W4A16-G64", "format": "INT4 g64", "runtime": "vLLM"},
+      {"repo": "QUASAR-QAT/gemma-4-E4B-it-QUASAR-Q4_0-GGUF", "format": "GGUF Q4_0", "runtime": "llama.cpp"}]},
+    {"name": "Gemma-4 12B", "base": "google/gemma-4-12B-it", "models": [
+      {"repo": "QUASAR-QAT/gemma-4-12B-it-QUASAR-W4A16-G64", "format": "INT4 g64", "runtime": "vLLM"},
+      {"repo": "QUASAR-QAT/gemma-4-12B-it-QUASAR-Q4_0-GGUF", "format": "GGUF Q4_0", "runtime": "llama.cpp"}]},
+    {"name": "Muse-Glimmer-30B", "base": "meta-models/Muse-Glimmer-30B", "models": [
+      {"repo": "QUASAR-QAT/Muse-Glimmer-30B-QUASAR-NVFP4", "format": "NVFP4", "runtime": "vLLM"},
+      {"repo": "QUASAR-QAT/Muse-Glimmer-30B-QUASAR-NVFP4-W4A4", "format": "NVFP4 W4A4", "runtime": "vLLM"},
+      {"repo": "QUASAR-QAT/Muse-Glimmer-30B-QUASAR-Q4_0-GGUF", "format": "GGUF Q4_0", "runtime": "llama.cpp"}]}
+  ]
+}

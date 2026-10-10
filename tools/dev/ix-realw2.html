@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex, nofollow">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Real weights dev</title>
+<script>
+  window.__errors = [];
+  window.onerror = function (msg, src, line, col) { window.__errors.push(msg + " @" + line + ":" + col); var e = document.getElementById("errs"); if (e) e.textContent = window.__errors.join("\n"); };
+  window.addEventListener("unhandledrejection", function (ev) { window.__errors.push("rejection: " + ev.reason); var e = document.getElementById("errs"); if (e) e.textContent = window.__errors.join("\n"); });
+</script>
+<script>
+  // ?fail: make the figure data unreachable (checks the '— data unavailable —' fallback)
+  if (/[?&]fail\b/.test(location.search)) { var _f = window.fetch; window.fetch = function (u) { return /ix-realw2/.test(String(u)) ? Promise.resolve(new Response("", { status: 404 })) : _f.apply(this, arguments); }; }
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Newsreader:ital,opsz,wght@0,6..72,400..600;1,6..72,400..500&display=swap">
+<link rel="stylesheet" href="../../assets/css/site.css">
+<link rel="stylesheet" href="../../assets/css/ix-realw2.css">
+<style>pre#errs{color:#b00;font:12px monospace;white-space:pre-wrap;margin:0 20px}</style>
+</head>
+<body>
+<pre id="errs"></pre>
+<main id="main">
+<section class="block" style="padding-top:24px">
+  <div class="wide">
+      <figure class="plate ix">
+        <div class="viz"><div class="viz-head"><span class="viz-kicker" data-label>Fig. 6 · <b>scale search</b> · INT3</span></div><div class="viz-body"><div id="ix-fig6" class="chart ix-mount" style="min-height:440px"></div></div></div>
+        <figcaption><b>Scale search for Qwen3-4B weight groups at INT3.</b> (a) One extreme weight sets the min–max range. (b) QUASAR clips the outlier and covers the bulk. (c) Distribution of selected range factors <i>f</i>⋆ across 28.4M groups; 99.6% use a range narrower than min–max.</figcaption>
+      </figure>
+  </div>
+  <div class="fig">
+    <div class="grid-2">
+      <figure class="plate ix">
+        <div class="viz"><div class="viz-head"><span class="viz-kicker" data-label>Fig. 7 · <b>selected clipping-range factors</b></span></div><div class="viz-body"><div id="ix-fig7" class="chart ix-mount" style="min-height:360px"></div></div></div>
+        <figcaption><b>Distribution of selected clipping-range factors <i>f</i>⋆ across weight groups after QAD at INT4, INT3, and INT2 for Qwen3-4B-Thinking-2507 and Llama-3.1-8B-Instruct.</b> Lower bit widths favor narrower ranges.</figcaption>
+      </figure>
+      <figure class="plate ix">
+        <div class="viz"><div class="viz-head"><span class="viz-kicker" data-label>Fig. 8 · <b>saliency in one layer</b></span></div><div class="viz-body"><div class="chart" style="min-height:420px"></div></div></div>
+        <figcaption>(placeholder for the paired card)</figcaption>
+      </figure>
+    </div>
+  </div>
+  <div class="fig">
+      <figure class="plate ix">
+        <div class="viz"><div class="viz-head"><span class="viz-kicker" data-label>Fig. 11 · <b>reduction across projection types</b></span></div><div class="viz-body"><div id="ix-fig11" class="chart ix-mount" style="min-height:360px"></div></div></div>
+        <figcaption><b>QUASAR reduces reconstruction error across projection types.</b> Median reduction in loss-aware reconstruction error relative to Standard QAT across Qwen3-4B-Thinking-2507 modules at INT4, INT3, and INT2, measured at initialization (left) and after training (right). Error is measured against the full-precision weights.</figcaption>
+      </figure>
+  </div>
+</section>
+</main>
+<script src="../../assets/js/viz.js"></script>
+<script src="../../assets/js/ix-realw2.js"></script>
+</body>
+</html>

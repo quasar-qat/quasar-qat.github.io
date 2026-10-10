@@ -1,0 +1,4058 @@
+[
+ {
+  "id": 1,
+  "section": "Abstract",
+  "sentence": "As large language model inference shifts toward lower precision, post-training quantization (PTQ) becomes increasingly brittle, making quantization-aware training (QAT) essential for preserving model quality.",
+  "kind": "body",
+  "para": 2,
+  "src": "main.tex:59"
+ },
+ {
+  "id": 2,
+  "section": "Abstract",
+  "sentence": "However, QAT has a structural mismatch: gradient updates are applied to latent full-precision weights, while the loss and gradients are computed on lossy reconstructions of those weights.",
+  "kind": "body",
+  "para": 2,
+  "src": "main.tex:59"
+ },
+ {
+  "id": 3,
+  "section": "Abstract",
+  "sentence": "This mismatch can lead to suboptimal training trajectories and a higher loss floor.",
+  "kind": "body",
+  "para": 2,
+  "src": "main.tex:59"
+ },
+ {
+  "id": 4,
+  "section": "Abstract",
+  "sentence": "Second-order PTQ methods address a similar problem by minimizing loss-aware reconstruction error, but applying such expensive reconstruction repeatedly during QAT as the weights evolve is impractical.",
+  "kind": "body",
+  "para": 2,
+  "src": "main.tex:59"
+ },
+ {
+  "id": 5,
+  "section": "Abstract",
+  "sentence": "We introduce QUASAR, a QAT method that brings lightweight, loss-aware reconstruction into the training loop.",
+  "kind": "body",
+  "para": 2,
+  "src": "main.tex:59"
+ },
+ {
+  "id": 6,
+  "section": "Abstract",
+  "sentence": "At each training step, QUASAR reconstructs the latent weights by searching over a small set of clipping ranges and fitting dequantization parameters through saliency-weighted least squares.",
+  "kind": "body",
+  "para": 2,
+  "src": "main.tex:59"
+ },
+ {
+  "id": 7,
+  "section": "Abstract",
+  "sentence": "We use an exponential moving average of squared gradients as the per-parameter saliency signal.",
+  "kind": "body",
+  "para": 2,
+  "src": "main.tex:59"
+ },
+ {
+  "id": 8,
+  "section": "Abstract",
+  "sentence": "Our theoretical analysis shows that optimizing QUASAR's reconstruction objective tightens both the convergence and final-loss bounds of QAT.",
+  "kind": "body",
+  "para": 2,
+  "src": "main.tex:59"
+ },
+ {
+  "id": 9,
+  "section": "Abstract",
+  "sentence": "We evaluate QUASAR across four model families and across INT4, INT3, INT2, and NVFP4 quantization formats.",
+  "kind": "body",
+  "para": 2,
+  "src": "main.tex:59"
+ },
+ {
+  "id": 10,
+  "section": "Abstract",
+  "sentence": "QUASAR consistently achieves lower training and evaluation loss than competitive QAT methods and outperforms QAT and PTQ baselines on downstream benchmarks.",
+  "kind": "body",
+  "para": 2,
+  "src": "main.tex:59"
+ },
+ {
+  "id": 11,
+  "section": "Abstract",
+  "sentence": "At INT2, QUASAR improves average accuracy over the best QAT baseline by 13.3 points with quantization-aware distillation and by 10.9 points with QAT on mathematical reasoning data.",
+  "kind": "body",
+  "para": 2,
+  "src": "main.tex:59"
+ },
+ {
+  "id": 12,
+  "section": "Abstract",
+  "sentence": "Notably, after distillation on only ~600M tokens, QUASAR's INT4 Gemma-4 E4B checkpoint outperforms the corresponding QAT checkpoint released by Google, with 66% lower KL divergence and 1.8 points higher average accuracy.",
+  "kind": "body",
+  "para": 2,
+  "src": "main.tex:59"
+ },
+ {
+  "id": 13,
+  "section": "1 Introduction",
+  "sentence": "As large language models (LLMs) grow in size and adoption, inference is overtaking training as the dominant recurring cost of deployment.",
+  "kind": "body",
+  "para": 4,
+  "src": "introduction.tex:3"
+ },
+ {
+  "id": 14,
+  "section": "1 Introduction",
+  "sentence": "To reduce this cost, inference is rapidly moving toward low-precision formats such as FP4 and INT4, which shrink the model's memory footprint, reduce decoding latency, and enable higher concurrency and throughput.",
+  "kind": "body",
+  "para": 4,
+  "src": "introduction.tex:5"
+ },
+ {
+  "id": 15,
+  "section": "1 Introduction",
+  "sentence": "However, since models are typically trained in high precision but served in low precision, preserving model quality as precision becomes increasingly aggressive remains a critical challenge.",
+  "kind": "body",
+  "para": 4,
+  "src": "introduction.tex:8"
+ },
+ {
+  "id": 16,
+  "section": "1 Introduction",
+  "sentence": "Post-training quantization (PTQ) has been the standard way to convert a trained model to low precision, but it is becoming increasingly brittle on newer models.",
+  "kind": "body",
+  "para": 4,
+  "src": "introduction.tex:11"
+ },
+ {
+  "id": 17,
+  "section": "1 Introduction",
+  "sentence": "Reasoning and agentic models often operate over long contexts, where quantization errors can accumulate and degrade performance.",
+  "kind": "body",
+  "para": 4,
+  "src": "introduction.tex:13"
+ },
+ {
+  "id": 18,
+  "section": "1 Introduction",
+  "sentence": "PTQ models may also exhibit behavioral shifts and biases relative to their full-precision counterparts.",
+  "kind": "body",
+  "para": 4,
+  "src": "introduction.tex:16"
+ },
+ {
+  "id": 19,
+  "section": "1 Introduction",
+  "sentence": "Producing a native low-precision model with stronger quality guarantees therefore requires training under the same precision used for serving.",
+  "kind": "body",
+  "para": 4,
+  "src": "introduction.tex:18"
+ },
+ {
+  "id": 20,
+  "section": "1 Introduction",
+  "sentence": "Figure 1: The structural mismatch of gradients in standard QAT versus QUASAR.",
+  "kind": "figure_caption",
+  "para": 5,
+  "src": "introduction.tex:24"
+ },
+ {
+  "id": 21,
+  "section": "1 Introduction",
+  "sentence": "Under the STE, both methods evaluate the gradient at the reconstructed weights r and apply it to the latent weights w.",
+  "kind": "figure_caption",
+  "para": 5,
+  "src": "introduction.tex:24"
+ },
+ {
+  "id": 22,
+  "section": "1 Introduction",
+  "sentence": "QUASAR minimizes the loss-aware reconstruction error, making the gradient at r a more faithful proxy for the gradient at w.",
+  "kind": "figure_caption",
+  "para": 5,
+  "src": "introduction.tex:24"
+ },
+ {
+  "id": 23,
+  "section": "1 Introduction",
+  "sentence": "Quantization-aware training (QAT) addresses this need by inserting quantization into the training loop, allowing the model to adapt to quantization noise as it learns.",
+  "kind": "body",
+  "para": 6,
+  "src": "introduction.tex:29"
+ },
+ {
+  "id": 24,
+  "section": "1 Introduction",
+  "sentence": "QAT, however, introduces a structural mismatch into optimization (Figure 1): the forward pass and loss computation use quantized–dequantized reconstruction weights r, while the gradient updates are applied to the latent full-precision weights w.",
+  "kind": "body",
+  "para": 6,
+  "src": "introduction.tex:31"
+ },
+ {
+  "id": 25,
+  "section": "1 Introduction",
+  "sentence": "Because quantization has zero gradient almost everywhere, QAT typically uses the straight-through estimator (STE), approximating ∂ℒ/∂w with ∂ℒ/∂r.",
+  "kind": "body",
+  "para": 6,
+  "src": "introduction.tex:34"
+ },
+ {
+  "id": 26,
+  "section": "1 Introduction",
+  "sentence": "This surrogate is generally not the optimal descent direction for the latent weights, leading training along a suboptimal trajectory.",
+  "kind": "body",
+  "para": 6,
+  "src": "introduction.tex:37"
+ },
+ {
+  "id": 27,
+  "section": "1 Introduction",
+  "sentence": "The consequence is a loss-floor gap: given the same model and training data, QAT converges to a higher final training and evaluation loss than full-precision training.",
+  "kind": "body",
+  "para": 6,
+  "src": "introduction.tex:38"
+ },
+ {
+  "id": 28,
+  "section": "1 Introduction",
+  "sentence": "Prior QAT methods narrow this gap by softening the rounding operation, learning quantization parameters jointly with the weights, or improving initialization.",
+  "kind": "body",
+  "para": 6,
+  "src": "introduction.tex:40"
+ },
+ {
+  "id": 29,
+  "section": "1 Introduction",
+  "sentence": "We instead draw on a complementary insight from second-order PTQ methods: the excess training loss caused by QAT's structural mismatch can be reduced by optimizing reconstruction.",
+  "kind": "body",
+  "para": 6,
+  "src": "introduction.tex:41"
+ },
+ {
+  "id": 30,
+  "section": "1 Introduction",
+  "sentence": "A second-order expansion of the loss around the full-precision weights w, assuming that the first-order term is negligible near an optimum, gives ℒ(r)−ℒ(w) ≈ 1/2 S, S=(r−w)ᵀH(r−w), where H(w) is the Hessian evaluated at w.",
+  "kind": "body",
+  "para": 7,
+  "src": "introduction.tex:44"
+ },
+ {
+  "id": 31,
+  "section": "1 Introduction",
+  "sentence": "We refer to S as the loss-aware reconstruction error.",
+  "kind": "body",
+  "para": 7,
+  "src": "introduction.tex:51"
+ },
+ {
+  "id": 32,
+  "section": "1 Introduction",
+  "sentence": "Many modern PTQ methods minimize this quantity, or an approximation to it, to construct a low-precision model whose loss remains close to that of a frozen full-precision model.",
+  "kind": "body",
+  "para": 7,
+  "src": "introduction.tex:52"
+ },
+ {
+  "id": 33,
+  "section": "1 Introduction",
+  "sentence": "Applying the same principle to QAT would keep the low-precision loss ℒ(r) closer to the full-precision loss ℒ(w) as the latent weights evolve, thereby mitigating the effect of the structural mismatch.",
+  "kind": "body",
+  "para": 7,
+  "src": "introduction.tex:54"
+ },
+ {
+  "id": 34,
+  "section": "1 Introduction",
+  "sentence": "The challenge, however, is computational cost.",
+  "kind": "body",
+  "para": 7,
+  "src": "introduction.tex:54"
+ },
+ {
+  "id": 35,
+  "section": "1 Introduction",
+  "sentence": "In PTQ, the full-precision model is frozen, so its reconstruction needs to be optimized only once, typically requiring minutes to hours for a billion-parameter LLM.",
+  "kind": "body",
+  "para": 7,
+  "src": "introduction.tex:54"
+ },
+ {
+  "id": 36,
+  "section": "1 Introduction",
+  "sentence": "In QAT, however, the latent weights change at every step, requiring the reconstruction to be continually re-optimized.",
+  "kind": "body",
+  "para": 7,
+  "src": "introduction.tex:56"
+ },
+ {
+  "id": 37,
+  "section": "1 Introduction",
+  "sentence": "Running a conventional second-order optimization procedure on every forward pass would therefore be prohibitively expensive.",
+  "kind": "body",
+  "para": 7,
+  "src": "introduction.tex:58"
+ },
+ {
+  "id": 38,
+  "section": "1 Introduction",
+  "sentence": "We introduce QUASAR (Quantization-aware training with loss-aware reconstruction), a QAT method that continually minimizes loss-aware reconstruction error to improve the training trajectory and lower the loss floor.",
+  "kind": "body",
+  "para": 8,
+  "src": "introduction.tex:61"
+ },
+ {
+  "id": 39,
+  "section": "1 Introduction",
+  "sentence": "QUASAR decomposes reconstruction into two stages: quantization, which maps full-precision weights to discrete codes while treating the clipping range as a free parameter, and dequantization, which maps those codes back to reconstructed weights using a learned scale and offset.",
+  "kind": "body",
+  "para": 8,
+  "src": "introduction.tex:61"
+ },
+ {
+  "id": 40,
+  "section": "1 Introduction",
+  "sentence": "To make the loss-aware objective tractable during training, QUASAR approximates the Hessian using an exponential moving average of squared gradients, yielding per-parameter saliency scores that estimate each weight's effect on the loss.",
+  "kind": "body",
+  "para": 8,
+  "src": "introduction.tex:61"
+ },
+ {
+  "id": 41,
+  "section": "1 Introduction",
+  "sentence": "It then searches over a small set of candidate clipping ranges, each defining a different assignment of discrete codes; for each assignment, it solves for the dequantization parameters in closed form by saliency-weighted least squares and selects the candidate with the smallest loss-aware reconstruction error.",
+  "kind": "body",
+  "para": 8,
+  "src": "introduction.tex:61"
+ },
+ {
+  "id": 42,
+  "section": "1 Introduction",
+  "sentence": "Our theoretical analysis shows that reducing this error tightens the QAT convergence bound and final-loss bound (Section 4).",
+  "kind": "body",
+  "para": 8,
+  "src": "introduction.tex:61"
+ },
+ {
+  "id": 43,
+  "section": "1 Introduction",
+  "sentence": "Our contributions are threefold.",
+  "kind": "body",
+  "para": 9,
+  "src": "introduction.tex:63"
+ },
+ {
+  "id": 44,
+  "section": "1 Introduction",
+  "sentence": "(i) We identify loss-aware reconstruction error, previously optimized for frozen models in second-order PTQ, as a principled objective for QAT.",
+  "kind": "body",
+  "para": 9,
+  "src": "introduction.tex:63"
+ },
+ {
+  "id": 45,
+  "section": "1 Introduction",
+  "sentence": "We introduce QUASAR to minimize this objective at every training step using an exponential moving average of squared gradients, closed-form saliency-weighted least squares, and a small clipping-range search.",
+  "kind": "body",
+  "para": 9,
+  "src": "introduction.tex:63"
+ },
+ {
+  "id": 46,
+  "section": "1 Introduction",
+  "sentence": "(ii) Under empirically validated assumptions, we prove that reducing this error tightens bounds on both QAT convergence and the loss of the final quantized model.",
+  "kind": "body",
+  "para": 9,
+  "src": "introduction.tex:64"
+ },
+ {
+  "id": 47,
+  "section": "1 Introduction",
+  "sentence": "(iii) Across four model families and four quantization formats, QUASAR consistently reduces loss and improves downstream performance over competitive QAT and PTQ baselines.",
+  "kind": "body",
+  "para": 9,
+  "src": "introduction.tex:64"
+ },
+ {
+  "id": 48,
+  "section": "1 Introduction",
+  "sentence": "At INT2, it improves average accuracy by up to 13.3 points over the strongest QAT baseline; at INT4, its Gemma-4 E4B checkpoint achieves 66% lower held-out KL and 1.8 points higher average accuracy than Google's public QAT checkpoint.",
+  "kind": "body",
+  "para": 9,
+  "src": "introduction.tex:64"
+ },
+ {
+  "id": 49,
+  "section": "2 Related Work",
+  "sentence": "QUASAR sits between two lines of work: PTQ and QAT.",
+  "kind": "body",
+  "para": 11,
+  "src": "body.tex:7"
+ },
+ {
+  "id": 50,
+  "section": "2 Related Work",
+  "sentence": "PTQ treats quantization as a one-shot algorithm: given a trained model and a small calibration set, select low-precision values that damage the loss least, typically by minimizing a second-order expansion of the loss or learning the rounding against a reconstruction objective.",
+  "kind": "body",
+  "para": 11,
+  "src": "body.tex:7"
+ },
+ {
+  "id": 51,
+  "section": "2 Related Work",
+  "sentence": "All rest on the premise that the weights are frozen, so the reconstruction happens only once.",
+  "kind": "body",
+  "para": 11,
+  "src": "body.tex:7"
+ },
+ {
+  "id": 52,
+  "section": "2 Related Work",
+  "sentence": "A second PTQ line spreads outliers with random orthogonal transforms and replaces the quantization grid with lattice, trellis, or additive codebooks; these are the strongest PTQ methods at two and three bits, but their inference-time transforms and decodes hurt throughput, while hardware moves toward simpler formats such as MXFP4 and NVFP4.",
+  "kind": "body",
+  "para": 11,
+  "src": "body.tex:7"
+ },
+ {
+  "id": 53,
+  "section": "2 Related Work",
+  "sentence": "Below four bits, the PTQ methods that do not add inference overhead degrade sharply.",
+  "kind": "body",
+  "para": 12,
+  "src": "body.tex:9"
+ },
+ {
+  "id": 54,
+  "section": "2 Related Work",
+  "sentence": "QAT reaches higher quality at these bit widths by learning step sizes, supervising with the full-precision model, or freezing the quantized weights and training low-rank adapters; none of these optimize the map from latent weights to reconstructed weights, which is set by heuristics.",
+  "kind": "body",
+  "para": 12,
+  "src": "body.tex:9"
+ },
+ {
+  "id": 55,
+  "section": "2 Related Work",
+  "sentence": "QUASAR directly optimizes that map: it brings the reconstruction PTQ solves once into the training loop as the weights adapt, while still deploying exactly as an RTN-quantized model.",
+  "kind": "body",
+  "para": 12,
+  "src": "body.tex:9"
+ },
+ {
+  "id": 56,
+  "section": "2 Related Work",
+  "sentence": "Other methods are complementary and compose with QUASAR: EfficientQAT's second stage learns only the step sizes, the same quantizer parameter as LSQ, and its block-wise first stage is a complementary initialization; ParetoQ splits a fixed training budget between full-precision training and QAT.",
+  "kind": "body",
+  "para": 12,
+  "src": "body.tex:9"
+ },
+ {
+  "id": 57,
+  "section": "3 Methodology",
+  "sentence": "We first describe weight reconstruction in standard QAT and explain how reconstruction error affects the training loss.",
+  "kind": "body",
+  "para": 14,
+  "src": "methodology.tex:3"
+ },
+ {
+  "id": 58,
+  "section": "3 Methodology",
+  "sentence": "We then introduce QUASAR, which makes this reconstruction loss-aware through an efficient curvature approximation, scale search over clipping ranges, and optimal dequantization.",
+  "kind": "body",
+  "para": 14,
+  "src": "methodology.tex:3"
+ },
+ {
+  "id": 59,
+  "section": "3.1 Preliminary: Reconstruction in QAT",
+  "sentence": "QAT maintains and updates full-precision latent weights w, but computes the forward pass and loss using reconstructed weights r.",
+  "kind": "body",
+  "para": 16,
+  "src": "methodology.tex:7"
+ },
+ {
+  "id": 60,
+  "section": "3.1 Preliminary: Reconstruction in QAT",
+  "sentence": "At each step, QAT maps w to low-bit codes q and then dequantizes those codes to obtain r: w ↦ q ↦ r.",
+  "kind": "body",
+  "para": 16,
+  "src": "methodology.tex:7"
+ },
+ {
+  "id": 61,
+  "section": "3.1 Preliminary: Reconstruction in QAT",
+  "sentence": "We refer to this process as weight reconstruction.",
+  "kind": "body",
+  "para": 16,
+  "src": "methodology.tex:9"
+ },
+ {
+  "id": 62,
+  "section": "3.1 Preliminary: Reconstruction in QAT",
+  "sentence": "It exposes the model to inference-time quantization error during training while allowing the latent weights to adapt.",
+  "kind": "body",
+  "para": 16,
+  "src": "methodology.tex:9"
+ },
+ {
+  "id": 63,
+  "section": "3.1 Preliminary: Reconstruction in QAT",
+  "sentence": "Because the code assignment involves rounding and has no useful derivative, QAT uses the straight-through estimator (STE): ∂ℒ/∂w ≈ ∂ℒ/∂r.",
+  "kind": "body",
+  "para": 16,
+  "src": "methodology.tex:9"
+ },
+ {
+  "id": 64,
+  "section": "3.1 Preliminary: Reconstruction in QAT",
+  "sentence": "The gradient evaluated at r is therefore applied to w (Figure 1).",
+  "kind": "body",
+  "para": 16,
+  "src": "methodology.tex:11"
+ },
+ {
+  "id": 65,
+  "section": "3.1 Preliminary: Reconstruction in QAT",
+  "sentence": "For asymmetric integer quantization, each weight matrix is partitioned into groups of g contiguous weights, commonly with g=32 or 128.",
+  "kind": "body",
+  "para": 17,
+  "src": "methodology.tex:13"
+ },
+ {
+  "id": 66,
+  "section": "3.1 Preliminary: Reconstruction in QAT",
+  "sentence": "A group w∈ℝ^g is represented by b-bit integer codes q_i∈{0,…,2^b−1}.",
+  "kind": "body",
+  "para": 17,
+  "src": "methodology.tex:13"
+ },
+ {
+  "id": 67,
+  "section": "3.1 Preliminary: Reconstruction in QAT",
+  "sentence": "All weights in the group share a scale s and an offset z, which determine the quantization grid.",
+  "kind": "body",
+  "para": 17,
+  "src": "methodology.tex:13"
+ },
+ {
+  "id": 68,
+  "section": "3.1 Preliminary: Reconstruction in QAT",
+  "sentence": "Quantization assigns codes and dequantization reconstructs weights as q_i = clamp_{[0,2^b−1]}(⌊ (w_i−z)/s ⌉), r_i=sq_i+z.",
+  "kind": "body",
+  "para": 17,
+  "src": "methodology.tex:13"
+ },
+ {
+  "id": 69,
+  "section": "3.1 Preliminary: Reconstruction in QAT",
+  "sentence": "Reconstruction has two stages: code assignment, w ↦ q, and dequantization, q ↦ r.",
+  "kind": "body",
+  "para": 17,
+  "src": "methodology.tex:23"
+ },
+ {
+  "id": 70,
+  "section": "3.1 Preliminary: Reconstruction in QAT",
+  "sentence": "Standard QAT uses the minimum and maximum weights in each group for both stages, setting z=min_i w_i and s=(max_i w_i−min_i w_i)/(2^b−1).",
+  "kind": "body",
+  "para": 17,
+  "src": "methodology.tex:23"
+ },
+ {
+  "id": 71,
+  "section": "3.1 Preliminary: Reconstruction in QAT",
+  "sentence": "This uniform grid represents the full range of weight values without clipping and preserves the extreme values in the group, but it may not be optimal for reducing the training loss.",
+  "kind": "body",
+  "para": 17,
+  "src": "methodology.tex:23"
+ },
+ {
+  "id": 72,
+  "section": "3.1 Preliminary: Reconstruction in QAT",
+  "sentence": "Reconstruction quality directly affects the training loss of QAT.",
+  "kind": "body",
+  "para": 18,
+  "src": "methodology.tex:25"
+ },
+ {
+  "id": 73,
+  "section": "3.1 Preliminary: Reconstruction in QAT",
+  "sentence": "At step t, consider the difference between the loss at the reconstructed weights and the loss at the latent weights, ℒ(r_t)−ℒ(w_t).",
+  "kind": "body",
+  "para": 18,
+  "src": "methodology.tex:25"
+ },
+ {
+  "id": 74,
+  "section": "3.1 Preliminary: Reconstruction in QAT",
+  "sentence": "When the first-order term is negligible, as near a stationary region, a second-order expansion around w_t, with H_t=∇²ℒ(w_t), gives ℒ(r_t)−ℒ(w_t) ≈ 1/2 S_t, where S_t=(r_t−w_t)ᵀH_t(r_t−w_t).",
+  "kind": "body",
+  "para": 18,
+  "src": "methodology.tex:25"
+ },
+ {
+  "id": 75,
+  "section": "3.1 Preliminary: Reconstruction in QAT",
+  "sentence": "We call S_t the loss-aware reconstruction error.",
+  "kind": "body",
+  "para": 18,
+  "src": "methodology.tex:33"
+ },
+ {
+  "id": 76,
+  "section": "3.1 Preliminary: Reconstruction in QAT",
+  "sentence": "It measures the local change in loss caused by reconstructing the latent weights.",
+  "kind": "body",
+  "para": 18,
+  "src": "methodology.tex:33"
+ },
+ {
+  "id": 77,
+  "section": "3.1 Preliminary: Reconstruction in QAT",
+  "sentence": "Because both the forward pass and the STE gradient are evaluated at r_t, this error can affect every optimization step.",
+  "kind": "body",
+  "para": 18,
+  "src": "methodology.tex:33"
+ },
+ {
+  "id": 78,
+  "section": "3.1 Preliminary: Reconstruction in QAT",
+  "sentence": "Second-order PTQ methods minimize this objective, or a related approximation, once for a frozen model, but the process can take hours for a large model.",
+  "kind": "body",
+  "para": 18,
+  "src": "methodology.tex:33"
+ },
+ {
+  "id": 79,
+  "section": "3.1 Preliminary: Reconstruction in QAT",
+  "sentence": "Repeating this optimization at every QAT training step is impractical because the latent weights change after every update.",
+  "kind": "body",
+  "para": 18,
+  "src": "methodology.tex:33"
+ },
+ {
+  "id": 80,
+  "section": "3.1 Preliminary: Reconstruction in QAT",
+  "sentence": "QUASAR instead minimizes a close approximation to S_t at every training step using a lightweight procedure that combines scale search with a closed-form fit for dequantization.",
+  "kind": "body",
+  "para": 18,
+  "src": "methodology.tex:33"
+ },
+ {
+  "id": 81,
+  "section": "3.1 Preliminary: Reconstruction in QAT",
+  "sentence": "Figure 2: The training loops for standard QAT and QUASAR differ only in the reconstruction w ↦ q ↦ r.",
+  "kind": "figure_caption",
+  "para": 19,
+  "src": "methodology.tex:38"
+ },
+ {
+  "id": 82,
+  "section": "3.1 Preliminary: Reconstruction in QAT",
+  "sentence": "Standard QAT determines the quantization grid from each group's extreme weights; QUASAR searches over code assignments and fits the dequantizer to minimize loss-aware reconstruction error.",
+  "kind": "figure_caption",
+  "para": 19,
+  "src": "methodology.tex:38"
+ },
+ {
+  "id": 83,
+  "section": "3.1 Preliminary: Reconstruction in QAT",
+  "sentence": "The right panels show the resulting grids and error distributions; empirical measurements appear in Appendix A.",
+  "kind": "figure_caption",
+  "para": 19,
+  "src": "methodology.tex:38"
+ },
+ {
+  "id": 84,
+  "section": "3.2 A Tractable Loss-Aware Objective",
+  "sentence": "QUASAR aims to minimize the loss-aware reconstruction error S_t in Equation (2).",
+  "kind": "body",
+  "para": 21,
+  "src": "methodology.tex:44"
+ },
+ {
+  "id": 85,
+  "section": "3.2 A Tractable Loss-Aware Objective",
+  "sentence": "The exact Hessian H in S_t is intractable to compute, so an approximation is required.",
+  "kind": "body",
+  "para": 21,
+  "src": "methodology.tex:44"
+ },
+ {
+  "id": 86,
+  "section": "3.2 A Tractable Loss-Aware Objective",
+  "sentence": "One could consider computing the Hessian Vector Product (HVP), but it is also too expensive since it requires computing an HVP for every candidate reconstruction for every training step.",
+  "kind": "body",
+  "para": 21,
+  "src": "methodology.tex:44"
+ },
+ {
+  "id": 87,
+  "section": "3.2 A Tractable Loss-Aware Objective",
+  "sentence": "We therefore use the diagonal Fisher information matrix as a proxy for the Hessian.",
+  "kind": "body",
+  "para": 21,
+  "src": "methodology.tex:44"
+ },
+ {
+  "id": 88,
+  "section": "3.2 A Tractable Loss-Aware Objective",
+  "sentence": "Following Li et al. (2025a), we approximate it with an exponential moving average (EMA) of squared gradients.",
+  "kind": "body",
+  "para": 21,
+  "src": "methodology.tex:44"
+ },
+ {
+  "id": 89,
+  "section": "3.2 A Tractable Loss-Aware Objective",
+  "sentence": "Adam and AdamW already maintain this quantity as the second-moment estimate v_t, allowing QUASAR to reuse it without additional memory overhead.",
+  "kind": "body",
+  "para": 21,
+  "src": "methodology.tex:44"
+ },
+ {
+  "id": 90,
+  "section": "3.2 A Tractable Loss-Aware Objective",
+  "sentence": "The EMA also smooths noise from individual training steps.",
+  "kind": "body",
+  "para": 21,
+  "src": "methodology.tex:44"
+ },
+ {
+  "id": 91,
+  "section": "3.2 A Tractable Loss-Aware Objective",
+  "sentence": "Let g_i=∂ℒ/∂w_i be the gradient with respect to the latent weight w_i, and define h_i=EMA(g_i²).",
+  "kind": "body",
+  "para": 22,
+  "src": "methodology.tex:46"
+ },
+ {
+  "id": 92,
+  "section": "3.2 A Tractable Loss-Aware Objective",
+  "sentence": "We use h_i as the ith diagonal entry of the Hessian approximation, giving the objective S_t ≈ Ŝ_t = Σ_i h_i (r_i−w_i)².",
+  "kind": "body",
+  "para": 22,
+  "src": "methodology.tex:46"
+ },
+ {
+  "id": 93,
+  "section": "3.2 A Tractable Loss-Aware Objective",
+  "sentence": "We call h_i the saliency of w_i.",
+  "kind": "body",
+  "para": 22,
+  "src": "methodology.tex:54"
+ },
+ {
+  "id": 94,
+  "section": "3.2 A Tractable Loss-Aware Objective",
+  "sentence": "Saliency varies substantially within a weight group (Appendix A, Figure 8).",
+  "kind": "body",
+  "para": 22,
+  "src": "methodology.tex:54"
+ },
+ {
+  "id": 95,
+  "section": "3.2 A Tractable Loss-Aware Objective",
+  "sentence": "Because all g weights in a group share dequantization parameters, reducing the reconstruction error of one weight can increase that of another.",
+  "kind": "body",
+  "para": 22,
+  "src": "methodology.tex:54"
+ },
+ {
+  "id": 96,
+  "section": "3.2 A Tractable Loss-Aware Objective",
+  "sentence": "The weights h_i govern this tradeoff: QUASAR prioritizes accurate reconstruction of high-saliency weights while tolerating more error on low-saliency weights (Appendix A, Figure 5).",
+  "kind": "body",
+  "para": 22,
+  "src": "methodology.tex:54"
+ },
+ {
+  "id": 97,
+  "section": "3.3 Optimizing Both Stages of Reconstruction",
+  "sentence": "To minimize the objective in Equation (3), QUASAR optimizes code assignment w ↦ q and dequantization q ↦ r separately.",
+  "kind": "body",
+  "para": 24,
+  "src": "methodology.tex:58"
+ },
+ {
+  "id": 98,
+  "section": "3.3 Optimizing Both Stages of Reconstruction",
+  "sentence": "Standard QAT uses the same scale and offset to assign codes and reconstruct weights.",
+  "kind": "body",
+  "para": 24,
+  "src": "methodology.tex:58"
+ },
+ {
+  "id": 99,
+  "section": "3.3 Optimizing Both Stages of Reconstruction",
+  "sentence": "In contrast, QUASAR searches over candidate clipping scales to find code assignments and, for each assignment, computes the optimal dequantization scale and offset in closed form.",
+  "kind": "body",
+  "para": 24,
+  "src": "methodology.tex:58"
+ },
+ {
+  "id": 100,
+  "section": "3.3 Optimizing Both Stages of Reconstruction",
+  "sentence": "It then selects the candidate with the smallest loss-aware reconstruction error.",
+  "kind": "body",
+  "para": 24,
+  "src": "methodology.tex:58"
+ },
+ {
+  "id": 101,
+  "section": "3.3 Optimizing Both Stages of Reconstruction",
+  "sentence": "Algorithm 1 summarizes the procedure.",
+  "kind": "body",
+  "para": 24,
+  "src": "methodology.tex:58"
+ },
+ {
+  "id": 102,
+  "section": "3.3 Optimizing Both Stages of Reconstruction",
+  "sentence": "A weighted least-squares fit gives the optimal dequantization.",
+  "kind": "body",
+  "para": 25,
+  "src": "methodology.tex:60"
+ },
+ {
+  "id": 103,
+  "section": "3.3 Optimizing Both Stages of Reconstruction",
+  "sentence": "For a fixed code assignment q, QUASAR solves for (s,z) in r_i=sq_i+z to minimize Equation (3).",
+  "kind": "body",
+  "para": 25,
+  "src": "methodology.tex:61"
+ },
+ {
+  "id": 104,
+  "section": "3.3 Optimizing Both Stages of Reconstruction",
+  "sentence": "This is a weighted linear regression and therefore has a closed-form solution (Equation (6), Appendix A.1).",
+  "kind": "body",
+  "para": 25,
+  "src": "methodology.tex:61"
+ },
+ {
+  "id": 105,
+  "section": "3.3 Optimizing Both Stages of Reconstruction",
+  "sentence": "Scale search finds good code assignments.",
+  "kind": "body",
+  "para": 26,
+  "src": "methodology.tex:63"
+ },
+ {
+  "id": 106,
+  "section": "3.3 Optimizing Both Stages of Reconstruction",
+  "sentence": "The closed-form fit is optimal for a fixed q, but the code assignment itself may be far from optimal.",
+  "kind": "body",
+  "para": 26,
+  "src": "methodology.tex:64"
+ },
+ {
+  "id": 107,
+  "section": "3.3 Optimizing Both Stages of Reconstruction",
+  "sentence": "QUASAR therefore searches over scale factors that shrink the clipping range.",
+  "kind": "body",
+  "para": 26,
+  "src": "methodology.tex:64"
+ },
+ {
+  "id": 108,
+  "section": "3.3 Optimizing Both Stages of Reconstruction",
+  "sentence": "Each range creates a different code assignment.",
+  "kind": "body",
+  "para": 26,
+  "src": "methodology.tex:64"
+ },
+ {
+  "id": 109,
+  "section": "3.3 Optimizing Both Stages of Reconstruction",
+  "sentence": "For a group with midpoint c and half-range ρ, a factor f∈(0,1] defines the assignment range I_f, where c= (min_i w_i+max_i w_i)/2, ρ= (max_i w_i−min_i w_i)/2, I_f=[c−fρ, c+fρ].",
+  "kind": "body",
+  "para": 26,
+  "src": "methodology.tex:64"
+ },
+ {
+  "id": 110,
+  "section": "3.3 Optimizing Both Stages of Reconstruction",
+  "sentence": "The case f=1 is the full min–max range used by standard QAT.",
+  "kind": "body",
+  "para": 26,
+  "src": "methodology.tex:72"
+ },
+ {
+  "id": 111,
+  "section": "3.3 Optimizing Both Stages of Reconstruction",
+  "sentence": "A factor f<1 narrows the range and clips weights outside it, so the quantization levels cover a smaller interval with finer spacing.",
+  "kind": "body",
+  "para": 26,
+  "src": "methodology.tex:72"
+ },
+ {
+  "id": 112,
+  "section": "3.3 Optimizing Both Stages of Reconstruction",
+  "sentence": "In our integer experiments, we search ℱ={0.30,0.35,…,1.00}.",
+  "kind": "body",
+  "para": 26,
+  "src": "methodology.tex:72"
+ },
+ {
+  "id": 113,
+  "section": "3.3 Optimizing Both Stages of Reconstruction",
+  "sentence": "For each candidate f∈ℱ, QUASAR first uses the corresponding clipping range to assign codes q_f.",
+  "kind": "body",
+  "para": 27,
+  "src": "methodology.tex:74"
+ },
+ {
+  "id": 114,
+  "section": "3.3 Optimizing Both Stages of Reconstruction",
+  "sentence": "It then fits the optimal dequantization parameters (s_f,z_f) for q_f using Equation (6) and computes the resulting error Ŝ_t(f).",
+  "kind": "body",
+  "para": 27,
+  "src": "methodology.tex:74"
+ },
+ {
+  "id": 115,
+  "section": "3.3 Optimizing Both Stages of Reconstruction",
+  "sentence": "After evaluating all candidates, QUASAR uses the reconstruction associated with f⋆=argmin_{f∈ℱ} Ŝ_t(f).",
+  "kind": "body",
+  "para": 27,
+  "src": "methodology.tex:74"
+ },
+ {
+  "id": 116,
+  "section": "3.3 Optimizing Both Stages of Reconstruction",
+  "sentence": "This search is performed as part of each QAT forward pass.",
+  "kind": "body",
+  "para": 27,
+  "src": "methodology.tex:75"
+ },
+ {
+  "id": 117,
+  "section": "3.3 Optimizing Both Stages of Reconstruction",
+  "sentence": "Its empirical behavior is shown in Figures 6 and 7 in Appendix A.",
+  "kind": "body",
+  "para": 27,
+  "src": "methodology.tex:75"
+ },
+ {
+  "id": 118,
+  "section": "3.3 Optimizing Both Stages of Reconstruction",
+  "sentence": "QUASAR changes only the weight reconstruction used in the forward pass.",
+  "kind": "body",
+  "para": 28,
+  "src": "methodology.tex:77"
+ },
+ {
+  "id": 119,
+  "section": "3.3 Optimizing Both Stages of Reconstruction",
+  "sentence": "It leaves activation quantization and backpropagation unchanged: gradients still pass through the weight quantizer with the standard STE, and neither scale search nor dequantization fitting requires a separate backward rule.",
+  "kind": "body",
+  "para": 28,
+  "src": "methodology.tex:77"
+ },
+ {
+  "id": 120,
+  "section": "3.3 Optimizing Both Stages of Reconstruction",
+  "sentence": "The same two-stage procedure applies to asymmetric and symmetric integer formats as well as floating-point formats such as NVFP4 and MXFP4 (the corresponding algorithms are presented in Appendix A.1).",
+  "kind": "body",
+  "para": 28,
+  "src": "methodology.tex:77"
+ },
+ {
+  "id": 121,
+  "section": "3.3 Optimizing Both Stages of Reconstruction",
+  "sentence": "We evaluate QUASAR for NVFP4 in Section 5.2.",
+  "kind": "body",
+  "para": 28,
+  "src": "methodology.tex:77"
+ },
+ {
+  "id": 122,
+  "section": "3.3 Optimizing Both Stages of Reconstruction",
+  "sentence": "Algorithm 1: QUASAR reconstruction of one weight group, run at every training step.",
+  "kind": "algorithm_caption",
+  "para": 29,
+  "src": "methodology.tex:80"
+ },
+ {
+  "id": 123,
+  "section": "3.3 Optimizing Both Stages of Reconstruction",
+  "sentence": "A fully specified version appears in Algorithm 2 (Appendix A.1).",
+  "kind": "algorithm_caption",
+  "para": 29,
+  "src": "methodology.tex:81"
+ },
+ {
+  "id": 124,
+  "section": "4 Theory: Reconstruction Error Bounds QAT Final Loss",
+  "sentence": "In this section, we show that QUASAR lowers the excess loss of the final quantized model, ℒ(r_T)−ℒ⋆.",
+  "kind": "body",
+  "para": 31,
+  "src": "theory.tex:4"
+ },
+ {
+  "id": 125,
+  "section": "4 Theory: Reconstruction Error Bounds QAT Final Loss",
+  "sentence": "This gap is bounded by QUASAR's loss-aware reconstruction error, so minimizing that error is a natural target.",
+  "kind": "body",
+  "para": 31,
+  "src": "theory.tex:5"
+ },
+ {
+  "id": 126,
+  "section": "4 Theory: Reconstruction Error Bounds QAT Final Loss",
+  "sentence": "Under the identity STE, the gradient evaluated at the reconstruction r_t is applied to the latent weights w_t, creating the gradient mismatch e_t:=∇ℒ(r_t)−∇ℒ(w_t).",
+  "kind": "body",
+  "para": 31,
+  "src": "theory.tex:6"
+ },
+ {
+  "id": 127,
+  "section": "4 Theory: Reconstruction Error Bounds QAT Final Loss",
+  "sentence": "Prior work has studied when STE gradients remain useful descent directions, how curvature shapes QAT plateaus, and how a systematic gradient bias slows SGD.",
+  "kind": "body",
+  "para": 31,
+  "src": "theory.tex:8"
+ },
+ {
+  "id": 128,
+  "section": "4 Theory: Reconstruction Error Bounds QAT Final Loss",
+  "sentence": "To the best of our knowledge, no prior work has studied the relationship between the reconstruction error of the quantizer to the convergence of QAT or to the loss of the final quantized model.",
+  "kind": "body",
+  "para": 31,
+  "src": "theory.tex:11"
+ },
+ {
+  "id": 129,
+  "section": "4 Theory: Reconstruction Error Bounds QAT Final Loss",
+  "sentence": "Let ℒ:ℝ^d → ℝ be the training objective with ℒ⋆:=inf_x ℒ(x), and T ≥ 1 be the number of training steps.",
+  "kind": "body",
+  "para": 31,
+  "src": "theory.tex:13"
+ },
+ {
+  "id": 130,
+  "section": "4 Theory: Reconstruction Error Bounds QAT Final Loss",
+  "sentence": "At step t, w_t, r_t∈ℝ^d are the latent and reconstructed weights, h_t∈ℝ_+^d the saliencies, and Ŝ_t:=Σ_i h_{t,i}(r_{t,i}−w_{t,i})² the objective of Section 3 at step t.",
+  "kind": "body",
+  "para": 31,
+  "src": "theory.tex:14"
+ },
+ {
+  "id": 131,
+  "section": "4 Theory: Reconstruction Error Bounds QAT Final Loss",
+  "sentence": "𝔼_t[·] denotes expectation conditional on the training history ℋ_t, which determines h_t and r_t.",
+  "kind": "body",
+  "para": 31,
+  "src": "theory.tex:18"
+ },
+ {
+  "id": 132,
+  "section": "4 Theory: Reconstruction Error Bounds QAT Final Loss",
+  "sentence": "Assumptions.",
+  "kind": "body",
+  "para": 32,
+  "src": "introduction.tex:64"
+ },
+ {
+  "id": 133,
+  "section": "4 Theory: Reconstruction Error Bounds QAT Final Loss",
+  "sentence": "We make four assumptions.",
+  "kind": "body",
+  "para": 32,
+  "src": "theory.tex:22"
+ },
+ {
+  "id": 134,
+  "section": "4 Theory: Reconstruction Error Bounds QAT Final Loss",
+  "sentence": "(1) The objective ℒ is well behaved: twice continuously differentiable, L-smooth, and bounded below.",
+  "kind": "body",
+  "para": 32,
+  "src": "theory.tex:22"
+ },
+ {
+  "id": 135,
+  "section": "4 Theory: Reconstruction Error Bounds QAT Final Loss",
+  "sentence": "(2) The STE gradient is the true gradient at the reconstruction plus zero-mean noise: G_t=∇ℒ(r_t)+ξ_t with 𝔼_t[ξ_t]=0 and 𝔼_t‖ξ_t‖² ≤ M‖∇ℒ(r_t)‖²+σ² for constants M,σ² ≥ 0, the biased-SGD noise condition; the update is w_{t+1}=w_t−ηG_t.",
+  "kind": "body",
+  "para": 32,
+  "src": "theory.tex:24"
+ },
+ {
+  "id": 136,
+  "section": "4 Theory: Reconstruction Error Bounds QAT Final Loss",
+  "sentence": "(3) The reconstruction error controls the gradient mismatch: for some finite constant C and every t∈{0,…,T}, ‖∇ℒ(r_t)−∇ℒ(w_t)‖² ≤ C Ŝ_t.",
+  "kind": "body",
+  "para": 32,
+  "src": "theory.tex:30"
+ },
+ {
+  "id": 137,
+  "section": "4 Theory: Reconstruction Error Bounds QAT Final Loss",
+  "sentence": "Appendix B.1 gives a sufficient curvature condition with C=L²/h_min under a saliency floor h_min >0, Figure 14 (Appendix C) confirms the inequality empirically at all tested bit widths, and Appendix B.2 discusses the assumptions further.",
+  "kind": "body",
+  "para": 32,
+  "src": "theory.tex:31"
+ },
+ {
+  "id": 138,
+  "section": "4 Theory: Reconstruction Error Bounds QAT Final Loss",
+  "sentence": "Appendix A.2 compares the H- and H²-motivated saliency weightings.",
+  "kind": "body",
+  "para": 32,
+  "src": "theory.tex:38"
+ },
+ {
+  "id": 139,
+  "section": "4 Theory: Reconstruction Error Bounds QAT Final Loss",
+  "sentence": "(4) The objective satisfies the global Polyak–Łojasiewicz (PL) inequality ‖∇ℒ(x)‖² ≥ 2μ(ℒ(x)−ℒ⋆) for all x∈ℝ^d and some μ>0; it is needed only for the final-model bound.",
+  "kind": "body",
+  "para": 32,
+  "src": "theory.tex:40"
+ },
+ {
+  "id": 140,
+  "section": "4 Theory: Reconstruction Error Bounds QAT Final Loss",
+  "sentence": "Theorem 1 (Reconstruction error controls QAT convergence and final loss).",
+  "kind": "body",
+  "para": 33,
+  "src": "theory.tex:45"
+ },
+ {
+  "id": 141,
+  "section": "4 Theory: Reconstruction Error Bounds QAT Final Loss",
+  "sentence": "Under Assumptions 1–3, let 0<η< 1/(L(1+M)).",
+  "kind": "body",
+  "para": 33,
+  "src": "theory.tex:47"
+ },
+ {
+  "id": 142,
+  "section": "4 Theory: Reconstruction Error Bounds QAT Final Loss",
+  "sentence": "The following statements hold.",
+  "kind": "body",
+  "para": 33,
+  "src": "theory.tex:47"
+ },
+ {
+  "id": 143,
+  "section": "4 Theory: Reconstruction Error Bounds QAT Final Loss",
+  "sentence": "(i) Convergence.",
+  "kind": "body",
+  "para": 34,
+  "src": "main.tex:59"
+ },
+ {
+  "id": 144,
+  "section": "4 Theory: Reconstruction Error Bounds QAT Final Loss",
+  "sentence": "1/T Σ_{t=0}^(T−1)𝔼[‖∇ℒ(w_t)‖² +(1−Lη(1+M))‖∇ℒ(r_t)‖²] ≤ (2(ℒ(w_0)−ℒ⋆))/ηT +Lησ² + C/T Σ_{t=0}^(T−1)𝔼Ŝ_t.",
+  "kind": "body",
+  "para": 34,
+  "src": null
+ },
+ {
+  "id": 145,
+  "section": "4 Theory: Reconstruction Error Bounds QAT Final Loss",
+  "sentence": "(ii) Final quantized model.",
+  "kind": "body",
+  "para": 35,
+  "src": "introduction.tex:64"
+ },
+ {
+  "id": 146,
+  "section": "4 Theory: Reconstruction Error Bounds QAT Final Loss",
+  "sentence": "If Assumption 4 also holds and η< 1/μ, then, for a random training iterate τ (Appendix B.1), 𝔼[ℒ(r_T)−ℒ⋆] ≤ 2L/μ (1−ημ)^T (ℒ(w_0)−ℒ⋆) + LC/μ² 𝔼Ŝ_τ + L²ησ²/μ² + C/μ 𝔼Ŝ_T.",
+  "kind": "body",
+  "para": 35,
+  "src": "theory.tex:61"
+ },
+ {
+  "id": 147,
+  "section": "4 Theory: Reconstruction Error Bounds QAT Final Loss",
+  "sentence": "Proofs are presented in Appendix B. Theorem 1 shows that the QAT convergence bound contains the usual stochastic-optimization terms (initialization, minibatch noise) plus a quantization term given by the loss-aware reconstruction error.",
+  "kind": "body",
+  "para": 36,
+  "src": "theory.tex:77"
+ },
+ {
+  "id": 148,
+  "section": "4 Theory: Reconstruction Error Bounds QAT Final Loss",
+  "sentence": "QUASAR directly minimizes this term at every step, hence tightening the bound on the quantized model's final loss.",
+  "kind": "body",
+  "para": 36,
+  "src": "theory.tex:77"
+ },
+ {
+  "id": 149,
+  "section": "4 Theory: Reconstruction Error Bounds QAT Final Loss",
+  "sentence": "Appendix C supports the theorem's assumptions (Figures 14 and 16), evaluates the bound (Figure 17), shows that reconstruction error tracks final loss (Figures 10, 12, and 13), and repeats the comparison under SGD (Figure 18).",
+  "kind": "body",
+  "para": 36,
+  "src": "theory.tex:77"
+ },
+ {
+  "id": 150,
+  "section": "5 Experiments",
+  "sentence": "In this section, we evaluate QUASAR against competitive QAT and PTQ baselines.",
+  "kind": "body",
+  "para": 38,
+  "src": "experiments.tex:3"
+ },
+ {
+  "id": 151,
+  "section": "5 Experiments",
+  "sentence": "We assess its ability to preserve quantized model quality using Quantization-aware Distillation (QAD), to adapt quantized models to learn new tasks using QAT, and to generalize to different quantization formats including INT4/INT3/INT2 and NVFP4.",
+  "kind": "body",
+  "para": 38,
+  "src": "experiments.tex:3"
+ },
+ {
+  "id": 152,
+  "section": "5 Experiments",
+  "sentence": "Moreover, we compare QUASAR QAT'ed checkpoints against the QAT checkpoints released by Google under the same format.",
+  "kind": "body",
+  "para": 38,
+  "src": "experiments.tex:3"
+ },
+ {
+  "id": 153,
+  "section": "5 Experiments",
+  "sentence": "Setup and baselines.",
+  "kind": "body",
+  "para": 39,
+  "src": "experiments.tex:5"
+ },
+ {
+  "id": 154,
+  "section": "5 Experiments",
+  "sentence": "For healing, we apply QAD to Qwen3-4B-Thinking-2507 and Llama-3.1-8B-Instruct at INT2, INT3, and INT4 using Open-PerfectBlend data and logits from the full-precision teachers.",
+  "kind": "body",
+  "para": 39,
+  "src": "experiments.tex:6"
+ },
+ {
+  "id": 155,
+  "section": "5 Experiments",
+  "sentence": "For adaptation, we train all weights of Qwen3-4B-Base on OpenMathReasoning using cross-entropy.",
+  "kind": "body",
+  "para": 39,
+  "src": "experiments.tex:6"
+ },
+ {
+  "id": 156,
+  "section": "5 Experiments",
+  "sentence": "We also apply QAD in NVFP4 to Qwen3-8B, Qwen3.5-9B, and Muse-Glimmer-30B, and evaluate QUASAR against Google's QAT checkpoint, Gemma 4, and other independent checkpoints.",
+  "kind": "body",
+  "para": 39,
+  "src": "experiments.tex:6"
+ },
+ {
+  "id": 157,
+  "section": "5 Experiments",
+  "sentence": "Baselines in each experiment use the same data, objective, training budget, and tuned learning rate, with matched inference formats.",
+  "kind": "body",
+  "para": 39,
+  "src": "experiments.tex:6"
+ },
+ {
+  "id": 158,
+  "section": "5 Experiments",
+  "sentence": "We compare against Standard QAT (Section 3.1), LSQ, Denoising QAT, BitDistiller, RTN, GPTQ, and AWQ; for GGUF, we also include imatrix PTQ, which uses calibration activations to estimate weight importance.",
+  "kind": "body",
+  "para": 39,
+  "src": "experiments.tex:6"
+ },
+ {
+  "id": 159,
+  "section": "5 Experiments",
+  "sentence": "Full training protocols and hyperparameters are in Appendix D.",
+  "kind": "body",
+  "para": 39,
+  "src": "experiments.tex:6"
+ },
+ {
+  "id": 160,
+  "section": "5 Experiments",
+  "sentence": "Evaluation.",
+  "kind": "body",
+  "para": 40,
+  "src": "main.tex:59"
+ },
+ {
+  "id": 161,
+  "section": "5 Experiments",
+  "sentence": "We evaluate quantized checkpoints and report fidelity to the full-precision model together with downstream accuracy.",
+  "kind": "body",
+  "para": 40,
+  "src": "experiments.tex:9"
+ },
+ {
+  "id": 162,
+  "section": "5 Experiments",
+  "sentence": "Our benchmark suites cover standard language understanding (MMLU, ARC, HellaSwag, WinoGrande, TruthfulQA, and IFEval); mathematical and scientific reasoning (MATH-500, GSM8K, AIME, HMMT, MMLU-Pro, SuperGPQA, and GPQA-Diamond); coding (LiveCodeBench and OJBench); and long-context performance (LongBench-v2, RULER, MRCR, and LongProc).",
+  "kind": "body",
+  "para": 40,
+  "src": "experiments.tex:9"
+ },
+ {
+  "id": 163,
+  "section": "5.1 Results on Healing and Adaptation",
+  "sentence": "Figure 3: QAD of Qwen3-4B-Thinking-2507 (left) and Llama-3.1-8B-Instruct (right) at INT4, INT3, and INT2 on Open-PerfectBlend.",
+  "kind": "figure_caption",
+  "para": 42,
+  "src": "experiments.tex:16"
+ },
+ {
+  "id": 164,
+  "section": "5.1 Results on Healing and Adaptation",
+  "sentence": "We show training loss over the full run, the final 1,000 steps, and held-out evaluation loss.",
+  "kind": "figure_caption",
+  "para": 42,
+  "src": "experiments.tex:16"
+ },
+ {
+  "id": 165,
+  "section": "5.1 Results on Healing and Adaptation",
+  "sentence": "All losses are forward KL to the full-precision model.",
+  "kind": "figure_caption",
+  "para": 42,
+  "src": "experiments.tex:16"
+ },
+ {
+  "id": 166,
+  "section": "5.1 Results on Healing and Adaptation",
+  "sentence": "Table 1: Reasoning, coding, and long-context results for Qwen3-4B-Thinking-2507 and Llama-3.1-8B-Instruct at INT2, INT3, and INT4.",
+  "kind": "table_caption",
+  "para": 43,
+  "src": "healing_hard_table.tex:4"
+ },
+ {
+  "id": 167,
+  "section": "5.1 Results on Healing and Adaptation",
+  "sentence": "We report KL and top-1 agreement between quantized checkpoints and the BF16 original, as well as benchmark accuracy.",
+  "kind": "table_caption",
+  "para": 43,
+  "src": "healing_hard_table.tex:4"
+ },
+ {
+  "id": 168,
+  "section": "5.1 Results on Healing and Adaptation",
+  "sentence": "Healing with QAD.",
+  "kind": "body",
+  "para": 44,
+  "src": "experiments.tex:23"
+ },
+ {
+  "id": 169,
+  "section": "5.1 Results on Healing and Adaptation",
+  "sentence": "Figure 3 presents the training and evaluation loss of QUASAR and baseline QAT methods, and Table 1 presents the downstream accuracy of the final quantized checkpoints of QAT and PTQ.",
+  "kind": "body",
+  "para": 44,
+  "src": "experiments.tex:23"
+ },
+ {
+  "id": 170,
+  "section": "5.1 Results on Healing and Adaptation",
+  "sentence": "Across both models and all bit widths, QUASAR reaches the lowest training and evaluation loss (KL).",
+  "kind": "body",
+  "para": 44,
+  "src": "experiments.tex:23"
+ },
+ {
+  "id": 171,
+  "section": "5.1 Results on Healing and Adaptation",
+  "sentence": "At INT2, it reduces KL by about 30% over the strongest QAT baseline.",
+  "kind": "body",
+  "para": 44,
+  "src": "experiments.tex:23"
+ },
+ {
+  "id": 172,
+  "section": "5.1 Results on Healing and Adaptation",
+  "sentence": "On reasoning, coding, and long-context tasks, QUASAR improves average accuracy by 13.3 points for Qwen and 2.2 points for Llama (Table 1).",
+  "kind": "body",
+  "para": 44,
+  "src": "experiments.tex:24"
+ },
+ {
+  "id": 173,
+  "section": "5.1 Results on Healing and Adaptation",
+  "sentence": "Additional results and analyses are in Appendix E.",
+  "kind": "body",
+  "para": 44,
+  "src": "experiments.tex:26"
+ },
+ {
+  "id": 174,
+  "section": "5.1 Results on Healing and Adaptation",
+  "sentence": "Adaptation with QAT.",
+  "kind": "body",
+  "para": 45,
+  "src": "experiments.tex:30"
+ },
+ {
+  "id": 175,
+  "section": "5.1 Results on Healing and Adaptation",
+  "sentence": "Table 2 presents the downstream accuracy of INT4/INT3/INT2 Qwen3-4B-Base adapted using different QAT methods, and Figure 30 in the Appendix presents the training and evaluation loss curves.",
+  "kind": "body",
+  "para": 45,
+  "src": "experiments.tex:30"
+ },
+ {
+  "id": 176,
+  "section": "5.1 Results on Healing and Adaptation",
+  "sentence": "QUASAR has the lowest held-out perplexity and the best or tied-best average accuracy at every bit width.",
+  "kind": "body",
+  "para": 45,
+  "src": "experiments.tex:30"
+ },
+ {
+  "id": 177,
+  "section": "5.1 Results on Healing and Adaptation",
+  "sentence": "At INT2, QUASAR reaches 29.6 average accuracy, 10.9 points above the strongest QAT baseline and 29.0 points above full-precision fine-tuning followed by PTQ (Table 2).",
+  "kind": "body",
+  "para": 45,
+  "src": "experiments.tex:31"
+ },
+ {
+  "id": 178,
+  "section": "5.1 Results on Healing and Adaptation",
+  "sentence": "It is also the only INT2 quantized model to outperform the original base model and score above zero on HMMT'25.",
+  "kind": "body",
+  "para": 45,
+  "src": "experiments.tex:34"
+ },
+ {
+  "id": 179,
+  "section": "5.1 Results on Healing and Adaptation",
+  "sentence": "Additional results are in Appendix F.",
+  "kind": "body",
+  "para": 45,
+  "src": "experiments.tex:36"
+ },
+ {
+  "id": 180,
+  "section": "5.1 Results on Healing and Adaptation",
+  "sentence": "Table 2: Comparison of QAT and PTQ methods for adapting Qwen3-4B-Base on OpenMathReasoning at INT2, INT3, and INT4.",
+  "kind": "table_caption",
+  "para": 46,
+  "src": "adaptation_table.tex:4"
+ },
+ {
+  "id": 181,
+  "section": "5.1 Results on Healing and Adaptation",
+  "sentence": "We report held-out perplexity and accuracy on five math benchmarks.",
+  "kind": "table_caption",
+  "para": 46,
+  "src": "adaptation_table.tex:4"
+ },
+ {
+  "id": 182,
+  "section": "5.2 NVFP4 and Checkpoint Comparisons",
+  "sentence": "NVFP4 QAD.",
+  "kind": "body",
+  "para": 48,
+  "src": "experiments.tex:42"
+ },
+ {
+  "id": 183,
+  "section": "5.2 NVFP4 and Checkpoint Comparisons",
+  "sentence": "Table 3 reports downstream accuracy for Qwen3-8B, Qwen3.5-9B, and Muse-Glimmer-30B in NVFP4, all trained with the same QAD healing recipe as in Section 5.1.",
+  "kind": "body",
+  "para": 48,
+  "src": "experiments.tex:42"
+ },
+ {
+  "id": 184,
+  "section": "5.2 NVFP4 and Checkpoint Comparisons",
+  "sentence": "Figure 34 in Appendix G shows the corresponding training and evaluation loss curves for the two Qwen models.",
+  "kind": "body",
+  "para": 48,
+  "src": "experiments.tex:42"
+ },
+ {
+  "id": 185,
+  "section": "5.2 NVFP4 and Checkpoint Comparisons",
+  "sentence": "All checkpoints are evaluated using vLLM's native NVFP4 path.",
+  "kind": "body",
+  "para": 48,
+  "src": "experiments.tex:42"
+ },
+ {
+  "id": 186,
+  "section": "5.2 NVFP4 and Checkpoint Comparisons",
+  "sentence": "For Qwen3-8B and Qwen3.5-9B, QUASAR reduces held-out KL divergence by 12% and 15% relative to Standard QAT, respectively.",
+  "kind": "body",
+  "para": 48,
+  "src": "experiments.tex:42"
+ },
+ {
+  "id": 187,
+  "section": "5.2 NVFP4 and Checkpoint Comparisons",
+  "sentence": "On the more challenging reasoning, coding, and long-horizon benchmarks, Qwen3.5-9B achieves an average score of 55.7, compared with 52.6 for Standard QAT and 39.4 for GPTQ (Table 3).",
+  "kind": "body",
+  "para": 48,
+  "src": "experiments.tex:42"
+ },
+ {
+  "id": 188,
+  "section": "5.2 NVFP4 and Checkpoint Comparisons",
+  "sentence": "These results also highlight the value of QAD: both QAD checkpoints remain stable over long generations, whereas the PTQ checkpoints often fail to complete them, despite GPTQ achieving lower held-out KL divergence than Standard QAT.",
+  "kind": "body",
+  "para": 48,
+  "src": "experiments.tex:42"
+ },
+ {
+  "id": 189,
+  "section": "5.2 NVFP4 and Checkpoint Comparisons",
+  "sentence": "Full results are provided in Appendix G.",
+  "kind": "body",
+  "para": 48,
+  "src": "experiments.tex:42"
+ },
+ {
+  "id": 190,
+  "section": "5.2 NVFP4 and Checkpoint Comparisons",
+  "sentence": "Table 3: Comparison of QUASAR with QAT and PTQ baselines across NVFP4, INT4, and Q4_0 (llama.cpp GGUF format).",
+  "kind": "table_caption",
+  "para": 49,
+  "src": "merged_table.tex:3"
+ },
+ {
+  "id": 191,
+  "section": "5.2 NVFP4 and Checkpoint Comparisons",
+  "sentence": "We report fidelity to BF16 and accuracy on ten reasoning, coding, and long-horizon benchmarks.",
+  "kind": "table_caption",
+  "para": 49,
+  "src": "merged_table.tex:3"
+ },
+ {
+  "id": 192,
+  "section": "5.2 NVFP4 and Checkpoint Comparisons",
+  "sentence": "Comparison with Google's QAT checkpoints.",
+  "kind": "body",
+  "para": 50,
+  "src": "experiments.tex:47"
+ },
+ {
+  "id": 193,
+  "section": "5.2 NVFP4 and Checkpoint Comparisons",
+  "sentence": "Table 3 compares QUASAR with Google's public QAT checkpoint and PTQ baselines for Gemma-4 E4B.",
+  "kind": "body",
+  "para": 50,
+  "src": "experiments.tex:48"
+ },
+ {
+  "id": 194,
+  "section": "5.2 NVFP4 and Checkpoint Comparisons",
+  "sentence": "For the INT4 Gemma model, QUASAR achieves a held-out KL divergence of 0.022 and an average accuracy of 35.8 on the ten downstream benchmarks, compared with 0.064 and 34.0 for Google's QAT checkpoint.",
+  "kind": "body",
+  "para": 50,
+  "src": "experiments.tex:48"
+ },
+ {
+  "id": 195,
+  "section": "5.2 NVFP4 and Checkpoint Comparisons",
+  "sentence": "This corresponds to 66% lower KL divergence and 1.8 points higher average accuracy.",
+  "kind": "body",
+  "para": 50,
+  "src": "experiments.tex:48"
+ },
+ {
+  "id": 196,
+  "section": "5.2 NVFP4 and Checkpoint Comparisons",
+  "sentence": "Notably, QUASAR achieves these results with only 600M tokens of distillation and 5 hours of training, while Google does not disclose the training data or compute used for its QAT checkpoint.",
+  "kind": "body",
+  "para": 50,
+  "src": "experiments.tex:48"
+ },
+ {
+  "id": 197,
+  "section": "5.2 NVFP4 and Checkpoint Comparisons",
+  "sentence": "QUASAR also uses a larger quantization group size of 64, compared with 32 for Google's checkpoint.",
+  "kind": "body",
+  "para": 50,
+  "src": "experiments.tex:48"
+ },
+ {
+  "id": 198,
+  "section": "5.2 NVFP4 and Checkpoint Comparisons",
+  "sentence": "Appendix H extends this comparison to Gemma-4 12B.",
+  "kind": "body",
+  "para": 50,
+  "src": "experiments.tex:48"
+ },
+ {
+  "id": 199,
+  "section": "5.3 Ablations and Training Overhead",
+  "sentence": "We perform experiments to ablate the effectiveness of the components of QUASAR.",
+  "kind": "body",
+  "para": 52,
+  "src": "experiments.tex:51"
+ },
+ {
+  "id": 200,
+  "section": "5.3 Ablations and Training Overhead",
+  "sentence": "Figure 4 presents ablations of QUASAR's two components: scale search and saliency for weighted least squares.",
+  "kind": "body",
+  "para": 52,
+  "src": "experiments.tex:51"
+ },
+ {
+  "id": 201,
+  "section": "5.3 Ablations and Training Overhead",
+  "sentence": "Removing both recovers Standard QAT.",
+  "kind": "body",
+  "para": 52,
+  "src": "experiments.tex:51"
+ },
+ {
+  "id": 202,
+  "section": "5.3 Ablations and Training Overhead",
+  "sentence": "The experiment uses Qwen3-4B-Thinking-2507 at INT2 with the healing recipe of Section 5.1.",
+  "kind": "body",
+  "para": 52,
+  "src": "experiments.tex:51"
+ },
+ {
+  "id": 203,
+  "section": "5.3 Ablations and Training Overhead",
+  "sentence": "Scale search provides most of the gain, while Adam and Fisher saliency perform similarly, despite Adam being computationally cheaper.",
+  "kind": "body",
+  "para": 52,
+  "src": "experiments.tex:51"
+ },
+ {
+  "id": 204,
+  "section": "5.3 Ablations and Training Overhead",
+  "sentence": "QUASAR achieves the lowest training and evaluation loss across ablations.",
+  "kind": "body",
+  "para": 52,
+  "src": "experiments.tex:51"
+ },
+ {
+  "id": 205,
+  "section": "5.3 Ablations and Training Overhead",
+  "sentence": "Appendix E, Table 8 shows further details.",
+  "kind": "body",
+  "para": 52,
+  "src": "experiments.tex:51"
+ },
+ {
+  "id": 206,
+  "section": "5.3 Ablations and Training Overhead",
+  "sentence": "Furthermore, we compare the efficiency of QUASAR and Standard QAT.",
+  "kind": "body",
+  "para": 53,
+  "src": "experiments.tex:53"
+ },
+ {
+  "id": 207,
+  "section": "5.3 Ablations and Training Overhead",
+  "sentence": "QUASAR uses loss-aware reconstruction which introduces slight latency overhead.",
+  "kind": "body",
+  "para": 53,
+  "src": "experiments.tex:53"
+ },
+ {
+  "id": 208,
+  "section": "5.3 Ablations and Training Overhead",
+  "sentence": "Table 4 in Appendix presents the average latency breakdown for QAD of Qwen3-4B at INT3 on 8x H100 GPUs.",
+  "kind": "body",
+  "para": 53,
+  "src": "experiments.tex:53"
+ },
+ {
+  "id": 209,
+  "section": "5.3 Ablations and Training Overhead",
+  "sentence": "QUASAR only adds 1.4% wall-clock step time compared with Standard QAT (2.97 and 2.93 seconds per step, respectively), with the overhead only coming from the weight reconstruction.",
+  "kind": "body",
+  "para": 53,
+  "src": "experiments.tex:53"
+ },
+ {
+  "id": 210,
+  "section": "5.3 Ablations and Training Overhead",
+  "sentence": "Compared with Standard QAT, QUASAR introduces no memory overhead.",
+  "kind": "body",
+  "para": 53,
+  "src": "experiments.tex:53"
+ },
+ {
+  "id": 211,
+  "section": "5.3 Ablations and Training Overhead",
+  "sentence": "Figure 4: Ablation Study: INT2 QAD for Qwen3-4B-Thinking-2507 with different choices for QUASAR's components.",
+  "kind": "figure_caption",
+  "para": 54,
+  "src": "experiments.tex:58"
+ },
+ {
+  "id": 212,
+  "section": "5.3 Ablations and Training Overhead",
+  "sentence": "Training and evaluation (held-out) loss both use forward KL.",
+  "kind": "figure_caption",
+  "para": 54,
+  "src": "experiments.tex:58"
+ },
+ {
+  "id": 213,
+  "section": "6 Conclusion",
+  "sentence": "We introduce QUASAR, which integrates loss-aware reconstruction into the training loop to lower the loss floor of QAT.",
+  "kind": "body",
+  "para": 56,
+  "src": "body.tex:21"
+ },
+ {
+  "id": 214,
+  "section": "6 Conclusion",
+  "sentence": "QUASAR combines scale search with a saliency-weighted dequantization fit, using an exponential moving average of squared gradients as the saliency signal.",
+  "kind": "body",
+  "para": 56,
+  "src": "body.tex:21"
+ },
+ {
+  "id": 215,
+  "section": "6 Conclusion",
+  "sentence": "It adds only 1.4% latency overhead per training step and incurs no inference overhead.",
+  "kind": "body",
+  "para": 56,
+  "src": "body.tex:21"
+ },
+ {
+  "id": 216,
+  "section": "6 Conclusion",
+  "sentence": "Our theoretical analysis shows that loss-aware reconstruction error directly controls QAT convergence and the quantized model's final loss, providing a principled foundation for QUASAR's objective.",
+  "kind": "body",
+  "para": 56,
+  "src": "body.tex:21"
+ },
+ {
+  "id": 217,
+  "section": "6 Conclusion",
+  "sentence": "We evaluate QUASAR across four model families and four quantization formats.",
+  "kind": "body",
+  "para": 56,
+  "src": "body.tex:21"
+ },
+ {
+  "id": 218,
+  "section": "6 Conclusion",
+  "sentence": "Across these settings, QUASAR achieves lower training and evaluation loss than competitive QAT baselines and improves downstream accuracy over QAT and PTQ methods.",
+  "kind": "body",
+  "para": 56,
+  "src": "body.tex:21"
+ },
+ {
+  "id": 219,
+  "section": "6 Conclusion",
+  "sentence": "Notably, QUASAR's INT4 Gemma-4 checkpoint outperforms Google's QAT checkpoint in KL divergence and benchmark accuracy.",
+  "kind": "body",
+  "para": 56,
+  "src": "body.tex:21"
+ },
+ {
+  "id": 220,
+  "section": "A Method Details",
+  "sentence": "This appendix provides additional details on QUASAR.",
+  "kind": "body",
+  "para": 59,
+  "src": "appendix_method.tex:3"
+ },
+ {
+  "id": 221,
+  "section": "A Method Details",
+  "sentence": "Using real weight groups, it examines per-weight reconstruction error, the clipping ranges selected by scale search, and the saliency signal h, complementing Section 3.",
+  "kind": "body",
+  "para": 59,
+  "src": "appendix_method.tex:3"
+ },
+ {
+  "id": 222,
+  "section": "A Method Details",
+  "sentence": "It also reports training-step overhead (Table 4), gives algorithm variants for formats with fast inference kernels (Appendix A.1), and compares two saliency weightings (Appendix A.2).",
+  "kind": "body",
+  "para": 59,
+  "src": "appendix_method.tex:6"
+ },
+ {
+  "id": 223,
+  "section": "A Method Details",
+  "sentence": "Figure 5: Per-weight loss-aware reconstruction error for 14 Qwen3-4B weight groups at INT3.",
+  "kind": "figure_caption",
+  "para": 60,
+  "src": "appendix_method.tex:14"
+ },
+ {
+  "id": 224,
+  "section": "A Method Details",
+  "sentence": "Color shows |√h (r−w)| under (a) Standard QAT with min–max reconstruction and (b) QUASAR.",
+  "kind": "figure_caption",
+  "para": 60,
+  "src": "appendix_method.tex:15"
+ },
+ {
+  "id": 225,
+  "section": "A Method Details",
+  "sentence": "Each row contains 128 weights ordered by saliency h.",
+  "kind": "figure_caption",
+  "para": 60,
+  "src": "appendix_method.tex:16"
+ },
+ {
+  "id": 226,
+  "section": "A Method Details",
+  "sentence": "At INT3, 99.6% of Qwen3-4B weight groups select a range narrower than min–max, reducing Ŝ_t to 69% of the full-range baseline (Figure 6).",
+  "kind": "body",
+  "para": 61,
+  "src": "appendix_method.tex:21"
+ },
+ {
+  "id": 227,
+  "section": "A Method Details",
+  "sentence": "Figure 7 shows the selected ranges across models and bit widths.",
+  "kind": "body",
+  "para": 61,
+  "src": "appendix_method.tex:23"
+ },
+ {
+  "id": 228,
+  "section": "A Method Details",
+  "sentence": "Figure 6: Scale search for Qwen3-4B weight groups at INT3.",
+  "kind": "figure_caption",
+  "para": 62,
+  "src": "appendix_method.tex:29"
+ },
+ {
+  "id": 229,
+  "section": "A Method Details",
+  "sentence": "(a) One extreme weight sets the min–max range.",
+  "kind": "figure_caption",
+  "para": 62,
+  "src": "appendix_method.tex:29"
+ },
+ {
+  "id": 230,
+  "section": "A Method Details",
+  "sentence": "(b) QUASAR clips the outlier and covers the bulk.",
+  "kind": "figure_caption",
+  "para": 62,
+  "src": "appendix_method.tex:30"
+ },
+ {
+  "id": 231,
+  "section": "A Method Details",
+  "sentence": "(c) Distribution of selected range factors f⋆ across 28.4M groups; 99.6% use a range narrower than min–max.",
+  "kind": "figure_caption",
+  "para": 62,
+  "src": "appendix_method.tex:31"
+ },
+ {
+  "id": 232,
+  "section": "A Method Details",
+  "sentence": "Across both models, the median selected range factor decreases from 0.95 at INT4 to 0.60 at INT2 (Figure 7).",
+  "kind": "body",
+  "para": 63,
+  "src": "appendix_method.tex:36"
+ },
+ {
+  "id": 233,
+  "section": "A Method Details",
+  "sentence": "With fewer codes, the search clips extreme weights more aggressively to better represent the bulk of the distribution.",
+  "kind": "body",
+  "para": 63,
+  "src": "appendix_method.tex:37"
+ },
+ {
+  "id": 234,
+  "section": "A Method Details",
+  "sentence": "Figure 7: Distribution of selected clipping-range factors f⋆ across weight groups after QAD at INT4, INT3, and INT2 for Qwen3-4B-Thinking-2507 and Llama-3.1-8B-Instruct.",
+  "kind": "figure_caption",
+  "para": 64,
+  "src": "appendix_method.tex:44"
+ },
+ {
+  "id": 235,
+  "section": "A Method Details",
+  "sentence": "Lower bit widths favor narrower ranges.",
+  "kind": "figure_caption",
+  "para": 64,
+  "src": "appendix_method.tex:46"
+ },
+ {
+  "id": 236,
+  "section": "A Method Details",
+  "sentence": "Figure 8: Saliency h in one Qwen3-4B layer.",
+  "kind": "figure_caption",
+  "para": 65,
+  "src": "appendix_method.tex:54"
+ },
+ {
+  "id": 237,
+  "section": "A Method Details",
+  "sentence": "Weight groups span 128 weights along the input dimension.",
+  "kind": "figure_caption",
+  "para": 65,
+  "src": "appendix_method.tex:54"
+ },
+ {
+  "id": 238,
+  "section": "A Method Details",
+  "sentence": "The large variation within each group lets QUASAR prioritize the most salient weights.",
+  "kind": "figure_caption",
+  "para": 65,
+  "src": "appendix_method.tex:55"
+ },
+ {
+  "id": 239,
+  "section": "A Method Details",
+  "sentence": "Table 4: Wall-clock time of one training step, per component and in seconds: quantization-aware distillation of Qwen3-4B-Thinking-2507 at INT3 on 8x H100 GPUs.",
+  "kind": "table_caption",
+  "para": 66,
+  "src": "appendix_method.tex:65"
+ },
+ {
+  "id": 240,
+  "section": "A Method Details",
+  "sentence": "QUASAR differs from Standard QAT only in the weight reconstruction row.",
+  "kind": "table_caption",
+  "para": 66,
+  "src": "appendix_method.tex:67"
+ },
+ {
+  "id": 241,
+  "section": "A.1 Algorithm Statements for Deployment Formats",
+  "sentence": "QUASAR applies to affine and symmetric integer formats, NVFP4, and MXFP4.",
+  "kind": "body",
+  "para": 68,
+  "src": "appendix_formats.tex:3"
+ },
+ {
+  "id": 242,
+  "section": "A.1 Algorithm Statements for Deployment Formats",
+  "sentence": "Each variant follows Algorithm 1: it searches over code assignments, fits the allowed dequantization parameters when the format permits, and selects the reconstruction with the lowest loss-aware error.",
+  "kind": "body",
+  "para": 68,
+  "src": "appendix_formats.tex:5"
+ },
+ {
+  "id": 243,
+  "section": "A.1 Algorithm Statements for Deployment Formats",
+  "sentence": "The code grid and stored parameters depend on the format.",
+  "kind": "body",
+  "para": 68,
+  "src": "appendix_formats.tex:7"
+ },
+ {
+  "id": 244,
+  "section": "A.1 Algorithm Statements for Deployment Formats",
+  "sentence": "Table 5 summarizes the variants.",
+  "kind": "body",
+  "para": 68,
+  "src": "appendix_formats.tex:8"
+ },
+ {
+  "id": 245,
+  "section": "A.1 Algorithm Statements for Deployment Formats",
+  "sentence": "QUASAR checkpoints use standard layouts supported by vLLM's quantization backends.",
+  "kind": "body",
+  "para": 69,
+  "src": "appendix_formats.tex:11"
+ },
+ {
+  "id": 246,
+  "section": "A.1 Algorithm Statements for Deployment Formats",
+  "sentence": "In vLLM, Marlin and Machete serve INT4 weights, NVFP4 runs natively on Blackwell GPUs, and MXFP4 weight-only checkpoints are supported.",
+  "kind": "body",
+  "para": 69,
+  "src": "appendix_formats.tex:12"
+ },
+ {
+  "id": 247,
+  "section": "A.1 Algorithm Statements for Deployment Formats",
+  "sentence": "INT3 and INT2 currently lack dedicated fast kernels, so we treat them as accuracy frontiers rather than deployment formats.",
+  "kind": "body",
+  "para": 69,
+  "src": "appendix_formats.tex:16"
+ },
+ {
+  "id": 248,
+  "section": "A.1 Algorithm Statements for Deployment Formats",
+  "sentence": "Table 5: QUASAR variants for deployment formats with fast inference kernels.",
+  "kind": "table_caption",
+  "para": 70,
+  "src": "appendix_formats.tex:22"
+ },
+ {
+  "id": 249,
+  "section": "A.1 Algorithm Statements for Deployment Formats",
+  "sentence": "The formats differ in their code grids, group sizes, stored parameters, and dequantization constraints.",
+  "kind": "table_caption",
+  "para": 70,
+  "src": "appendix_formats.tex:23"
+ },
+ {
+  "id": 250,
+  "section": "A.1 Algorithm Statements for Deployment Formats",
+  "sentence": "Affine integer formats.",
+  "kind": "body",
+  "para": 71,
+  "src": "appendix_formats.tex:38"
+ },
+ {
+  "id": 251,
+  "section": "A.1 Algorithm Statements for Deployment Formats",
+  "sentence": "For affine quantization, r_i=sq_i+z.",
+  "kind": "body",
+  "para": 71,
+  "src": "appendix_formats.tex:39"
+ },
+ {
+  "id": 252,
+  "section": "A.1 Algorithm Statements for Deployment Formats",
+  "sentence": "Given codes q, minimizing Equation (3) over s and z is weighted least squares: s⋆ = (Σ_i h_i(q_i−q̄_h)(w_i−w̄_h))/(Σ_i h_i(q_i−q̄_h)²), z⋆ = w̄_h−s⋆q̄_h, where q̄_h=Σ_i h_iq_i/Σ_i h_i and w̄_h=Σ_i h_iw_i/Σ_i h_i are the saliency-weighted means.",
+  "kind": "body",
+  "para": 71,
+  "src": "appendix_formats.tex:39"
+ },
+ {
+  "id": 253,
+  "section": "A.1 Algorithm Statements for Deployment Formats",
+  "sentence": "Algorithm 2 applies this fit to every candidate code assignment.",
+  "kind": "body",
+  "para": 71,
+  "src": "appendix_formats.tex:52"
+ },
+ {
+  "id": 254,
+  "section": "A.1 Algorithm Statements for Deployment Formats",
+  "sentence": "Algorithm 2: QUASAR for affine integer quantization.",
+  "kind": "algorithm_caption",
+  "para": 72,
+  "src": "appendix_formats.tex:56"
+ },
+ {
+  "id": 255,
+  "section": "A.1 Algorithm Statements for Deployment Formats",
+  "sentence": "Candidate ranges assign codes; weighted least squares then fits the stored scale and offset.",
+  "kind": "algorithm_caption",
+  "para": 72,
+  "src": "appendix_formats.tex:56"
+ },
+ {
+  "id": 256,
+  "section": "A.1 Algorithm Statements for Deployment Formats",
+  "sentence": "All candidates are evaluated in one batched kernel.",
+  "kind": "body",
+  "para": 73,
+  "src": "appendix_formats.tex:90"
+ },
+ {
+  "id": 257,
+  "section": "A.1 Algorithm Statements for Deployment Formats",
+  "sentence": "The assignment parameters are temporary; the best codes and fitted scale and offset define the reconstruction.",
+  "kind": "body",
+  "para": 73,
+  "src": "appendix_formats.tex:90"
+ },
+ {
+  "id": 258,
+  "section": "A.1 Algorithm Statements for Deployment Formats",
+  "sentence": "Backpropagation uses the same STE as standard QAT.",
+  "kind": "body",
+  "para": 73,
+  "src": "appendix_formats.tex:92"
+ },
+ {
+  "id": 259,
+  "section": "A.1 Algorithm Statements for Deployment Formats",
+  "sentence": "This adds 1.4% to the step time (Table 4) and preserves the standard RTN/GPTQ inference layout.",
+  "kind": "body",
+  "para": 73,
+  "src": "appendix_formats.tex:92"
+ },
+ {
+  "id": 260,
+  "section": "A.1 Algorithm Statements for Deployment Formats",
+  "sentence": "Symmetric integer formats.",
+  "kind": "body",
+  "para": 74,
+  "src": "methodology.tex:77"
+ },
+ {
+  "id": 261,
+  "section": "A.1 Algorithm Statements for Deployment Formats",
+  "sentence": "Symmetric integer formats store one scale per group and no zero-point, so r_i=sq_i.",
+  "kind": "body",
+  "para": 74,
+  "src": "appendix_formats.tex:97"
+ },
+ {
+  "id": 262,
+  "section": "A.1 Algorithm Statements for Deployment Formats",
+  "sentence": "For fixed signed codes, weighted least squares gives s⋆ = (Σ_i h_iq_iw_i)/(Σ_i h_iq_i²).",
+  "kind": "body",
+  "para": 74,
+  "src": "appendix_formats.tex:98"
+ },
+ {
+  "id": 263,
+  "section": "A.1 Algorithm Statements for Deployment Formats",
+  "sentence": "This is the GPTQ layout used by W4A16 and W4A8 serving kernels.",
+  "kind": "body",
+  "para": 74,
+  "src": "appendix_formats.tex:104"
+ },
+ {
+  "id": 264,
+  "section": "A.1 Algorithm Statements for Deployment Formats",
+  "sentence": "Algorithm 3: QUASAR for symmetric integer quantization.",
+  "kind": "algorithm_caption",
+  "para": 75,
+  "src": "appendix_formats.tex:107"
+ },
+ {
+  "id": 265,
+  "section": "A.1 Algorithm Statements for Deployment Formats",
+  "sentence": "Signed codes use a zero-centered assignment, and weighted least squares fits one scale.",
+  "kind": "algorithm_caption",
+  "para": 75,
+  "src": "appendix_formats.tex:107"
+ },
+ {
+  "id": 266,
+  "section": "A.1 Algorithm Statements for Deployment Formats",
+  "sentence": "Affine integer formats with an integer zero-point.",
+  "kind": "body",
+  "para": 76,
+  "src": "appendix_formats.tex:138"
+ },
+ {
+  "id": 267,
+  "section": "A.1 Algorithm Statements for Deployment Formats",
+  "sentence": "Some affine layouts, including AWQ, store an integer zero-point q_0 and reconstruct weights as r_i=s(q_i−q_0).",
+  "kind": "body",
+  "para": 76,
+  "src": "appendix_formats.tex:139"
+ },
+ {
+  "id": 268,
+  "section": "A.1 Algorithm Statements for Deployment Formats",
+  "sentence": "For each code assignment, QUASAR first computes the continuous fit, rounds q_0=−z⋆/s⋆ to a valid code, and refits the scale: q_0 = clamp(round(−z⋆/s⋆), 0, 2^b−1), s⋆_{q_0} = (Σ_i h_i(q_i−q_0) w_i)/(Σ_i h_i(q_i−q_0)²).",
+  "kind": "body",
+  "para": 76,
+  "src": "appendix_formats.tex:140"
+ },
+ {
+  "id": 269,
+  "section": "A.1 Algorithm Statements for Deployment Formats",
+  "sentence": "Algorithm 4 applies this constraint to every candidate.",
+  "kind": "body",
+  "para": 76,
+  "src": "appendix_formats.tex:152"
+ },
+ {
+  "id": 270,
+  "section": "A.1 Algorithm Statements for Deployment Formats",
+  "sentence": "Algorithm 4: QUASAR for affine integer quantization with an integer zero-point.",
+  "kind": "algorithm_caption",
+  "para": 77,
+  "src": "appendix_formats.tex:155"
+ },
+ {
+  "id": 271,
+  "section": "A.1 Algorithm Statements for Deployment Formats",
+  "sentence": "The continuous fit is snapped to an integer zero-point, then the scale is refit.",
+  "kind": "algorithm_caption",
+  "para": 77,
+  "src": "appendix_formats.tex:156"
+ },
+ {
+  "id": 272,
+  "section": "A.1 Algorithm Statements for Deployment Formats",
+  "sentence": "NVFP4.",
+  "kind": "body",
+  "para": 78,
+  "src": "main.tex:59"
+ },
+ {
+  "id": 273,
+  "section": "A.1 Algorithm Statements for Deployment Formats",
+  "sentence": "NVFP4 represents groups of 16 weights with E2M1 codes, an E4M3 scale per group, and a tensor-level FP32 scale σ.",
+  "kind": "body",
+  "para": 78,
+  "src": "appendix_formats.tex:198"
+ },
+ {
+  "id": 274,
+  "section": "A.1 Algorithm Statements for Deployment Formats",
+  "sentence": "It is symmetric and has no zero-point.",
+  "kind": "body",
+  "para": 78,
+  "src": "appendix_formats.tex:199"
+ },
+ {
+  "id": 275,
+  "section": "A.1 Algorithm Statements for Deployment Formats",
+  "sentence": "We set σ from the tensor's maximum absolute weight and keep it fixed.",
+  "kind": "body",
+  "para": 78,
+  "src": "appendix_formats.tex:200"
+ },
+ {
+  "id": 276,
+  "section": "A.1 Algorithm Statements for Deployment Formats",
+  "sentence": "For each candidate, QUASAR rounds the assignment scale to E4M3, assigns E2M1 codes, and fits the stored E4M3 dequantization scale.",
+  "kind": "body",
+  "para": 78,
+  "src": "appendix_formats.tex:201"
+ },
+ {
+  "id": 277,
+  "section": "A.1 Algorithm Statements for Deployment Formats",
+  "sentence": "It keeps the reconstruction with the lowest loss-aware error (Algorithm 5).",
+  "kind": "body",
+  "para": 78,
+  "src": "appendix_formats.tex:203"
+ },
+ {
+  "id": 278,
+  "section": "A.1 Algorithm Statements for Deployment Formats",
+  "sentence": "Algorithm 5: QUASAR for NVFP4.",
+  "kind": "algorithm_caption",
+  "para": 79,
+  "src": "methodology.tex:77"
+ },
+ {
+  "id": 279,
+  "section": "A.1 Algorithm Statements for Deployment Formats",
+  "sentence": "E2M1 codes use E4M3-rounded assignment and fitted group scales under a fixed FP32 tensor scale.",
+  "kind": "algorithm_caption",
+  "para": 79,
+  "src": "appendix_formats.tex:207"
+ },
+ {
+  "id": 280,
+  "section": "A.1 Algorithm Statements for Deployment Formats",
+  "sentence": "MXFP4.",
+  "kind": "body",
+  "para": 80,
+  "src": "body.tex:7"
+ },
+ {
+  "id": 281,
+  "section": "A.1 Algorithm Statements for Deployment Formats",
+  "sentence": "MXFP4 stores E2M1 codes in groups of 32 with one E8M0 power-of-two scale per group.",
+  "kind": "body",
+  "para": 80,
+  "src": "appendix_formats.tex:238"
+ },
+ {
+  "id": 282,
+  "section": "A.1 Algorithm Statements for Deployment Formats",
+  "sentence": "Because the stored scale is discrete, QUASAR searches the E8M0 scale grid directly rather than fitting a continuous scale.",
+  "kind": "body",
+  "para": 80,
+  "src": "appendix_formats.tex:239"
+ },
+ {
+  "id": 283,
+  "section": "A.1 Algorithm Statements for Deployment Formats",
+  "sentence": "Saliency h determines which candidate has the lowest loss-aware error (Algorithm 6).",
+  "kind": "body",
+  "para": 80,
+  "src": "appendix_formats.tex:240"
+ },
+ {
+  "id": 284,
+  "section": "A.1 Algorithm Statements for Deployment Formats",
+  "sentence": "Algorithm 6: QUASAR for MXFP4.",
+  "kind": "algorithm_caption",
+  "para": 81,
+  "src": "appendix_formats.tex:245"
+ },
+ {
+  "id": 285,
+  "section": "A.1 Algorithm Statements for Deployment Formats",
+  "sentence": "E2M1 codes share an E8M0 power-of-two scale, so scale search also determines the stored dequantization scale.",
+  "kind": "algorithm_caption",
+  "para": 81,
+  "src": "appendix_formats.tex:245"
+ },
+ {
+  "id": 286,
+  "section": "A.2 Choice of saliency weighting",
+  "sentence": "QUASAR weights squared reconstruction error by saliency h_t, our diagonal curvature estimate.",
+  "kind": "body",
+  "para": 83,
+  "src": "appendix_method.tex:93"
+ },
+ {
+  "id": 287,
+  "section": "A.2 Choice of saliency weighting",
+  "sentence": "A natural alternative is h_t², motivated by the squared linearized gradient mismatch: ‖H_t(r_t−w_t)‖² =(r_t−w_t)ᵀH_t²(r_t−w_t).",
+  "kind": "body",
+  "para": 83,
+  "src": "appendix_method.tex:94"
+ },
+ {
+  "id": 288,
+  "section": "A.2 Choice of saliency weighting",
+  "sentence": "We compare both choices with all other settings fixed: AdamW at INT2, INT3, and INT4, and SGD at three stable INT2 learning rates.",
+  "kind": "body",
+  "para": 83,
+  "src": "appendix_method.tex:100"
+ },
+ {
+  "id": 289,
+  "section": "A.2 Choice of saliency weighting",
+  "sentence": "Weighting by h_t gives lower held-out loss in all six settings.",
+  "kind": "body",
+  "para": 83,
+  "src": "appendix_method.tex:101"
+ },
+ {
+  "id": 290,
+  "section": "A.2 Choice of saliency weighting",
+  "sentence": "Weighting by h_t² is unstable at INT4 and at the higher SGD learning rates (Figure 9).",
+  "kind": "body",
+  "para": 83,
+  "src": "appendix_method.tex:102"
+ },
+ {
+  "id": 291,
+  "section": "A.2 Choice of saliency weighting",
+  "sentence": "Figure 9: Comparison of saliency weights h_t and h_t².",
+  "kind": "figure_caption",
+  "para": 84,
+  "src": "appendix_method.tex:109"
+ },
+ {
+  "id": 292,
+  "section": "A.2 Choice of saliency weighting",
+  "sentence": "We report held-out loss under AdamW at INT2, INT3, and INT4 (top) and under SGD at three INT2 learning rates (bottom).",
+  "kind": "figure_caption",
+  "para": 84,
+  "src": "appendix_method.tex:109"
+ },
+ {
+  "id": 293,
+  "section": "B Proofs and Deferred Theory Discussion",
+  "sentence": "This appendix contains the proofs of the results stated in Section 4.",
+  "kind": "body",
+  "para": 86,
+  "src": "appendix_proofs.tex:3"
+ },
+ {
+  "id": 294,
+  "section": "B.1 Proofs of the main results",
+  "sentence": "We use the notation 𝔼_t[·] introduced in Section 4 and write H(y):=∇²ℒ(y) for the Hessian at y.",
+  "kind": "body",
+  "para": 88,
+  "src": "appendix_proofs.tex:9"
+ },
+ {
+  "id": 295,
+  "section": "B.1 Proofs of the main results",
+  "sentence": "We first record a sufficient condition for Assumption 3.",
+  "kind": "body",
+  "para": 88,
+  "src": "appendix_proofs.tex:11"
+ },
+ {
+  "id": 296,
+  "section": "B.1 Proofs of the main results",
+  "sentence": "Fix any reconstruction index t under consideration, including the terminal index t=T, and put d_t=r_t−w_t, D_t=diag(h_t).",
+  "kind": "body",
+  "para": 88,
+  "src": "appendix_proofs.tex:12"
+ },
+ {
+  "id": 297,
+  "section": "B.1 Proofs of the main results",
+  "sentence": "Suppose that, at every point y=w_t+u d_t on the reconstruction segment, H(y)² ⪯ C D_t, 0 ≤ u ≤ 1.",
+  "kind": "body",
+  "para": 88,
+  "src": "appendix_proofs.tex:19"
+ },
+ {
+  "id": 298,
+  "section": "B.1 Proofs of the main results",
+  "sentence": "By the fundamental theorem of calculus, Jensen's inequality, and the symmetry of the Hessian, ‖∇ℒ(r_t)−∇ℒ(w_t)‖² = ‖∫_0¹ H(w_t+u d_t)d_t du‖² ≤ ∫_0¹ d_tᵀ H(w_t+u d_t)²d_t du ≤ C d_tᵀ D_t d_t =CŜ_t.",
+  "kind": "body",
+  "para": 88,
+  "src": "appendix_proofs.tex:25"
+ },
+ {
+  "id": 299,
+  "section": "B.1 Proofs of the main results",
+  "sentence": "Thus (9) implies Assumption 3.",
+  "kind": "body",
+  "para": 88,
+  "src": "appendix_proofs.tex:39"
+ },
+ {
+  "id": 300,
+  "section": "B.1 Proofs of the main results",
+  "sentence": "In particular, if ℒ is L-smooth and h_{t,i} ≥ h_min >0, then, for every y,d∈ℝ^d, ‖H(y)d‖² ≤ L²‖d‖² ≤ L²/h_min Σ_i h_{t,i}d_i².",
+  "kind": "body",
+  "para": 88,
+  "src": "appendix_proofs.tex:39"
+ },
+ {
+  "id": 301,
+  "section": "B.1 Proofs of the main results",
+  "sentence": "Consequently, Assumption 3 holds with C=L²/h_min.",
+  "kind": "body",
+  "para": 88,
+  "src": "appendix_proofs.tex:49"
+ },
+ {
+  "id": 302,
+  "section": "B.1 Proofs of the main results",
+  "sentence": "Proof of Theorem 1.",
+  "kind": "body",
+  "para": 89,
+  "src": "appendix_proofs.tex:51"
+ },
+ {
+  "id": 303,
+  "section": "B.1 Proofs of the main results",
+  "sentence": "For part (i), set a_t=∇ℒ(w_t), c_t=∇ℒ(r_t).",
+  "kind": "body",
+  "para": 89,
+  "src": "appendix_proofs.tex:52"
+ },
+ {
+  "id": 304,
+  "section": "B.1 Proofs of the main results",
+  "sentence": "By smoothness and the update in Assumption 2, ℒ(w_{t+1}) ≤ ℒ(w_t) −η⟨a_t,c_t+ξ_t⟩ + Lη²/2 ‖c_t+ξ_t‖².",
+  "kind": "body",
+  "para": 89,
+  "src": "appendix_proofs.tex:58"
+ },
+ {
+  "id": 305,
+  "section": "B.1 Proofs of the main results",
+  "sentence": "Conditional on ℋ_t, both a_t and c_t are fixed.",
+  "kind": "body",
+  "para": 89,
+  "src": "appendix_proofs.tex:69"
+ },
+ {
+  "id": 306,
+  "section": "B.1 Proofs of the main results",
+  "sentence": "Moreover, 𝔼_t‖c_t+ξ_t‖² =‖c_t‖²+𝔼_t‖ξ_t‖² ≤ (1+M)‖c_t‖²+σ².",
+  "kind": "body",
+  "para": 89,
+  "src": "experiments.tex:3"
+ },
+ {
+  "id": 307,
+  "section": "B.1 Proofs of the main results",
+  "sentence": "It follows that 𝔼_t[ℒ(w_{t+1})] ≤ ℒ(w_t) −η⟨a_t,c_t⟩+ Lη²/2 ((1+M)‖c_t‖²+σ²).",
+  "kind": "body",
+  "para": 89,
+  "src": "appendix_proofs.tex:75"
+ },
+ {
+  "id": 308,
+  "section": "B.1 Proofs of the main results",
+  "sentence": "Using the identity 2⟨a_t,c_t⟩=‖a_t‖²+‖c_t‖²−‖c_t−a_t‖² and Assumption 3, we obtain 𝔼_t[ℒ(w_{t+1})] ≤ ℒ(w_t) − η/2 ‖a_t‖² − (η(1−Lη(1+M)))/2 ‖c_t‖² + ηC/2 Ŝ_t + Lη²/2 σ².",
+  "kind": "body",
+  "para": 89,
+  "src": "appendix_proofs.tex:84"
+ },
+ {
+  "id": 309,
+  "section": "B.1 Proofs of the main results",
+  "sentence": "We take expectations and sum this inequality for 0 ≤ t<T.",
+  "kind": "body",
+  "para": 89,
+  "src": "appendix_proofs.tex:103"
+ },
+ {
+  "id": 310,
+  "section": "B.1 Proofs of the main results",
+  "sentence": "The terms involving the loss telescope, and therefore η/2 Σ_{t=0}^(T−1)𝔼[‖∇ℒ(w_t)‖² +(1−Lη(1+M))‖∇ℒ(r_t)‖²] ≤ ℒ(w_0)−𝔼ℒ(w_T) + ηC/2 Σ_{t=0}^(T−1)𝔼Ŝ_t + Lη²T/2 σ².",
+  "kind": "body",
+  "para": 89,
+  "src": "appendix_proofs.tex:103"
+ },
+ {
+  "id": 311,
+  "section": "B.1 Proofs of the main results",
+  "sentence": "Since ℒ(w_T) ≥ ℒ⋆, the desired result follows after division by ηT/2.",
+  "kind": "body",
+  "para": 89,
+  "src": "appendix_proofs.tex:118"
+ },
+ {
+  "id": 312,
+  "section": "B.1 Proofs of the main results",
+  "sentence": "This proves part (i).",
+  "kind": "body",
+  "para": 89,
+  "src": "appendix_proofs.tex:119"
+ },
+ {
+  "id": 313,
+  "section": "B.1 Proofs of the main results",
+  "sentence": "For part (ii), put γ=1−ημ.",
+  "kind": "body",
+  "para": 90,
+  "src": "appendix_proofs.tex:121"
+ },
+ {
+  "id": 314,
+  "section": "B.1 Proofs of the main results",
+  "sentence": "The assumption on η ensures that 0<γ<1 and that 1−Lη(1+M)>0.",
+  "kind": "body",
+  "para": 90,
+  "src": "appendix_proofs.tex:121"
+ },
+ {
+  "id": 315,
+  "section": "B.1 Proofs of the main results",
+  "sentence": "We may thus omit the term involving ‖c_t‖² in (10).",
+  "kind": "body",
+  "para": 90,
+  "src": "appendix_proofs.tex:123"
+ },
+ {
+  "id": 316,
+  "section": "B.1 Proofs of the main results",
+  "sentence": "The PL inequality at w_t gives 𝔼[ℒ(w_{t+1})−ℒ⋆] ≤ γ 𝔼[ℒ(w_t)−ℒ⋆] + ηC/2 𝔼Ŝ_t + Lη²/2 σ².",
+  "kind": "body",
+  "para": 90,
+  "src": "appendix_proofs.tex:124"
+ },
+ {
+  "id": 317,
+  "section": "B.1 Proofs of the main results",
+  "sentence": "Iteration yields 𝔼[ℒ(w_T)−ℒ⋆] ≤ γ^T(ℒ(w_0)−ℒ⋆) + ηC/2 Σ_{t=0}^(T−1)γ^(T−1−t)𝔼Ŝ_t + Lησ²/2μ (1−γ^T).",
+  "kind": "body",
+  "para": 90,
+  "src": "appendix_proofs.tex:132"
+ },
+ {
+  "id": 318,
+  "section": "B.1 Proofs of the main results",
+  "sentence": "It remains to compare w_T and r_T.",
+  "kind": "body",
+  "para": 91,
+  "src": "appendix_proofs.tex:146"
+ },
+ {
+  "id": 319,
+  "section": "B.1 Proofs of the main results",
+  "sentence": "Applying the smoothness inequality at w_T with the point w_T−L⁻¹∇ℒ(w_T), we get ℒ(w_T− 1/L ∇ℒ(w_T)) ≤ ℒ(w_T)− 1/2L ‖∇ℒ(w_T)‖².",
+  "kind": "body",
+  "para": 91,
+  "src": "appendix_proofs.tex:146"
+ },
+ {
+  "id": 320,
+  "section": "B.1 Proofs of the main results",
+  "sentence": "The left-hand side is at least ℒ⋆, and hence ‖∇ℒ(w_T)‖² ≤ 2L(ℒ(w_T)−ℒ⋆).",
+  "kind": "body",
+  "para": 91,
+  "src": "appendix_proofs.tex:153"
+ },
+ {
+  "id": 321,
+  "section": "B.1 Proofs of the main results",
+  "sentence": "Assumption 3 at the terminal index t=T gives ‖∇ℒ(r_T)−∇ℒ(w_T)‖² ≤ CŜ_T.",
+  "kind": "body",
+  "para": 91,
+  "src": "appendix_proofs.tex:159"
+ },
+ {
+  "id": 322,
+  "section": "B.1 Proofs of the main results",
+  "sentence": "By the PL inequality at r_T and ‖x+y‖² ≤ 2‖x‖²+2‖y‖², it follows that ℒ(r_T)−ℒ⋆ ≤ 1/2μ ‖∇ℒ(r_T)‖² ≤ 1/μ ‖∇ℒ(w_T)‖² + 1/μ ‖∇ℒ(r_T)−∇ℒ(w_T)‖² ≤ 2L/μ (ℒ(w_T)−ℒ⋆) + C/μ Ŝ_T.",
+  "kind": "body",
+  "para": 91,
+  "src": "appendix_proofs.tex:164"
+ },
+ {
+  "id": 323,
+  "section": "B.1 Proofs of the main results",
+  "sentence": "Taking expectations and substituting (11) yields the exact intermediate bound 𝔼[ℒ(r_T)−ℒ⋆] ≤ 2L/μ γ^T(ℒ(w_0)−ℒ⋆) + LηC/μ Σ_{t=0}^(T−1)γ^(T−1−t)𝔼Ŝ_t + L²ησ²/μ² (1−γ^T) + C/μ 𝔼Ŝ_T.",
+  "kind": "body",
+  "para": 91,
+  "src": "appendix_proofs.tex:180"
+ },
+ {
+  "id": 324,
+  "section": "B.1 Proofs of the main results",
+  "sentence": "The random index τ in part (ii) is independent of the training randomness and has distribution Pr(τ=t) = (ημγ^(T−1−t))/(1−γ^T), t∈{0,…,T−1}, so later training steps receive greater weight.",
+  "kind": "body",
+  "para": 91,
+  "src": "appendix_proofs.tex:194"
+ },
+ {
+  "id": 325,
+  "section": "B.1 Proofs of the main results",
+  "sentence": "Because 1−γ=ημ, these probabilities sum to one, and independence gives 𝔼Ŝ_τ = Σ_{t=0}^(T−1) (ημγ^(T−1−t))/(1−γ^T) 𝔼Ŝ_t, Σ_{t=0}^(T−1)γ^(T−1−t)𝔼Ŝ_t = (1−γ^T)/ημ 𝔼Ŝ_τ.",
+  "kind": "body",
+  "para": 91,
+  "src": "appendix_proofs.tex:203"
+ },
+ {
+  "id": 326,
+  "section": "B.1 Proofs of the main results",
+  "sentence": "Thus the second term in (12) equals LC/μ² (1−γ^T)𝔼Ŝ_τ.",
+  "kind": "body",
+  "para": 91,
+  "src": "appendix_proofs.tex:215"
+ },
+ {
+  "id": 327,
+  "section": "B.1 Proofs of the main results",
+  "sentence": "Since the reconstruction errors are nonnegative and 1−γ^T ≤ 1, this is at most LC/μ² 𝔼Ŝ_τ.",
+  "kind": "body",
+  "para": 91,
+  "src": "appendix_proofs.tex:216"
+ },
+ {
+  "id": 328,
+  "section": "B.1 Proofs of the main results",
+  "sentence": "Applying the same bound to the noise term and recalling γ=1−ημ gives (5), proving part (ii).",
+  "kind": "body",
+  "para": 91,
+  "src": "appendix_proofs.tex:218"
+ },
+ {
+  "id": 329,
+  "section": "B.2 Deferred discussion of the assumptions and the bound",
+  "sentence": "Remark 1 (Assumptions).",
+  "kind": "body",
+  "para": 93,
+  "src": "appendix_proofs.tex:226"
+ },
+ {
+  "id": 330,
+  "section": "B.2 Deferred discussion of the assumptions and the bound",
+  "sentence": "Assumptions 1 and 2 are standard in stochastic optimization.",
+  "kind": "body",
+  "para": 93,
+  "src": "appendix_proofs.tex:227"
+ },
+ {
+  "id": 331,
+  "section": "B.2 Deferred discussion of the assumptions and the bound",
+  "sentence": "Assumption 1 requires a twice continuously differentiable, smooth objective with a finite infimum, but not convexity.",
+  "kind": "body",
+  "para": 93,
+  "src": "appendix_proofs.tex:227"
+ },
+ {
+  "id": 332,
+  "section": "B.2 Deferred discussion of the assumptions and the bound",
+  "sentence": "Assumption 2 allows gradient noise to grow with the gradient norm and recovers bounded variance when M=0; the same condition is used to analyze biased SGD.",
+  "kind": "body",
+  "para": 93,
+  "src": "appendix_proofs.tex:229"
+ },
+ {
+  "id": 333,
+  "section": "B.2 Deferred discussion of the assumptions and the bound",
+  "sentence": "Assumption 3 is specific to reconstruction: small loss-aware reconstruction error must imply a small gradient mismatch.",
+  "kind": "body",
+  "para": 94,
+  "src": "appendix_proofs.tex:233"
+ },
+ {
+  "id": 334,
+  "section": "B.2 Deferred discussion of the assumptions and the bound",
+  "sentence": "Appendix B.1 derives a sufficient curvature condition.",
+  "kind": "body",
+  "para": 94,
+  "src": "appendix_proofs.tex:235"
+ },
+ {
+  "id": 335,
+  "section": "B.2 Deferred discussion of the assumptions and the bound",
+  "sentence": "Under L-smoothness and a positive saliency floor h_{t,i} ≥ h_min >0, it holds with C=L²/h_min.",
+  "kind": "body",
+  "para": 94,
+  "src": "appendix_proofs.tex:236"
+ },
+ {
+  "id": 336,
+  "section": "B.2 Deferred discussion of the assumptions and the bound",
+  "sentence": "Adam's second moment motivates the saliency estimate but does not guarantee the condition.",
+  "kind": "body",
+  "para": 94,
+  "src": "appendix_proofs.tex:239"
+ },
+ {
+  "id": 337,
+  "section": "B.2 Deferred discussion of the assumptions and the bound",
+  "sentence": "Empirically, saliency tracks the Hessian diagonal, and the full quadratic form is nearly proportional to Ŝ (Figure 15, Appendix C).",
+  "kind": "body",
+  "para": 94,
+  "src": "appendix_proofs.tex:240"
+ },
+ {
+  "id": 338,
+  "section": "B.2 Deferred discussion of the assumptions and the bound",
+  "sentence": "Assumption 4 is the Polyak–Łojasiewicz (PL) condition and is needed only for part (ii) of Theorem 1.",
+  "kind": "body",
+  "para": 95,
+  "src": "appendix_proofs.tex:244"
+ },
+ {
+  "id": 339,
+  "section": "B.2 Deferred discussion of the assumptions and the bound",
+  "sentence": "Strong convexity implies PL, but PL does not require convexity and ensures that every stationary point is a global minimum.",
+  "kind": "body",
+  "para": 95,
+  "src": "appendix_proofs.tex:245"
+ },
+ {
+  "id": 340,
+  "section": "B.2 Deferred discussion of the assumptions and the bound",
+  "sentence": "Local PL-type conditions have also been established for some overparameterized neural networks.",
+  "kind": "body",
+  "para": 95,
+  "src": "appendix_proofs.tex:247"
+ },
+ {
+  "id": 341,
+  "section": "B.2 Deferred discussion of the assumptions and the bound",
+  "sentence": "Comparison with standard and biased SGD.",
+  "kind": "body",
+  "para": 96,
+  "src": "appendix_proofs.tex:252"
+ },
+ {
+  "id": 342,
+  "section": "B.2 Deferred discussion of the assumptions and the bound",
+  "sentence": "To compare the guarantees, define B_T:= (ℒ(w_0)−ℒ⋆)/ηT +ησ², S̅_T:= 1/T Σ_{t=0}^(T−1)𝔼Ŝ_t.",
+  "kind": "body",
+  "para": 96,
+  "src": "appendix_proofs.tex:253"
+ },
+ {
+  "id": 343,
+  "section": "B.2 Deferred discussion of the assumptions and the bound",
+  "sentence": "Let α_η:=1−Lη(1+M)>0.",
+  "kind": "body",
+  "para": 96,
+  "src": "methodology.tex:46"
+ },
+ {
+  "id": 344,
+  "section": "B.2 Deferred discussion of the assumptions and the bound",
+  "sentence": "Up to constant factors, the relevant bounds are Standard SGD: 1/T Σ_{t=0}^(T−1) 𝔼‖∇ℒ(w_t)‖² ≲ B_T, Biased SGD: 1/T Σ_{t=0}^(T−1) 𝔼‖∇ℒ(w_t)‖² ≲ (B_T+ζ²)/(1−m), QUASAR: 1/T Σ_{t=0}^(T−1)𝔼[‖∇ℒ(w_t)‖²+α_η‖∇ℒ(r_t)‖²] ≲ B_T+CS̅_T.",
+  "kind": "body",
+  "para": 96,
+  "src": "appendix_proofs.tex:264"
+ },
+ {
+  "id": 345,
+  "section": "B.2 Deferred discussion of the assumptions and the bound",
+  "sentence": "Biased-SGD analysis assumes ‖b_t‖² ≤ m‖∇ℒ(w_t)‖²+ζ² with 0 ≤ m<1.",
+  "kind": "body",
+  "para": 96,
+  "src": "appendix_proofs.tex:283"
+ },
+ {
+  "id": 346,
+  "section": "B.2 Deferred discussion of the assumptions and the bound",
+  "sentence": "In QAT, the bias is the reconstruction-induced gradient mismatch b_t=e_t.",
+  "kind": "body",
+  "para": 96,
+  "src": "appendix_proofs.tex:285"
+ },
+ {
+  "id": 347,
+  "section": "B.2 Deferred discussion of the assumptions and the bound",
+  "sentence": "Assumption 3 bounds this mismatch by CŜ_t, which QUASAR minimizes at every step.",
+  "kind": "body",
+  "para": 96,
+  "src": "appendix_proofs.tex:286"
+ },
+ {
+  "id": 348,
+  "section": "B.2 Deferred discussion of the assumptions and the bound",
+  "sentence": "The resulting bound contains the usual SGD terms plus CS̅_T and controls stationarity at both the latent and reconstructed weights.",
+  "kind": "body",
+  "para": 96,
+  "src": "appendix_proofs.tex:287"
+ },
+ {
+  "id": 349,
+  "section": "C Empirical validation of the theory",
+  "sentence": "This appendix tests the assumptions and predictions of Section 4.",
+  "kind": "body",
+  "para": 98,
+  "src": "appendix_theory_validation.tex:5"
+ },
+ {
+  "id": 350,
+  "section": "C Empirical validation of the theory",
+  "sentence": "Across both model families and all tested bit widths, end-of-training reconstruction error closely tracks held-out KL for Standard QAT, Denoising QAT, and QUASAR.",
+  "kind": "body",
+  "para": 98,
+  "src": "appendix_theory_validation.tex:6"
+ },
+ {
+  "id": 351,
+  "section": "C Empirical validation of the theory",
+  "sentence": "QUASAR attains the lowest value of both in every setting (Figure 10; per-projection results in Figure 11).",
+  "kind": "body",
+  "para": 98,
+  "src": "appendix_theory_validation.tex:8"
+ },
+ {
+  "id": 352,
+  "section": "C Empirical validation of the theory",
+  "sentence": "The same ordering holds under the plain-SGD dynamics analyzed by the theorem (Figure 18).",
+  "kind": "body",
+  "para": 98,
+  "src": "appendix_theory_validation.tex:10"
+ },
+ {
+  "id": 353,
+  "section": "C Empirical validation of the theory",
+  "sentence": "The relationship is also causal: restricting the scale search raises both Ŝ_T and final KL.",
+  "kind": "body",
+  "para": 98,
+  "src": "appendix_theory_validation.tex:11"
+ },
+ {
+  "id": 354,
+  "section": "C Empirical validation of the theory",
+  "sentence": "It is predictive before training as well: reconstruction error at initialization predicts final KL (Figures 12 and 13).",
+  "kind": "body",
+  "para": 98,
+  "src": "appendix_theory_validation.tex:13"
+ },
+ {
+  "id": 355,
+  "section": "C Empirical validation of the theory",
+  "sentence": "Figure 10: Reconstruction error tracks final KL.",
+  "kind": "figure_caption",
+  "para": 99,
+  "src": "appendix_theory_validation.tex:20"
+ },
+ {
+  "id": 356,
+  "section": "C Empirical validation of the theory",
+  "sentence": "End-of-training loss-aware reconstruction error versus final held-out KL to the full-precision teacher, for Standard QAT, Denoising QAT, and QUASAR at INT4, INT3, and INT2.",
+  "kind": "figure_caption",
+  "para": 99,
+  "src": "appendix_theory_validation.tex:21"
+ },
+ {
+  "id": 357,
+  "section": "C Empirical validation of the theory",
+  "sentence": "Figure 11: QUASAR reduces reconstruction error across projection types.",
+  "kind": "figure_caption",
+  "para": 100,
+  "src": "appendix_theory_validation.tex:30"
+ },
+ {
+  "id": 358,
+  "section": "C Empirical validation of the theory",
+  "sentence": "Median reduction in loss-aware reconstruction error relative to Standard QAT across Qwen3-4B-Thinking-2507 modules at INT4, INT3, and INT2, measured at initialization (left) and after training (right).",
+  "kind": "figure_caption",
+  "para": 100,
+  "src": "appendix_theory_validation.tex:31"
+ },
+ {
+  "id": 359,
+  "section": "C Empirical validation of the theory",
+  "sentence": "Error is measured against the full-precision weights.",
+  "kind": "figure_caption",
+  "para": 100,
+  "src": "appendix_theory_validation.tex:33"
+ },
+ {
+  "id": 360,
+  "section": "C Empirical validation of the theory",
+  "sentence": "Figure 12: Reconstruction error drives final loss.",
+  "kind": "figure_caption",
+  "para": 101,
+  "src": "appendix_theory_validation.tex:41"
+ },
+ {
+  "id": 361,
+  "section": "C Empirical validation of the theory",
+  "sentence": "Five QUASAR INT2 runs differ only in the lower bound imposed on the scale-search factor f.",
+  "kind": "figure_caption",
+  "para": 101,
+  "src": "appendix_theory_validation.tex:42"
+ },
+ {
+  "id": 362,
+  "section": "C Empirical validation of the theory",
+  "sentence": "Restricting the search raises both the final reconstruction error Ŝ_T and held-out KL after 1,000 training steps.",
+  "kind": "figure_caption",
+  "para": 101,
+  "src": "appendix_theory_validation.tex:43"
+ },
+ {
+  "id": 363,
+  "section": "C Empirical validation of the theory",
+  "sentence": "The star marks the unrestricted search.",
+  "kind": "figure_caption",
+  "para": 101,
+  "src": "appendix_theory_validation.tex:45"
+ },
+ {
+  "id": 364,
+  "section": "C Empirical validation of the theory",
+  "sentence": "Figure 13: Reconstruction error predicts final loss before training.",
+  "kind": "figure_caption",
+  "para": 102,
+  "src": "appendix_theory_validation.tex:52"
+ },
+ {
+  "id": 365,
+  "section": "C Empirical validation of the theory",
+  "sentence": "Across Standard QAT, Denoising QAT, and QUASAR at INT4, INT3, and INT2, reconstruction error at initialization predicts held-out KL to the full-precision model after 4,096 steps (R²=0.98).",
+  "kind": "figure_caption",
+  "para": 102,
+  "src": "appendix_theory_validation.tex:53"
+ },
+ {
+  "id": 366,
+  "section": "C Empirical validation of the theory",
+  "sentence": "Results use Qwen3-4B-Thinking-2507.",
+  "kind": "figure_caption",
+  "para": 102,
+  "src": "appendix_theory_validation.tex:55"
+ },
+ {
+  "id": 367,
+  "section": "C Empirical validation of the theory",
+  "sentence": "Figure 14: Reconstruction error controls gradient mismatch.",
+  "kind": "figure_caption",
+  "para": 103,
+  "src": "appendix_theory_validation.tex:63"
+ },
+ {
+  "id": 368,
+  "section": "C Empirical validation of the theory",
+  "sentence": "Across INT4, INT3, and INT2, the squared gradient mismatch rises with the loss-aware reconstruction error Ŝ, supporting Assumption 3.",
+  "kind": "figure_caption",
+  "para": 103,
+  "src": "appendix_theory_validation.tex:64"
+ },
+ {
+  "id": 369,
+  "section": "C Empirical validation of the theory",
+  "sentence": "Circles, triangles, and squares show fixed clipping factors for INT4, INT3, and INT2, respectively; stars show QUASAR's per-group scale-search solutions.",
+  "kind": "figure_caption",
+  "para": 103,
+  "src": "appendix_theory_validation.tex:66"
+ },
+ {
+  "id": 370,
+  "section": "C Empirical validation of the theory",
+  "sentence": "Figure 15: QUASAR's saliency tracks curvature.",
+  "kind": "figure_caption",
+  "para": 104,
+  "src": "appendix_theory_validation.tex:74"
+ },
+ {
+  "id": 371,
+  "section": "C Empirical validation of the theory",
+  "sentence": "Each point represents one weight matrix from a trained INT2 Qwen3-4B-Thinking checkpoint and compares its mean saliency h (Adam's second moment) with a 32-sample Hutchinson estimate of its mean Hessian diagonal.",
+  "kind": "figure_caption",
+  "para": 104,
+  "src": "appendix_theory_validation.tex:75"
+ },
+ {
+  "id": 372,
+  "section": "C Empirical validation of the theory",
+  "sentence": "The log-scale correlation is r=0.81.",
+  "kind": "figure_caption",
+  "para": 104,
+  "src": "appendix_theory_validation.tex:78"
+ },
+ {
+  "id": 373,
+  "section": "C Empirical validation of the theory",
+  "sentence": "Figure 16: Training trajectories support a PL relation.",
+  "kind": "figure_caption",
+  "para": 105,
+  "src": "appendix_theory_validation.tex:86"
+ },
+ {
+  "id": 374,
+  "section": "C Empirical validation of the theory",
+  "sentence": "Each point is one step of an INT2 Qwen3-4B-Thinking run, with loss and gradient measured at the reconstruction r.",
+  "kind": "figure_caption",
+  "para": 105,
+  "src": "appendix_theory_validation.tex:87"
+ },
+ {
+  "id": 375,
+  "section": "C Empirical validation of the theory",
+  "sentence": "For all three methods, the squared gradient norm scales with the gap above the trajectory minimum.",
+  "kind": "figure_caption",
+  "para": 105,
+  "src": "appendix_theory_validation.tex:88"
+ },
+ {
+  "id": 376,
+  "section": "C Empirical validation of the theory",
+  "sentence": "QUASAR's estimated μ̂=1.72 is about 2.5× the baseline values.",
+  "kind": "figure_caption",
+  "para": 105,
+  "src": "appendix_theory_validation.tex:90"
+ },
+ {
+  "id": 377,
+  "section": "C Empirical validation of the theory",
+  "sentence": "In Theorem 1(ii), a larger μ gives faster geometric convergence and smaller floor terms, which scale with 1/μ or 1/μ².",
+  "kind": "figure_caption",
+  "para": 105,
+  "src": "appendix_theory_validation.tex:91"
+ },
+ {
+  "id": 378,
+  "section": "C Empirical validation of the theory",
+  "sentence": "This provides an optimization-side view of the healing curves (Figure 3): QUASAR's reconstruction adds less loss, so more of the remaining gap produces useful gradient, enabling faster healing and a lower loss floor.",
+  "kind": "figure_caption",
+  "para": 105,
+  "src": "appendix_theory_validation.tex:93"
+ },
+ {
+  "id": 379,
+  "section": "C Empirical validation of the theory",
+  "sentence": "Figure 17: Reconstruction error dominates the measured bound.",
+  "kind": "figure_caption",
+  "para": 106,
+  "src": "appendix_theory_validation.tex:103"
+ },
+ {
+  "id": 380,
+  "section": "C Empirical validation of the theory",
+  "sentence": "We evaluate each term of Theorem 1(i) on an INT2 QUASAR run with plain SGD and learning rate 10⁻³.",
+  "kind": "figure_caption",
+  "para": 106,
+  "src": "appendix_theory_validation.tex:104"
+ },
+ {
+  "id": 381,
+  "section": "C Empirical validation of the theory",
+  "sentence": "We measure λ_max by power iteration (approximating L), σ² from per-batch gradients, and C using Figure 14.",
+  "kind": "figure_caption",
+  "para": 106,
+  "src": "appendix_theory_validation.tex:105"
+ },
+ {
+  "id": 382,
+  "section": "C Empirical validation of the theory",
+  "sentence": "The resulting bound is within 3.1× of the observed average squared gradient norm, and reconstruction error is its largest term.",
+  "kind": "figure_caption",
+  "para": 106,
+  "src": "appendix_theory_validation.tex:107"
+ },
+ {
+  "id": 383,
+  "section": "C Empirical validation of the theory",
+  "sentence": "Validation under SGD dynamics.",
+  "kind": "body",
+  "para": 107,
+  "src": "appendix_theory_validation.tex:114"
+ },
+ {
+  "id": 384,
+  "section": "C Empirical validation of the theory",
+  "sentence": "Theorem 1 analyzes STE–SGD, whereas the main experiments use AdamW.",
+  "kind": "body",
+  "para": 107,
+  "src": "appendix_theory_validation.tex:117"
+ },
+ {
+  "id": 385,
+  "section": "C Empirical validation of the theory",
+  "sentence": "We therefore repeat the INT2 quantization-aware distillation experiment with plain SGD for 1,024 steps at global batch 32, using a constant learning rate and no momentum, warmup, or gradient clipping.",
+  "kind": "body",
+  "para": 107,
+  "src": "appendix_theory_validation.tex:118"
+ },
+ {
+  "id": 386,
+  "section": "C Empirical validation of the theory",
+  "sentence": "QUASAR replaces AdamW's second moment with an explicit EMA of squared gradients; the remaining recipe is unchanged.",
+  "kind": "body",
+  "para": 107,
+  "src": "appendix_theory_validation.tex:121"
+ },
+ {
+  "id": 387,
+  "section": "C Empirical validation of the theory",
+  "sentence": "At every stable learning rate, QUASAR reaches lower training and held-out loss floors than Standard QAT, preserving the ordering observed with AdamW (Figure 18).",
+  "kind": "body",
+  "para": 107,
+  "src": "appendix_theory_validation.tex:122"
+ },
+ {
+  "id": 388,
+  "section": "C Empirical validation of the theory",
+  "sentence": "Figure 18: QUASAR retains its advantage under plain SGD.",
+  "kind": "figure_caption",
+  "para": 108,
+  "src": "appendix_theory_validation.tex:130"
+ },
+ {
+  "id": 389,
+  "section": "C Empirical validation of the theory",
+  "sentence": "Training (top) and held-out (bottom) loss for Standard QAT and QUASAR at INT2 across three constant learning rates.",
+  "kind": "figure_caption",
+  "para": 108,
+  "src": "appendix_theory_validation.tex:131"
+ },
+ {
+  "id": 390,
+  "section": "C Empirical validation of the theory",
+  "sentence": "QUASAR reaches lower loss floors at every stable learning rate.",
+  "kind": "figure_caption",
+  "para": 108,
+  "src": "appendix_theory_validation.tex:132"
+ },
+ {
+  "id": 391,
+  "section": "D Experimental Details",
+  "sentence": "This appendix specifies the training and evaluation protocols for Section 5.",
+  "kind": "body",
+  "para": 110,
+  "src": "appendix_setup.tex:3"
+ },
+ {
+  "id": 392,
+  "section": "D Experimental Details",
+  "sentence": "Format-specific algorithms are given in Appendix A.1, and released checkpoints are listed in Appendix H.",
+  "kind": "body",
+  "para": 110,
+  "src": "appendix_setup.tex:4"
+ },
+ {
+  "id": 393,
+  "section": "D Experimental Details",
+  "sentence": "Quantization scope.",
+  "kind": "body",
+  "para": 111,
+  "src": "appendix_setup.tex:8"
+ },
+ {
+  "id": 394,
+  "section": "D Experimental Details",
+  "sentence": "The controlled INT experiments use asymmetric weight-only INT4, INT3, or INT2 quantization with group size 128.",
+  "kind": "body",
+  "para": 111,
+  "src": "appendix_setup.tex:9"
+ },
+ {
+  "id": 395,
+  "section": "D Experimental Details",
+  "sentence": "We quantize every linear projection in the transformer blocks and keep activations, embeddings, the language-model head, and norms in BF16.",
+  "kind": "body",
+  "para": 111,
+  "src": "appendix_setup.tex:10"
+ },
+ {
+  "id": 396,
+  "section": "D Experimental Details",
+  "sentence": "Healing updates only the quantized linear weights; adaptation updates all student parameters.",
+  "kind": "body",
+  "para": 111,
+  "src": "appendix_setup.tex:12"
+ },
+ {
+  "id": 397,
+  "section": "D Experimental Details",
+  "sentence": "Healing.",
+  "kind": "body",
+  "para": 112,
+  "src": "experiments.tex:6"
+ },
+ {
+  "id": 398,
+  "section": "D Experimental Details",
+  "sentence": "We apply QAD for 4,096 steps at sequence length 4,096.",
+  "kind": "body",
+  "para": 112,
+  "src": "appendix_setup.tex:16"
+ },
+ {
+  "id": 399,
+  "section": "D Experimental Details",
+  "sentence": "Qwen3-4B uses global batch 32 and learning rates 2,3,5×10⁻⁵ at INT4, INT3, and INT2.",
+  "kind": "body",
+  "para": 112,
+  "src": "appendix_setup.tex:16"
+ },
+ {
+  "id": 400,
+  "section": "D Experimental Details",
+  "sentence": "Llama-3.1-8B uses global batch 128 and learning rates 1,2,3×10⁻⁵.",
+  "kind": "body",
+  "para": 112,
+  "src": "appendix_setup.tex:18"
+ },
+ {
+  "id": 401,
+  "section": "D Experimental Details",
+  "sentence": "This corresponds to roughly 60k supervised tokens per step.",
+  "kind": "body",
+  "para": 112,
+  "src": "appendix_setup.tex:19"
+ },
+ {
+  "id": 402,
+  "section": "D Experimental Details",
+  "sentence": "Training uses KL distillation from the full-precision teacher.",
+  "kind": "body",
+  "para": 112,
+  "src": "appendix_setup.tex:20"
+ },
+ {
+  "id": 403,
+  "section": "D Experimental Details",
+  "sentence": "QUASAR uses AdamW's second moment as saliency and searches clipping factors from 0.30 to 1.00 in increments of 0.05.",
+  "kind": "body",
+  "para": 112,
+  "src": "appendix_setup.tex:21"
+ },
+ {
+  "id": 404,
+  "section": "D Experimental Details",
+  "sentence": "Adaptation.",
+  "kind": "body",
+  "para": 113,
+  "src": "experiments.tex:6"
+ },
+ {
+  "id": 405,
+  "section": "D Experimental Details",
+  "sentence": "We train Qwen3-4B-Base on OpenMathReasoning for 4,096 steps at sequence length 18,432 and global batch 8.",
+  "kind": "body",
+  "para": 113,
+  "src": "appendix_setup.tex:25"
+ },
+ {
+  "id": 406,
+  "section": "D Experimental Details",
+  "sentence": "All methods use cross-entropy, AdamW with learning rate 5×10⁻⁵, a cosine schedule with 1% warmup, no weight decay, and gradient clipping at 1.",
+  "kind": "body",
+  "para": 113,
+  "src": "appendix_setup.tex:26"
+ },
+ {
+  "id": 407,
+  "section": "D Experimental Details",
+  "sentence": "QUASAR uses the same integer quantizer and scale-search grid as in healing.",
+  "kind": "body",
+  "para": 113,
+  "src": "appendix_setup.tex:28"
+ },
+ {
+  "id": 408,
+  "section": "D Experimental Details",
+  "sentence": "NVFP4.",
+  "kind": "body",
+  "para": 114,
+  "src": "main.tex:59"
+ },
+ {
+  "id": 409,
+  "section": "D Experimental Details",
+  "sentence": "NVFP4 QAD uses AdamW with learning rate 10⁻⁶ and global batch 32.",
+  "kind": "body",
+  "para": 114,
+  "src": "appendix_setup.tex:32"
+ },
+ {
+  "id": 410,
+  "section": "D Experimental Details",
+  "sentence": "We materialize the final checkpoints and evaluate them through vLLM's native NVFP4 path.",
+  "kind": "body",
+  "para": 114,
+  "src": "appendix_setup.tex:33"
+ },
+ {
+  "id": 411,
+  "section": "D Experimental Details",
+  "sentence": "Baselines.",
+  "kind": "body",
+  "para": 115,
+  "src": "main.tex:59"
+ },
+ {
+  "id": 412,
+  "section": "D Experimental Details",
+  "sentence": "Standard QAT uses fixed min–max ranges; LSQ learns the scales; Denoising QAT refits the dequantization parameters; BitDistiller combines clipping with self-distillation; RTN rounds to the nearest grid point; GPTQ minimizes a second-order reconstruction error; and AWQ protects activation-salient weights.",
+  "kind": "body",
+  "para": 115,
+  "src": "appendix_setup.tex:37"
+ },
+ {
+  "id": 413,
+  "section": "D Experimental Details",
+  "sentence": "Evaluation protocol.",
+  "kind": "body",
+  "para": 116,
+  "src": "appendix_setup.tex:44"
+ },
+ {
+  "id": 414,
+  "section": "D Experimental Details",
+  "sentence": "For healing, we report fidelity to the full-precision model and downstream accuracy.",
+  "kind": "body",
+  "para": 116,
+  "src": "appendix_setup.tex:45"
+ },
+ {
+  "id": 415,
+  "section": "D Experimental Details",
+  "sentence": "For adaptation, we report held-out perplexity and accuracy on five math benchmarks.",
+  "kind": "body",
+  "para": 116,
+  "src": "appendix_setup.tex:46"
+ },
+ {
+  "id": 416,
+  "section": "D Experimental Details",
+  "sentence": "NVFP4 results include fidelity, reasoning, coding, and long-context evaluations.",
+  "kind": "body",
+  "para": 116,
+  "src": "appendix_setup.tex:47"
+ },
+ {
+  "id": 417,
+  "section": "D Experimental Details",
+  "sentence": "Full task protocols are given with the corresponding results in Appendices E, F, and G.",
+  "kind": "body",
+  "para": 116,
+  "src": "appendix_setup.tex:48"
+ },
+ {
+  "id": 418,
+  "section": "E Additional Healing Results",
+  "sentence": "This appendix extends the healing results of Section 5.1 with additional fidelity and downstream metrics, training dynamics, and an LLM-judge analysis of INT2 response quality.",
+  "kind": "body",
+  "para": 118,
+  "src": "appendix_healing.tex:3"
+ },
+ {
+  "id": 419,
+  "section": "E Additional Healing Results",
+  "sentence": "It also reports representative generations and QUASAR ablations.",
+  "kind": "body",
+  "para": 118,
+  "src": "appendix_healing.tex:6"
+ },
+ {
+  "id": 420,
+  "section": "E Additional Healing Results",
+  "sentence": "NVFP4 results are in Appendix G.",
+  "kind": "body",
+  "para": 118,
+  "src": "appendix_healing.tex:7"
+ },
+ {
+  "id": 421,
+  "section": "E.1 Standard Tasks and Fidelity",
+  "sentence": "Table 6: QUASAR gives the highest fidelity in all six model–bit-width settings.",
+  "kind": "table_caption",
+  "para": 120,
+  "src": "healing_tables.tex:4"
+ },
+ {
+  "id": 422,
+  "section": "E.1 Standard Tasks and Fidelity",
+  "sentence": "Held-out forward KL, top-1 agreement, and accuracy on eight benchmarks for QAD of Qwen3-4B-Thinking-2507 and Llama-3.1-8B-Instruct.",
+  "kind": "table_caption",
+  "para": 120,
+  "src": "healing_tables.tex:5"
+ },
+ {
+  "id": 423,
+  "section": "E.1 Standard Tasks and Fidelity",
+  "sentence": "Figure 19: QUASAR gives the lowest held-out KL across both models and all bit widths.",
+  "kind": "figure_caption",
+  "para": 121,
+  "src": "appendix_healing.tex:16"
+ },
+ {
+  "id": 424,
+  "section": "E.1 Standard Tasks and Fidelity",
+  "sentence": "Forward KL to the full-precision model after QAD of Qwen3-4B-Thinking-2507 (left) and Llama-3.1-8B-Instruct (right).",
+  "kind": "figure_caption",
+  "para": 121,
+  "src": "appendix_healing.tex:17"
+ },
+ {
+  "id": 425,
+  "section": "E.1 Standard Tasks and Fidelity",
+  "sentence": "Lower is better.",
+  "kind": "figure_caption",
+  "para": 121,
+  "src": "appendix_healing.tex:19"
+ },
+ {
+  "id": 426,
+  "section": "E.1 Standard Tasks and Fidelity",
+  "sentence": "Figure 20: QUASAR attains the highest INT2 average accuracy on both models.",
+  "kind": "figure_caption",
+  "para": 122,
+  "src": "appendix_healing.tex:26"
+ },
+ {
+  "id": 427,
+  "section": "E.1 Standard Tasks and Fidelity",
+  "sentence": "Average accuracy over the eight benchmarks of Table 6 versus bit width for Qwen3-4B-Thinking-2507 (left) and Llama-3.1-8B-Instruct (right).",
+  "kind": "figure_caption",
+  "para": 122,
+  "src": "appendix_healing.tex:27"
+ },
+ {
+  "id": 428,
+  "section": "E.1 Standard Tasks and Fidelity",
+  "sentence": "Gray circles mark the full-precision models.",
+  "kind": "figure_caption",
+  "para": 122,
+  "src": "appendix_healing.tex:30"
+ },
+ {
+  "id": 429,
+  "section": "E.1 Standard Tasks and Fidelity",
+  "sentence": "Figure 21: QUASAR gives the best fidelity at each quantized model size.",
+  "kind": "figure_caption",
+  "para": 123,
+  "src": "appendix_healing.tex:37"
+ },
+ {
+  "id": 430,
+  "section": "E.1 Standard Tasks and Fidelity",
+  "sentence": "Average accuracy over eight benchmarks (left) and held-out KL to the full-precision model (right) versus model size.",
+  "kind": "figure_caption",
+  "para": 123,
+  "src": "appendix_healing.tex:38"
+ },
+ {
+  "id": 431,
+  "section": "E.1 Standard Tasks and Fidelity",
+  "sentence": "Filled markers denote Qwen3-4B-Thinking-2507, open markers denote Llama-3.1-8B-Instruct, and gray circles mark the full-precision models.",
+  "kind": "figure_caption",
+  "para": 123,
+  "src": "appendix_healing.tex:39"
+ },
+ {
+  "id": 432,
+  "section": "E.1 Standard Tasks and Fidelity",
+  "sentence": "Figure 22: QUASAR preserves INT2 accuracy broadly across tasks.",
+  "kind": "figure_caption",
+  "para": 124,
+  "src": "appendix_healing.tex:48"
+ },
+ {
+  "id": 433,
+  "section": "E.1 Standard Tasks and Fidelity",
+  "sentence": "Per-task accuracy normalized by the full-precision model for Qwen3-4B-Thinking-2507 (left) and Llama-3.1-8B-Instruct (right) on the eight benchmarks of Table 6.",
+  "kind": "figure_caption",
+  "para": 124,
+  "src": "appendix_healing.tex:49"
+ },
+ {
+  "id": 434,
+  "section": "E.1 Standard Tasks and Fidelity",
+  "sentence": "Figure 23: Lower held-out KL correlates with higher downstream accuracy.",
+  "kind": "figure_caption",
+  "para": 125,
+  "src": "appendix_healing.tex:58"
+ },
+ {
+  "id": 435,
+  "section": "E.1 Standard Tasks and Fidelity",
+  "sentence": "Average accuracy over eight benchmarks versus final forward KL for the QAT and PTQ methods of Table 6, across both models and all three bit widths.",
+  "kind": "figure_caption",
+  "para": 125,
+  "src": "appendix_healing.tex:59"
+ },
+ {
+  "id": 436,
+  "section": "E.1 Standard Tasks and Fidelity",
+  "sentence": "Dashed lines mark full-precision accuracy.",
+  "kind": "figure_caption",
+  "para": 125,
+  "src": "appendix_healing.tex:61"
+ },
+ {
+  "id": 437,
+  "section": "E.2 Training Dynamics",
+  "sentence": "Figure 24: QUASAR reaches the highest final top-1 agreement in all six settings.",
+  "kind": "figure_caption",
+  "para": 127,
+  "src": "appendix_healing.tex:71"
+ },
+ {
+  "id": 438,
+  "section": "E.2 Training Dynamics",
+  "sentence": "Top-1 agreement with the full-precision model during QAD of Qwen3-4B-Thinking-2507 (top) and Llama-3.1-8B-Instruct (bottom) at INT4, INT3, and INT2.",
+  "kind": "figure_caption",
+  "para": 127,
+  "src": "appendix_healing.tex:72"
+ },
+ {
+  "id": 439,
+  "section": "E.2 Training Dynamics",
+  "sentence": "Figure 25: QUASAR is robust to learning rate.",
+  "kind": "figure_caption",
+  "para": 128,
+  "src": "appendix_healing.tex:81"
+ },
+ {
+  "id": 440,
+  "section": "E.2 Training Dynamics",
+  "sentence": "Final held-out KL after 1,000 steps of INT2 QAD of Qwen3-4B-Thinking-2507 across a 50× learning-rate range.",
+  "kind": "figure_caption",
+  "para": 128,
+  "src": "appendix_healing.tex:82"
+ },
+ {
+  "id": 441,
+  "section": "E.2 Training Dynamics",
+  "sentence": "QUASAR attains the lowest KL at every tested rate; Standard QAT diverges at high rates, while BitDistiller degrades at low rates.",
+  "kind": "figure_caption",
+  "para": 128,
+  "src": "appendix_healing.tex:83"
+ },
+ {
+  "id": 442,
+  "section": "E.2 Training Dynamics",
+  "sentence": "Figure 26: QUASAR becomes the final leader early in training.",
+  "kind": "figure_caption",
+  "para": 129,
+  "src": "appendix_healing.tex:92"
+ },
+ {
+  "id": 443,
+  "section": "E.2 Training Dynamics",
+  "sentence": "Each strip identifies the method with the lowest held-out KL among six methods for Qwen3-4B-Thinking-2507.",
+  "kind": "figure_caption",
+  "para": 129,
+  "src": "appendix_healing.tex:93"
+ },
+ {
+  "id": 444,
+  "section": "E.2 Training Dynamics",
+  "sentence": "QUASAR leads from step 128 at INT3 and INT2, and from step 1,408 at INT4, through the end of training.",
+  "kind": "figure_caption",
+  "para": 129,
+  "src": "appendix_healing.tex:94"
+ },
+ {
+  "id": 445,
+  "section": "E.3 LLM-as-a-Judge Preference at 2 Bits",
+  "sentence": "Across 128 WildChat prompts per model, Llama-3.3-70B-Instruct prefers QUASAR to all seven quantized baselines for both models (Figure 27; Table 7).",
+  "kind": "body",
+  "para": 131,
+  "src": "appendix_healing.tex:101"
+ },
+ {
+  "id": 446,
+  "section": "E.3 LLM-as-a-Judge Preference at 2 Bits",
+  "sentence": "The margin is largest against PTQ, whose INT2 responses are often repetitive or incomplete (Figure 28).",
+  "kind": "body",
+  "para": 131,
+  "src": "appendix_healing.tex:103"
+ },
+ {
+  "id": 447,
+  "section": "E.3 LLM-as-a-Judge Preference at 2 Bits",
+  "sentence": "The full-precision models remain preferred.",
+  "kind": "body",
+  "para": 131,
+  "src": "appendix_healing.tex:105"
+ },
+ {
+  "id": 448,
+  "section": "E.3 LLM-as-a-Judge Preference at 2 Bits",
+  "sentence": "Figure 29 shows one representative response.",
+  "kind": "body",
+  "para": 131,
+  "src": "appendix_healing.tex:106"
+ },
+ {
+  "id": 449,
+  "section": "E.3 LLM-as-a-Judge Preference at 2 Bits",
+  "sentence": "Figure 27: The judge prefers QUASAR to every INT2 quantized baseline.",
+  "kind": "figure_caption",
+  "para": 132,
+  "src": "appendix_healing.tex:111"
+ },
+ {
+  "id": 450,
+  "section": "E.3 LLM-as-a-Judge Preference at 2 Bits",
+  "sentence": "Pairwise win, tie, and loss rates on responses to 128 WildChat prompts for Qwen3-4B-Thinking-2507 and Llama-3.1-8B-Instruct.",
+  "kind": "figure_caption",
+  "para": 132,
+  "src": "appendix_healing.tex:112"
+ },
+ {
+  "id": 451,
+  "section": "E.3 LLM-as-a-Judge Preference at 2 Bits",
+  "sentence": "Llama-3.3-70B-Instruct serves as the judge.",
+  "kind": "figure_caption",
+  "para": 132,
+  "src": "appendix_healing.tex:114"
+ },
+ {
+  "id": 452,
+  "section": "E.3 LLM-as-a-Judge Preference at 2 Bits",
+  "sentence": "Table 7: QUASAR wins all 14 comparisons with quantized baselines.",
+  "kind": "table_caption",
+  "para": 133,
+  "src": "appendix_healing.tex:120"
+ },
+ {
+  "id": 453,
+  "section": "E.3 LLM-as-a-Judge Preference at 2 Bits",
+  "sentence": "Mean per-prompt preference in [−1,1], with 95% bootstrap confidence intervals over 128 prompts.",
+  "kind": "table_caption",
+  "para": 133,
+  "src": "appendix_healing.tex:121"
+ },
+ {
+  "id": 454,
+  "section": "E.3 LLM-as-a-Judge Preference at 2 Bits",
+  "sentence": "Positive values favor QUASAR.",
+  "kind": "table_caption",
+  "para": 133,
+  "src": "appendix_healing.tex:122"
+ },
+ {
+  "id": 455,
+  "section": "E.3 LLM-as-a-Judge Preference at 2 Bits",
+  "sentence": "The final row compares QUASAR with the full-precision model.",
+  "kind": "table_caption",
+  "para": 133,
+  "src": "appendix_healing.tex:122"
+ },
+ {
+  "id": 456,
+  "section": "E.3 LLM-as-a-Judge Preference at 2 Bits",
+  "sentence": "Figure 28: QUASAR matches the full-precision models' response stability at INT2.",
+  "kind": "figure_caption",
+  "para": 134,
+  "src": "appendix_healing.tex:147"
+ },
+ {
+  "id": 457,
+  "section": "E.3 LLM-as-a-Judge Preference at 2 Bits",
+  "sentence": "Mean word-repetition ratio over 128 WildChat prompts for Qwen3-4B-Thinking-2507 (left) and Llama-3.1-8B-Instruct (right), with greedy decoding.",
+  "kind": "figure_caption",
+  "para": 134,
+  "src": "appendix_healing.tex:148"
+ },
+ {
+  "id": 458,
+  "section": "E.3 LLM-as-a-Judge Preference at 2 Bits",
+  "sentence": "Dashed lines mark the full-precision models; counts show responses that close the reasoning block for Qwen or stop before the token cap for Llama.",
+  "kind": "figure_caption",
+  "para": 134,
+  "src": "appendix_healing.tex:150"
+ },
+ {
+  "id": 459,
+  "section": "E.3 LLM-as-a-Judge Preference at 2 Bits",
+  "sentence": "Figure 29: The beginning of each method's response to one held-out prompt, for Qwen3-4B-Thinking-2507 at INT2, INT3, and INT4 with greedy decoding.",
+  "kind": "figure_caption",
+  "para": 135,
+  "src": "appendix_healing.tex:194"
+ },
+ {
+  "id": 460,
+  "section": "E.4 Ablations",
+  "sentence": "Table 8: Ablation Study: Effect of QUASAR's scale search and weighted dequantization fit on Qwen3-4B-Thinking-2507 with INT2 QAD.",
+  "kind": "table_caption",
+  "para": 137,
+  "src": "ablation_table_main.tex:4"
+ },
+ {
+  "id": 461,
+  "section": "E.4 Ablations",
+  "sentence": "We report final held-out KL and its change from Standard QAT.",
+  "kind": "table_caption",
+  "para": 137,
+  "src": "ablation_table_main.tex:5"
+ },
+ {
+  "id": 462,
+  "section": "F Additional Adaptation Results",
+  "sentence": "This appendix extends the adaptation results of Section 5.1 with training curves and three analyses of the INT2 Qwen3-4B-Base checkpoints: answer outcomes, variation across repeated samples, and divergence from FP-SFT along reasoning traces.",
+  "kind": "body",
+  "para": 139,
+  "src": "appendix_adaptation.tex:3"
+ },
+ {
+  "id": 463,
+  "section": "F Additional Adaptation Results",
+  "sentence": "QUASAR's advantage is largest on benchmarks requiring long reasoning.",
+  "kind": "body",
+  "para": 140,
+  "src": "appendix_adaptation.tex:8"
+ },
+ {
+  "id": 464,
+  "section": "F Additional Adaptation Results",
+  "sentence": "FP-SFT generates median responses of 27k tokens on AIME'24 and 20k on HMMT'25.",
+  "kind": "body",
+  "para": 140,
+  "src": "appendix_adaptation.tex:9"
+ },
+ {
+  "id": 465,
+  "section": "F Additional Adaptation Results",
+  "sentence": "At INT2, QUASAR is the only quantized model to score above zero on HMMT'25, suggesting that it better preserves the adapted behavior over long generations.",
+  "kind": "body",
+  "para": 140,
+  "src": "appendix_adaptation.tex:10"
+ },
+ {
+  "id": 466,
+  "section": "F Additional Adaptation Results",
+  "sentence": "Figure 30: QUASAR reaches the lowest held-out perplexity at every bit width.",
+  "kind": "figure_caption",
+  "para": 141,
+  "src": "appendix_adaptation.tex:17"
+ },
+ {
+  "id": 467,
+  "section": "F Additional Adaptation Results",
+  "sentence": "Training perplexity over the full run (left) and final 1,000 steps (center), and held-out perplexity (right), for QAT of Qwen3-4B-Base on OpenMathReasoning.",
+  "kind": "figure_caption",
+  "para": 141,
+  "src": "appendix_adaptation.tex:18"
+ },
+ {
+  "id": 468,
+  "section": "F Additional Adaptation Results",
+  "sentence": "FP-SFT is included as a full-precision reference.",
+  "kind": "figure_caption",
+  "para": 141,
+  "src": "appendix_adaptation.tex:20"
+ },
+ {
+  "id": 469,
+  "section": "F Additional Adaptation Results",
+  "sentence": "Figure 31: Answer outcomes for the INT2 checkpoints.",
+  "kind": "figure_caption",
+  "para": 142,
+  "src": "appendix_adaptation.tex:27"
+ },
+ {
+  "id": 470,
+  "section": "F Additional Adaptation Results",
+  "sentence": "Share of generated samples that produce a correct answer, an incorrect answer, or no final answer on MATH-500 and GSM8K.",
+  "kind": "figure_caption",
+  "para": 142,
+  "src": "appendix_adaptation.tex:28"
+ },
+ {
+  "id": 471,
+  "section": "F Additional Adaptation Results",
+  "sentence": "The base model and FP-SFT are included as references.",
+  "kind": "figure_caption",
+  "para": 142,
+  "src": "appendix_adaptation.tex:29"
+ },
+ {
+  "id": 472,
+  "section": "F Additional Adaptation Results",
+  "sentence": "Figure 32: Variation across repeated INT2 samples.",
+  "kind": "figure_caption",
+  "para": 143,
+  "src": "appendix_adaptation.tex:37"
+ },
+ {
+  "id": 473,
+  "section": "F Additional Adaptation Results",
+  "sentence": "Ratio of pass@8 to avg@1 on MATH-500 for Qwen3-4B-Base checkpoints, using eight samples per problem at temperature 0.6.",
+  "kind": "figure_caption",
+  "para": 143,
+  "src": "appendix_adaptation.tex:38"
+ },
+ {
+  "id": 474,
+  "section": "F Additional Adaptation Results",
+  "sentence": "A ratio of 1 means that the same problems are solved on every attempt; higher values indicate less consistent successes.",
+  "kind": "figure_caption",
+  "para": 143,
+  "src": "appendix_adaptation.tex:39"
+ },
+ {
+  "id": 475,
+  "section": "F Additional Adaptation Results",
+  "sentence": "The base model and FP-SFT are included as references.",
+  "kind": "figure_caption",
+  "para": 143,
+  "src": "appendix_adaptation.tex:29"
+ },
+ {
+  "id": 476,
+  "section": "F Additional Adaptation Results",
+  "sentence": "Figure 33: Divergence from FP-SFT along reasoning traces.",
+  "kind": "figure_caption",
+  "para": 144,
+  "src": "appendix_adaptation.tex:6"
+ },
+ {
+  "id": 477,
+  "section": "F Additional Adaptation Results",
+  "sentence": "Forward KL to FP-SFT by trace decile for selected quantized checkpoints, averaged over 1,000 MATH-500 traces generated by FP-SFT.",
+  "kind": "figure_caption",
+  "para": 144,
+  "src": "appendix_adaptation.tex:49"
+ },
+ {
+  "id": 478,
+  "section": "F Additional Adaptation Results",
+  "sentence": "Every checkpoint is evaluated on the same token sequences.",
+  "kind": "figure_caption",
+  "para": 144,
+  "src": "appendix_adaptation.tex:50"
+ },
+ {
+  "id": 479,
+  "section": "G Additional NVFP4 Results",
+  "sentence": "This appendix collects the training curves and the full evaluation results for the NVFP4 experiments of Section 5.2.",
+  "kind": "body",
+  "para": 146,
+  "src": "appendix_nvfp4.tex:4"
+ },
+ {
+  "id": 480,
+  "section": "G Additional NVFP4 Results",
+  "sentence": "Figure 34: QUASAR reaches lower held-out loss for both NVFP4 models.",
+  "kind": "figure_caption",
+  "para": 147,
+  "src": "appendix_nvfp4.tex:10"
+ },
+ {
+  "id": 481,
+  "section": "G Additional NVFP4 Results",
+  "sentence": "Training forward KL over the full run (left) and final 1,000 steps (center), and held-out forward KL (right), for NVFP4 QAD of Qwen3-8B (top) and Qwen3.5-9B (bottom).",
+  "kind": "figure_caption",
+  "para": 147,
+  "src": "appendix_nvfp4.tex:11"
+ },
+ {
+  "id": 482,
+  "section": "G Additional NVFP4 Results",
+  "sentence": "Table 9: QUASAR gives the best average accuracy among the quantized checkpoints.",
+  "kind": "table_caption",
+  "para": 148,
+  "src": "appendix_nvfp4.tex:19"
+ },
+ {
+  "id": 483,
+  "section": "G Additional NVFP4 Results",
+  "sentence": "Accuracy on nine downstream benchmarks for Qwen3-8B and Qwen3.5-9B.",
+  "kind": "table_caption",
+  "para": 148,
+  "src": "appendix_nvfp4.tex:20"
+ },
+ {
+  "id": 484,
+  "section": "G Additional NVFP4 Results",
+  "sentence": "The materialized NVFP4 checkpoints are evaluated through vLLM's native W4A4 path.",
+  "kind": "table_caption",
+  "para": 148,
+  "src": "appendix_nvfp4.tex:21"
+ },
+ {
+  "id": 485,
+  "section": "G Additional NVFP4 Results",
+  "sentence": "Figure 35: QUASAR better preserves long-horizon behavior in NVFP4.",
+  "kind": "figure_caption",
+  "para": 149,
+  "src": "appendix_nvfp4.tex:52"
+ },
+ {
+  "id": 486,
+  "section": "G Additional NVFP4 Results",
+  "sentence": "Expanded Qwen3.5-9B results from Table 3: (a) OpenAI-MRCR score by context length; (b) share of long generations that terminate within the 32k-token output budget.",
+  "kind": "figure_caption",
+  "para": 149,
+  "src": "appendix_nvfp4.tex:53"
+ },
+ {
+  "id": 487,
+  "section": "G Additional NVFP4 Results",
+  "sentence": "Higher is better.",
+  "kind": "figure_caption",
+  "para": 149,
+  "src": "appendix_nvfp4.tex:55"
+ },
+ {
+  "id": 488,
+  "section": "G Additional NVFP4 Results",
+  "sentence": "Table 10: QUASAR has the lowest or tied-lowest non-termination rate among the quantized checkpoints.",
+  "kind": "table_caption",
+  "para": 150,
+  "src": "nvfp4_longctx_tables.tex:3"
+ },
+ {
+  "id": 489,
+  "section": "G Additional NVFP4 Results",
+  "sentence": "Percentage of generations that reach the 32,768-token output budget without stopping, using the same generations as Table 3.",
+  "kind": "table_caption",
+  "para": 150,
+  "src": "nvfp4_longctx_tables.tex:4"
+ },
+ {
+  "id": 490,
+  "section": "G Additional NVFP4 Results",
+  "sentence": "Lower is better.",
+  "kind": "table_caption",
+  "para": 150,
+  "src": "appendix_healing.tex:19"
+ },
+ {
+  "id": 491,
+  "section": "H Comparison with Google's QAT and Other 4-bit Checkpoints",
+  "sentence": "Table 11 extends Table 3 with Qwen3.5-4B and Gemma-4 12B.",
+  "kind": "body",
+  "para": 152,
+  "src": "appendix_released.tex:3"
+ },
+ {
+  "id": 492,
+  "section": "H Comparison with Google's QAT and Other 4-bit Checkpoints",
+  "sentence": "The RTN rows, and the GPTQ rows at NVFP4 W4A16 and INT4 g64, are our own conversions of the BF16 models; all other rows are public artifacts, listed in Table 12.",
+  "kind": "body",
+  "para": 152,
+  "src": "appendix_released.tex:4"
+ },
+ {
+  "id": 493,
+  "section": "H Comparison with Google's QAT and Other 4-bit Checkpoints",
+  "sentence": "Table 11: Comparison with released 4-bit checkpoints across four model families.",
+  "kind": "table_caption",
+  "para": 153,
+  "src": "released_table_full.tex:3"
+ },
+ {
+  "id": 494,
+  "section": "H Comparison with Google's QAT and Other 4-bit Checkpoints",
+  "sentence": "We report fidelity to BF16 and accuracy on each model's benchmark suite.",
+  "kind": "table_caption",
+  "para": 153,
+  "src": "released_table_full.tex:3"
+ },
+ {
+  "id": 495,
+  "section": "H Comparison with Google's QAT and Other 4-bit Checkpoints",
+  "sentence": "GGUF KL values are comparable only within each block. ‡ denotes mixed NVFP4, FP8, and BF16 precision.",
+  "kind": "table_caption",
+  "para": 153,
+  "src": "released_table_full.tex:3"
+ },
+ {
+  "id": 496,
+  "section": "H Comparison with Google's QAT and Other 4-bit Checkpoints",
+  "sentence": "bpw includes the quantized transformer-block weights, scales, and zero-points.",
+  "kind": "body",
+  "para": 154,
+  "src": "appendix_released.tex:10"
+ },
+ {
+  "id": 497,
+  "section": "H Comparison with Google's QAT and Other 4-bit Checkpoints",
+  "sentence": "Embeddings, output layers, norms, and small gating tensors are excluded.",
+  "kind": "body",
+  "para": 154,
+  "src": "appendix_released.tex:11"
+ },
+ {
+  "id": 498,
+  "section": "H Comparison with Google's QAT and Other 4-bit Checkpoints",
+  "sentence": "Artifact definitions.",
+  "kind": "body",
+  "para": 155,
+  "src": "appendix_released.tex:13"
+ },
+ {
+  "id": 499,
+  "section": "H Comparison with Google's QAT and Other 4-bit Checkpoints",
+  "sentence": "For rows not described above:",
+  "kind": "body",
+  "para": 155,
+  "src": "appendix_released.tex:14"
+ },
+ {
+  "id": 500,
+  "section": "H Comparison with Google's QAT and Other 4-bit Checkpoints",
+  "sentence": "GPTQ (INT4 g128), AWQ (INT4 g32), and GPTQ (NVFP4 W4A4) are checkpoints created with LLM Compressor; gk denotes one scale per k weights, and W4A4 also quantizes activations to NVFP4.",
+  "kind": "body",
+  "para": 156,
+  "src": "appendix_released.tex:16"
+ },
+ {
+  "id": 501,
+  "section": "H Comparison with Google's QAT and Other 4-bit Checkpoints",
+  "sentence": "ModelOpt PTQ applies calibrated NVFP4 rounding without training.",
+  "kind": "body",
+  "para": 157,
+  "src": "appendix_released.tex:17"
+ },
+ {
+  "id": 502,
+  "section": "H Comparison with Google's QAT and Other 4-bit Checkpoints",
+  "sentence": "AutoQuantize selects NVFP4, FP8, or BF16 per layer under a 5.5-bit budget.",
+  "kind": "body",
+  "para": 157,
+  "src": "appendix_released.tex:17"
+ },
+ {
+  "id": 503,
+  "section": "H Comparison with Google's QAT and Other 4-bit Checkpoints",
+  "sentence": "Google QAT uses Google's unpublished INT4 recipe with 32-weight groups.",
+  "kind": "body",
+  "para": 158,
+  "src": "appendix_released.tex:18"
+ },
+ {
+  "id": 504,
+  "section": "H Comparison with Google's QAT and Other 4-bit Checkpoints",
+  "sentence": "Its Q4_0 variants convert or repack those weights for llama.cpp.",
+  "kind": "body",
+  "para": 158,
+  "src": "appendix_released.tex:18"
+ },
+ {
+  "id": 505,
+  "section": "H Comparison with Google's QAT and Other 4-bit Checkpoints",
+  "sentence": "KD-QAT g64 distills Qwen3.5-4B on a 64-weight INT4 grid before conversion to 32-weight Q4_0 blocks.",
+  "kind": "body",
+  "para": 159,
+  "src": "appendix_released.tex:19"
+ },
+ {
+  "id": 506,
+  "section": "H Comparison with Google's QAT and Other 4-bit Checkpoints",
+  "sentence": "imatrix (PTQ) selects GGUF Q4_0 scales using activation-weighted reconstruction error; the GGUF RTN rows use plain round-to-nearest.",
+  "kind": "body",
+  "para": 160,
+  "src": "appendix_released.tex:20"
+ },
+ {
+  "id": 507,
+  "section": "H Comparison with Google's QAT and Other 4-bit Checkpoints",
+  "sentence": "Table 12: Released checkpoints used in Tables 3 and 11.",
+  "kind": "table_caption",
+  "para": 161,
+  "src": "appendix_released.tex:24"
+ }
+]

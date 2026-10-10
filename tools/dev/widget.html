@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en" class="no-js">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex, nofollow">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Group Widget Dev</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Newsreader:ital,opsz,wght@0,6..72,400..600;1,6..72,400..500&display=swap">
+<link rel="stylesheet" href="../../assets/css/site.css">
+<link rel="stylesheet" href="../../assets/css/widget.css">
+<style>
+  #errors { font: 12px/1.4 var(--mono); color: #a13040; white-space: pre-wrap; }
+  .dev-pad { padding-top: 24px; }
+</style>
+<script>
+  document.documentElement.classList.remove("no-js");
+  // ?group=0&bits=2&f=0.7&mode=w|r&nointro=1&search=7 (freeze search after step 7)&theme=dark
+  (function () {
+    const p = new URLSearchParams(location.search), d = {};
+    // ?frame=390 renders this page inside a 390px-wide iframe (headless Chrome has a ~500px minimum window)
+    if (p.has("frame")) {
+      const w = +p.get("frame"), q = new URLSearchParams(location.search); q.delete("frame");
+      document.write("<style>html,body{margin:0;background:#ddd}main{display:none!important}</style><iframe id='f' src='?" + q.toString() +
+        "' style='border:0;display:block;width:" + w + "px;height:" + (+p.get("fh") || 2200) + "px;background:#fff'></iframe>");
+      window.GW_DEV = { nointro: true };
+      return;
+    }
+    for (const k of ["group", "bits", "f", "mode", "search"]) if (p.has(k)) d[k] = p.get(k);
+    if (p.has("nointro")) d.nointro = true;
+    window.GW_DEV = d;
+    if (p.get("theme")) document.documentElement.setAttribute("data-theme", p.get("theme"));
+    window.onerror = function (msg, src, line, col) {
+      const n = document.getElementById("errors");
+      if (n) n.textContent += "ERROR " + msg + " @" + src + ":" + line + ":" + col + "\n";
+    };
+    window.addEventListener("unhandledrejection", function (e) {
+      const n = document.getElementById("errors");
+      if (n) n.textContent += "REJECTION " + (e.reason && e.reason.stack || e.reason) + "\n";
+    });
+  })();
+</script>
+</head>
+<body>
+<main class="dev-pad">
+  <div class="wide">
+    <figure class="plate">
+      <div class="viz" id="group-widget-card">
+        <div class="viz-head"><span class="viz-kicker" data-label>Interactive · <b>real Qwen3-4B weight groups</b></span><span class="viz-hint" data-label>drag the clipping factor f · change bits · pick a group</span></div>
+        <div class="viz-body"><div id="group-widget" class="widget" data-src="../../assets/data/groups.json"></div></div>
+      </div>
+      <figcaption><b>Scale search finds good code assignments.</b> The case <i>f</i>=1 is the full min–max range used by standard QAT. A factor <i>f</i>&lt;1 narrows the range and clips weights outside it, so the quantization levels cover a smaller interval with finer spacing. <b>A weighted least-squares fit gives the optimal dequantization.</b> QUASAR prioritizes accurate reconstruction of high-saliency weights while tolerating more error on low-saliency weights.</figcaption>
+    </figure>
+  </div>
+  <div class="wide"><pre id="errors"></pre></div>
+</main>
+<script src="../../assets/js/viz.js" defer></script>
+<script src="../../assets/js/quasar-core.js" defer></script>
+<script src="../../assets/js/widget-group.js" defer></script>
+</body>
+</html>

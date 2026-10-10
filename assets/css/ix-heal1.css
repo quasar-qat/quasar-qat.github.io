@@ -1,0 +1,93 @@
+/* ix-heal1.css — appendix Figs. 19, 20 (assets/js/ix-heal1.js).
+   Figure content sits on the light card, so every color here is a fixed light-theme value.
+   Type: 12px (--fs-xs) for every in-chart label and key; 14px (--fs-s) for tooltip body text only.
+   Inter for labels, JetBrains Mono uppercase for axis titles and tooltip heads. */
+
+.h1 { color: #1d1f22; }
+
+/* ---- plot ---- */
+.h1-plot { position: relative; width: 100%; border-radius: 8px; outline: none; -webkit-tap-highlight-color: transparent; }
+.h1-plot:focus-visible { box-shadow: 0 0 0 2px #2e6f95; }
+.h1-plot svg { display: block; overflow: visible; font-family: var(--sans); touch-action: pan-y pinch-zoom; }
+.h1-svg text { font-variant-numeric: tabular-nums lining-nums; }
+.h1-svg .axis text { font-size: var(--fs-xs, 12px); }
+.h1-svg .axis-title { font: 600 var(--fs-xs, 12px) var(--mono); letter-spacing: .08em; text-transform: uppercase; fill: #6b6f75; }
+.h1-ptitle { font: 600 var(--fs-xs, 12px) var(--sans); fill: #1d1f22; }
+.h1-clab { font: 500 var(--fs-xs, 12px) var(--sans); fill: #6b6f75; }
+
+/* markers: pop in once, dim when another method is in focus */
+.h1-pt { transition: opacity .3s ease, transform .55s cubic-bezier(.3, 1.45, .5, 1); transform-box: fill-box; transform-origin: center; }
+.h1-pt.h1-pre { opacity: 0; transform: scale(.25); }
+.h1-m { transition: opacity .2s ease; }
+.h1-svg.h1-dim .h1-m:not(.on) { opacity: .14; }
+.h1-svg.h1-dim .h1-m.fp:not(.on) { opacity: .45; }
+.h1-qline { stroke: #d1495b; stroke-width: 1.8; stroke-dasharray: 5 3; stroke-linecap: round; transition: opacity .3s ease; }
+.h1-conn { fill: none; stroke-width: 1.7; stroke-linejoin: round; stroke-linecap: round; opacity: .9; }
+.h1-ring { fill: none; stroke-width: 1.6; opacity: .6; }
+.h1-band { fill: rgba(90, 76, 50, .07); }
+
+/* ---- Fig. 19 matrix ---- */
+.h1-cell { transition: opacity .35s ease; }
+.h1-cell.h1-pre { opacity: 0 !important; }
+.h1-svg.h1-dim .h1-cell:not(.on) { opacity: .22; }
+.h1-cv { font: 500 var(--fs-xs, 12px) var(--sans); fill: #1d1f22; pointer-events: none; }
+.h1-cv.inv { fill: #fdfdfd; }
+.h1-cv.q { fill: #a13040; font-weight: 700; }
+.h1-qrow { fill: none; stroke: #d1495b; stroke-width: 1.6; transition: opacity .2s ease; }
+.h1-svg.h1-dim .h1-qrow { opacity: .25; }
+.h1-srow { fill: none; stroke: #1d1f22; stroke-width: 1.6; }
+.h1-srow.q { stroke: #d1495b; stroke-width: 2; }
+.h1-hcell { fill: none; stroke: #1d1f22; stroke-width: 2; }
+.h1-tcell { fill: none; stroke: #44484f; stroke-width: 1.2; stroke-dasharray: 3 2.5; }
+.h1-kp { fill: #1d1f22; }
+.h1-kp.q { fill: #d1495b; }
+.h1-rows { position: absolute; left: 0; top: 0; width: 0; height: 0; }
+.h1-rowbtn {
+  position: absolute; left: 0; display: flex; align-items: center; gap: 4px; padding: 0 4px 0 2px; margin: 0;
+  border: 1px solid transparent; border-radius: 6px; background: transparent; cursor: pointer; text-align: left; white-space: nowrap;
+  font: 500 var(--fs-xs, 12px)/1 var(--sans); color: #44484f; transition: opacity .2s ease, background-color .15s ease;
+}
+.h1-rowbtn .h1-g { width: 14px; height: 14px; }
+.h1-rowbtn:hover { background: #f1eee8; }
+.h1-rowbtn[aria-pressed="true"] { border-color: #1d1f22; color: #1d1f22; font-weight: 600; background: #f6f4ef; }
+.h1-rowbtn.q { color: #a13040; font-weight: 700; }
+.h1-rowbtn.q[aria-pressed="true"] { border-color: #d1495b; }
+.h1-rowbtn.off { opacity: .45; }
+.h1-rowbtn:focus-visible { outline: 2px solid #2e6f95; outline-offset: 0; }
+
+/* ---- key row ---- */
+.h1-legend { display: flex; flex-wrap: wrap; align-items: center; gap: 2px 4px; margin-top: 10px; font: 500 var(--fs-xs, 12px)/1.2 var(--sans); color: #44484f; }
+.h1-g { width: 16px; height: 16px; flex: none; overflow: visible; display: inline-block; vertical-align: middle; }
+.h1-key { display: inline-flex; align-items: center; gap: 5px; padding: 5px 7px 5px 3px; white-space: nowrap; color: #6b6f75; }
+.h1-lb {
+  appearance: none; display: inline-flex; align-items: center; gap: 5px; margin: 0; padding: 6px 9px 6px 5px; min-height: 30px;
+  border: 1px solid transparent; border-radius: 999px; background: transparent; cursor: pointer; white-space: nowrap;
+  font: 500 var(--fs-xs, 12px)/1 var(--sans); color: #44484f; transition: background-color .15s ease, border-color .15s ease;
+}
+.h1-lb:hover { background: #f1eee8; }
+.h1-lb[aria-pressed="true"] { border-color: #1d1f22; background: #f6f4ef; color: #1d1f22; }
+.h1-lb.q { color: #a13040; font-weight: 700; }
+.h1-lb.q[aria-pressed="true"] { border-color: #d1495b; }
+.h1-lb:focus-visible { outline: 2px solid #2e6f95; outline-offset: 1px; }
+
+/* ---- tooltip (extends .vtip from site.css: 14px body, 12px mono head) ---- */
+.h1 .vtip { left: 0; top: 0; min-width: 170px; max-width: 300px; font: 400 var(--fs-s, 13px)/1.45 var(--sans); }
+.h1 .vtip .tt { display: flex; align-items: center; gap: 6px; font: 600 var(--fs-xs, 12px)/1.3 var(--mono); letter-spacing: .08em; text-transform: uppercase; }
+.h1 .vtip .tt .h1-g { margin-left: -2px; }
+.vtip .h1-tr { align-items: center; }
+.vtip .h1-tr b { font-weight: 650; font-variant-numeric: tabular-nums; }
+.vtip .h1-tn { display: inline-flex; align-items: center; gap: 6px; color: #44484f; white-space: nowrap; }
+.vtip .h1-tr.q .h1-tn { color: #a13040; font-weight: 600; }
+.vtip .h1-tr.cur { background: #f1eee8; margin: 0 -6px; padding: 0 6px; border-radius: 4px; }
+.vtip .h1-tr.cur .h1-tn { color: #1d1f22; font-weight: 600; }
+.vtip .h1-tr.q.cur .h1-tn { color: #a13040; }
+
+/* fetch failure: neutral data label in place of the chart */
+.h1-fail { padding: 22px 0; text-align: center; font: 500 var(--fs-xs, 12px)/1.4 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: #6b6f75; }
+
+@media (prefers-reduced-motion: reduce) {
+  .h1-pt, .h1-cell, .h1-m, .h1-qline { transition: none; }
+}
+@media print {
+  .h1 .vtip { display: none; }
+}

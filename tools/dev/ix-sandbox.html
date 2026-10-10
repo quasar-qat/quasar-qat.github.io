@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex, nofollow">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sandbox dev</title>
+<script>
+  window.__errors = [];
+  window.onerror = function (msg, src, line, col) { window.__errors.push(msg + " @" + line + ":" + col); var e = document.getElementById("errs"); if (e) e.textContent = window.__errors.join("\n"); };
+  window.addEventListener("unhandledrejection", function (ev) { window.__errors.push("rejection: " + ev.reason); var e = document.getElementById("errs"); if (e) e.textContent = window.__errors.join("\n"); });
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Newsreader:ital,opsz,wght@0,6..72,400..600;1,6..72,400..500&display=swap">
+<link rel="stylesheet" href="../../assets/css/site.css">
+<link rel="stylesheet" href="../../assets/css/ix-sandbox.css">
+<style>pre#errs{color:#b00;font:12px monospace;white-space:pre-wrap;margin:0 20px} pre#parity{font:12px/1.5 monospace;white-space:pre-wrap;color:#44484f;margin:20px auto;width:min(100% - 40px,960px)}</style>
+</head>
+<body>
+<pre id="errs"></pre>
+<main id="main">
+<section class="block" id="problem" style="padding-top:24px">
+  <div class="fig">
+      <figure class="plate ix">
+        <div class="viz"><div class="viz-head"><span class="viz-kicker" data-label><b>the borrowed gradient</b></span></div><div class="viz-body"><div id="ix-sandbox" class="chart ix-mount" style="min-height:460px"></div></div></div>
+        <figcaption><span class="tag" data-label>illustrative</span> Under the STE, both methods evaluate the gradient at the reconstructed weights <i>r</i> and apply it to the latent weights <i>w</i>. QUASAR minimizes the loss-aware reconstruction error, making the gradient at <i>r</i> a more faithful proxy for the gradient at <i>w</i>.</figcaption>
+      </figure>
+  </div>
+</section>
+<pre id="parity">parity: running…</pre>
+<div style="height:600px"></div>
+</main>
+<script src="../../assets/js/viz.js"></script>
+<script src="../../assets/js/ix-sandbox.js"></script>
+<script>
+  // JS port vs the Python reference (tools/extract_ix_sandbox.py -> tools/dev/ix-sandbox-check.json)
+  Promise.all(["../../assets/data/ix-sandbox.json", "ix-sandbox-check.json"].map(function (u) { return fetch(u).then(function (r) { return r.json(); }); }))
+    .then(function (ds) {
+      var D = ds[0], C = ds[1], sim = IxSandboxCore.makeSim(D), w = 0, r = 0, f = 0, a = 0, n = 0, ex = 0, zb = 0;
+      C.cases.forEach(function (cs) {
+        var T = sim.simulate(cs.w0, C.max_steps);
+        if (T.q.lat[0] !== cs.z || T.q.lat[1] !== cs.z) zb++;   // QUASAR's one lattice per run
+        ["std", "q"].forEach(function (k) {
+          for (var i = 0; i <= C.max_steps; i++) for (var d = 0; d < 2; d++) {
+            var e = Math.abs(T[k].w[i][d] - cs[k].w[i][d]); w = Math.max(w, e); n++; if (e === 0) ex++;
+            r = Math.max(r, Math.abs(T[k].r[i][d] - cs[k].r[i][d]));
+          }
+          for (var i = 0; i <= C.max_steps; i++) if (T[k].ang[i] != null) a = Math.max(a, Math.abs(T[k].ang[i] - cs.angle[k][i]));
+        });
+        for (var i = 0; i <= C.max_steps; i++) for (var d = 0; d < 2; d++) f = Math.max(f, Math.abs(T.fp.w[i][d] - cs.fp.w[i][d]));
+      });
+      window.__parity = { cases: C.cases.length, maxW: w, maxR: r, maxFP: f, maxAngle: a, exact: ex + "/" + n, zMismatch: zb };
+      document.getElementById("parity").textContent = "parity vs Python (" + C.cases.length + " starts x " + C.max_steps + " steps): max|dw| " + w.toExponential(2) +
+        "  max|dr| " + r + "  max|dfp| " + f + "  max|dangle| " + a.toExponential(2) + "  bit-exact w " + ex + "/" + n + "  lattice z mismatches " + zb;
+    })
+    .catch(function (e) { document.getElementById("parity").textContent = "parity: " + e; });
+</script>
+</body>
+</html>

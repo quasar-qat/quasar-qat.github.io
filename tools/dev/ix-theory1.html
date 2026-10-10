@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex, nofollow">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Theory scatters dev</title>
+<script>
+  window.__errors = [];
+  window.onerror = function (msg, src, line, col) { window.__errors.push(msg + " @" + line + ":" + col); var e = document.getElementById("errs"); if (e) e.textContent = window.__errors.join("\n"); };
+  window.addEventListener("unhandledrejection", function (ev) { window.__errors.push("rejection: " + ev.reason); var e = document.getElementById("errs"); if (e) e.textContent = window.__errors.join("\n"); });
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Newsreader:ital,opsz,wght@0,6..72,400..600;1,6..72,400..500&display=swap">
+<link rel="stylesheet" href="../../assets/css/site.css">
+<link rel="stylesheet" href="../../assets/css/ix-theory1.css">
+<style>pre#errs{color:#b00;font:12px monospace;white-space:pre-wrap;margin:0 20px}</style>
+</head>
+<body>
+<pre id="errs"></pre>
+<main id="main">
+<section class="block" id="theory" style="padding-top:24px">
+  <div class="fig">
+    <div class="grid-2">
+      <figure class="plate ix">
+        <div class="viz"><div class="viz-head"><span class="viz-kicker" data-label>Fig. 10 · <b>end of training</b></span></div><div class="viz-body"><div id="ix-fig10" class="chart ix-mount" style="min-height:320px"></div></div></div>
+        <figcaption><b>Reconstruction error tracks final KL.</b> End-of-training loss-aware reconstruction error versus final held-out KL to the full-precision teacher, for Standard QAT, Denoising QAT, and QUASAR at INT4, INT3, and INT2.</figcaption>
+      </figure>
+      <figure class="plate ix">
+        <div class="viz"><div class="viz-head"><span class="viz-kicker" data-label>Fig. 14 · <b>gradient mismatch</b></span></div><div class="viz-body"><div id="ix-fig14" class="chart ix-mount" style="min-height:320px"></div></div></div>
+        <figcaption><b>Reconstruction error controls gradient mismatch.</b> Across INT4, INT3, and INT2, the squared gradient mismatch rises with the loss-aware reconstruction error Ŝ, supporting Assumption 3.</figcaption>
+      </figure>
+    </div>
+  </div>
+  <div class="fig">
+    <div class="grid-2">
+      <figure class="plate ix">
+        <div class="viz"><div class="viz-head"><span class="viz-kicker" data-label>Fig. 15 · <b>saliency and curvature</b></span></div><div class="viz-body"><div id="ix-fig15" class="chart ix-mount" style="min-height:320px"></div></div></div>
+        <figcaption><b>QUASAR's saliency tracks curvature.</b> Each point represents one weight matrix from a trained INT2 Qwen3-4B-Thinking checkpoint and compares its mean saliency <i>h</i> (Adam's second moment) with a 32-sample Hutchinson estimate of its mean Hessian diagonal. The log-scale correlation is <i>r</i>=0.81.</figcaption>
+      </figure>
+      <figure class="plate ix">
+        <div class="viz"><div class="viz-head"><span class="viz-kicker" data-label>Fig. 10 · <b>end of training</b> · narrow</span></div><div class="viz-body" style="max-width:330px"><div id="dev-fig10-narrow" class="chart ix-mount" style="min-height:320px"></div></div></div>
+      </figure>
+    </div>
+  </div>
+  <div class="fig">
+    <figure class="plate ix">
+      <div class="viz"><div class="viz-head"><span class="viz-kicker" data-label>Fig. 10 · <b>end of training</b> · fig card</span></div><div class="viz-body"><div id="dev-fig10-wide" class="chart ix-mount" style="min-height:320px"></div></div></div>
+    </figure>
+  </div>
+</section>
+</main>
+<script src="../../assets/js/viz.js"></script>
+<script src="../../assets/js/ix-theory1.js"></script>
+<script>
+  IxTheory1.mount("dev-fig10-narrow", "ix-fig10");
+  IxTheory1.mount("dev-fig10-wide", "ix-fig10");
+</script>
+</body>
+</html>

@@ -1,0 +1,239 @@
+{
+ "source": "arXiv v2 (2608.13966), appendix_theory_validation.tex",
+ "generator": "tools/extract_ix_theory1.py",
+ "fig10": {
+  "figure": "Figure 10 (recon_predicts_theory.pdf, label fig:theory-tie)",
+  "caption_title": "Reconstruction error tracks final KL.",
+  "basis": "x = end-of-training loss-aware reconstruction error of the deployed reconstruction; y = final held-out forward KL to the full-precision teacher (Table 1 fidelity basis).",
+  "sources": {"x": "plot data of Figure 10", "y": "Table 1 KL (fidelity evaluation, unrounded)"},
+  "x_label": "Final loss-aware reconstruction error",
+  "y_label": "Final held-out KL to full-precision model",
+  "panels": [
+   {
+    "model": "Qwen3-4B-Thinking-2507",
+    "short": "Qwen3-4B-Thinking",
+    "points": [
+     {"method": "QUASAR", "key": "quasar", "bits": "INT4", "ST": 3.9676e-05, "kl": 0.01629},
+     {"method": "QUASAR", "key": "quasar", "bits": "INT3", "ST": 0.00013708, "kl": 0.05375},
+     {"method": "QUASAR", "key": "quasar", "bits": "INT2", "ST": 0.00045589, "kl": 0.12615},
+     {"method": "Denoising QAT", "key": "denoising_qat", "bits": "INT4", "ST": 7.1534e-05, "kl": 0.01839},
+     {"method": "Denoising QAT", "key": "denoising_qat", "bits": "INT3", "ST": 0.00030812, "kl": 0.06022},
+     {"method": "Denoising QAT", "key": "denoising_qat", "bits": "INT2", "ST": 0.00131, "kl": 0.17905},
+     {"method": "Standard QAT", "key": "standard_qat", "bits": "INT4", "ST": 7.3531e-05, "kl": 0.01858},
+     {"method": "Standard QAT", "key": "standard_qat", "bits": "INT3", "ST": 0.00033919, "kl": 0.06203},
+     {"method": "Standard QAT", "key": "standard_qat", "bits": "INT2", "ST": 0.002206, "kl": 0.1864}
+    ],
+    "fit": {
+     "kind": "OLS power law (log10-log10)",
+     "slope": 0.68398,
+     "intercept": 1.20408,
+     "r2": 0.928605,
+     "display": {"r2": "0.93"},
+     "x_range": [3.1516e-05, 0.0027772]
+    },
+    "paper_axes": {
+     "xlim": [2.5193e-05, 0.0034743],
+     "ylim": [0.0085, 0.25164]
+    }
+   },
+   {
+    "model": "Llama-3.1-8B-Instruct",
+    "short": "Llama-3.1-8B",
+    "points": [
+     {"method": "QUASAR", "key": "quasar", "bits": "INT4", "ST": 5.9969e-05, "kl": 0.01179},
+     {"method": "QUASAR", "key": "quasar", "bits": "INT3", "ST": 0.00023196, "kl": 0.03584},
+     {"method": "QUASAR", "key": "quasar", "bits": "INT2", "ST": 0.00081678, "kl": 0.10519},
+     {"method": "Denoising QAT", "key": "denoising_qat", "bits": "INT4", "ST": 0.00011031, "kl": 0.014},
+     {"method": "Denoising QAT", "key": "denoising_qat", "bits": "INT3", "ST": 0.00049275, "kl": 0.04628},
+     {"method": "Denoising QAT", "key": "denoising_qat", "bits": "INT2", "ST": 0.0023771, "kl": 0.1652},
+     {"method": "Standard QAT", "key": "standard_qat", "bits": "INT4", "ST": 0.00011276, "kl": 0.01408},
+     {"method": "Standard QAT", "key": "standard_qat", "bits": "INT3", "ST": 0.00052452, "kl": 0.0456},
+     {"method": "Standard QAT", "key": "standard_qat", "bits": "INT2", "ST": 0.003533, "kl": 0.16287}
+    ],
+    "fit": {
+     "kind": "OLS power law (log10-log10)",
+     "slope": 0.724793,
+     "intercept": 1.09028,
+     "r2": 0.958584,
+     "display": {"r2": "0.96"},
+     "x_range": [4.7635e-05, 0.0044478]
+    },
+    "paper_axes": {
+     "xlim": [3.7968e-05, 0.0055803],
+     "ylim": [0.0085, 0.22302]
+    }
+   }
+  ],
+  "axes": {
+   "xlim": [2.5193e-05, 0.0055803],
+   "ylim": [0.0085, 0.25164],
+   "xticks": [0.0001, 0.0003, 0.001, 0.003],
+   "yticks": [0.01, 0.02, 0.05, 0.1, 0.2]
+  }
+ },
+ "fig14": {
+  "figure": "Figure 14 (eq11_dose.pdf, label fig:eq11-dose)",
+  "caption_title": "Reconstruction error controls gradient mismatch.",
+  "model": "Qwen3-4B-Thinking-2507",
+  "basis": "init-dose artifacts: x = loss-aware reconstruction error S_hat(r); y = squared gradient norm of the KL to the full-precision teacher at r (equal to the squared gradient mismatch, since the gradient at the full-precision weights is zero). The f = 0.3 dose is excluded at every bit width, as in the figure.",
+  "sources": {"x": "plot data of Figure 14", "y": "plot data of Figure 14"},
+  "x_label": "Loss-aware reconstruction error",
+  "y_label": "Gradient mismatch",
+  "factors": [0.45, 0.6, 0.7, 0.8, 0.9, 1.0],
+  "bits": [
+   {
+    "bits": "INT4",
+    "color": "#8FB8D2",
+    "points": [
+     {"f": 0.45, "S": 0.00034308, "g": 245.27},
+     {"f": 0.6, "S": 0.0001639, "g": 56.422},
+     {"f": 0.7, "S": 0.00010128, "g": 29.931},
+     {"f": 0.8, "S": 7.2232e-05, "g": 24.619},
+     {"f": 0.9, "S": 6.2872e-05, "g": 13.261},
+     {"f": 1.0, "S": 6.9289e-05, "g": 10.798}
+    ],
+    "star": {"S": 6.2624e-05, "g": 9.0985},
+    "fit": {
+     "kind": "OLS power law (log10-log10)",
+     "slope": 1.75915,
+     "intercept": 8.47021,
+     "r2": 0.948434,
+     "display": {"slope": "1.76", "r2": "0.95"},
+     "x_range": [5.4543e-05, 0.00039391]
+    }
+   },
+   {
+    "bits": "INT3",
+    "color": "#4682A8",
+    "points": [
+     {"f": 0.45, "S": 0.00041268, "g": 382.99},
+     {"f": 0.6, "S": 0.00027001, "g": 92.549},
+     {"f": 0.7, "S": 0.00023539, "g": 67.231},
+     {"f": 0.8, "S": 0.00023484, "g": 74.149},
+     {"f": 0.9, "S": 0.00026089, "g": 75.517},
+     {"f": 1.0, "S": 0.00030197, "g": 101.83}
+    ],
+    "star": {"S": 0.00022698, "g": 74.157},
+    "fit": {
+     "kind": "OLS power law (log10-log10)",
+     "slope": 2.78701,
+     "intercept": 11.9374,
+     "r2": 0.913675,
+     "display": {"slope": "2.79", "r2": "0.91"},
+     "x_range": [0.00019769, 0.00047382]
+    }
+   },
+   {
+    "bits": "INT2",
+    "color": "#1D4E6E",
+    "points": [
+     {"f": 0.45, "S": 0.00076268, "g": 173340.0},
+     {"f": 0.6, "S": 0.00076352, "g": 24416.0},
+     {"f": 0.7, "S": 0.00084162, "g": 54431.0},
+     {"f": 0.8, "S": 0.00096941, "g": 87478.0},
+     {"f": 0.9, "S": 0.0011247, "g": 257120.0},
+     {"f": 1.0, "S": 0.0012917, "g": 627800.0}
+    ],
+    "star": {"S": 0.00072661, "g": 39202.0},
+    "fit": {
+     "kind": "OLS power law (log10-log10)",
+     "slope": 4.28905,
+     "intercept": 18.0659,
+     "r2": 0.683285,
+     "display": {"slope": "4.29", "r2": "0.68"},
+     "x_range": [0.00063285, 0.0014831]
+    }
+   }
+  ],
+  "axes": {
+   "xlim": [4.4e-05, 0.0021],
+   "ylim": [2.5, 3200000.0],
+   "xticks": [0.0001, 0.0003, 0.001],
+   "yticks": [10.0, 1000.0, 100000.0]
+  }
+ },
+ "fig15": {
+  "figure": "Figure 15 (curvature_proxy.pdf, label fig:curvature-proxy)",
+  "caption_title": "QUASAR's saliency tracks curvature.",
+  "model": "Qwen3-4B-Thinking-2507",
+  "bits": "INT2",
+  "basis": "trained INT2 QUASAR checkpoint; 63 sampled weight matrices (7 projections in every 4th block); x = mean saliency h (Adam second moment), y = mean Hutchinson Hessian diagonal (32 Rademacher draws). The matrices with a non-positive Hutchinson mean are left out, as in the figure.",
+  "sources": {"x": "plot data of Figure 15", "y": "plot data of Figure 15"},
+  "x_label": "Saliency h (Adam second moment), averaged per weight matrix",
+  "y_label": "Hessian diagonal (Hutchinson est.), per-matrix average",
+  "r": 0.80779,
+  "display": {"r": "0.81"},
+  "n_sampled": 63,
+  "n_shown": 56,
+  "layers": [0, 4, 8, 12, 16, 20, 24, 28, 32],
+  "projections": ["q", "k", "v", "o", "gate", "up", "down"],
+  "points": [
+   {"layer": 0, "block": "self_attn", "proj": "q", "h": 1.0059e-09, "hess": 1.2684e-06},
+   {"layer": 0, "block": "self_attn", "proj": "k", "h": 5.843e-09, "hess": 9.7435e-06},
+   {"layer": 4, "block": "self_attn", "proj": "q", "h": 6.9934e-10, "hess": 5.0547e-07},
+   {"layer": 4, "block": "self_attn", "proj": "k", "h": 3.683e-09, "hess": 6.8553e-07},
+   {"layer": 4, "block": "self_attn", "proj": "v", "h": 1.492e-08, "hess": 2.8839e-06},
+   {"layer": 4, "block": "self_attn", "proj": "o", "h": 6.3723e-10, "hess": 3.2098e-06},
+   {"layer": 4, "block": "mlp", "proj": "gate", "h": 1.2836e-08, "hess": 4.3122e-06},
+   {"layer": 4, "block": "mlp", "proj": "up", "h": 2.0844e-08, "hess": 5.7498e-06},
+   {"layer": 4, "block": "mlp", "proj": "down", "h": 7.5807e-09, "hess": 4.5833e-06},
+   {"layer": 8, "block": "self_attn", "proj": "q", "h": 7.1662e-09, "hess": 2.3788e-06},
+   {"layer": 8, "block": "self_attn", "proj": "k", "h": 3.0265e-08, "hess": 2.8331e-05},
+   {"layer": 8, "block": "self_attn", "proj": "v", "h": 1.3539e-07, "hess": 2.2458e-05},
+   {"layer": 8, "block": "self_attn", "proj": "o", "h": 6.8148e-09, "hess": 1.6038e-06},
+   {"layer": 8, "block": "mlp", "proj": "gate", "h": 1.9238e-09, "hess": 2.3108e-06},
+   {"layer": 8, "block": "mlp", "proj": "up", "h": 3.3535e-09, "hess": 1.1268e-06},
+   {"layer": 8, "block": "mlp", "proj": "down", "h": 4.0304e-09, "hess": 1.3721e-06},
+   {"layer": 12, "block": "self_attn", "proj": "q", "h": 7.8776e-09, "hess": 1.2876e-06},
+   {"layer": 12, "block": "self_attn", "proj": "k", "h": 2.8556e-08, "hess": 7.3501e-06},
+   {"layer": 12, "block": "self_attn", "proj": "v", "h": 1.6257e-07, "hess": 2.4217e-05},
+   {"layer": 12, "block": "self_attn", "proj": "o", "h": 1.8486e-08, "hess": 4.8379e-07},
+   {"layer": 12, "block": "mlp", "proj": "up", "h": 5.9099e-09, "hess": 1.446e-06},
+   {"layer": 12, "block": "mlp", "proj": "down", "h": 6.6319e-09, "hess": 2.6789e-06},
+   {"layer": 16, "block": "self_attn", "proj": "q", "h": 3.1947e-08, "hess": 5.7555e-06},
+   {"layer": 16, "block": "self_attn", "proj": "k", "h": 8.5034e-08, "hess": 2.5508e-05},
+   {"layer": 16, "block": "self_attn", "proj": "v", "h": 3.4368e-07, "hess": 4.5693e-05},
+   {"layer": 16, "block": "self_attn", "proj": "o", "h": 3.6456e-08, "hess": 5.043e-06},
+   {"layer": 16, "block": "mlp", "proj": "gate", "h": 6.6201e-09, "hess": 1.5648e-06},
+   {"layer": 16, "block": "mlp", "proj": "up", "h": 1.2355e-08, "hess": 2.0202e-06},
+   {"layer": 16, "block": "mlp", "proj": "down", "h": 4.373e-08, "hess": 2.286e-06},
+   {"layer": 20, "block": "self_attn", "proj": "q", "h": 3.8097e-08, "hess": 4.8768e-06},
+   {"layer": 20, "block": "self_attn", "proj": "k", "h": 8.8578e-08, "hess": 2.4658e-06},
+   {"layer": 20, "block": "self_attn", "proj": "v", "h": 4.4028e-07, "hess": 6.221e-05},
+   {"layer": 20, "block": "self_attn", "proj": "o", "h": 6.1267e-08, "hess": 9.1984e-06},
+   {"layer": 20, "block": "mlp", "proj": "gate", "h": 9.8742e-09, "hess": 2.9268e-06},
+   {"layer": 20, "block": "mlp", "proj": "up", "h": 1.7597e-08, "hess": 3.7625e-06},
+   {"layer": 20, "block": "mlp", "proj": "down", "h": 1.1266e-08, "hess": 3.3335e-06},
+   {"layer": 24, "block": "self_attn", "proj": "q", "h": 3.3214e-08, "hess": 5.84e-06},
+   {"layer": 24, "block": "self_attn", "proj": "k", "h": 6.8595e-08, "hess": 1.9869e-05},
+   {"layer": 24, "block": "self_attn", "proj": "v", "h": 2.8559e-07, "hess": 4.5993e-05},
+   {"layer": 24, "block": "self_attn", "proj": "o", "h": 2.9201e-08, "hess": 6.363e-06},
+   {"layer": 24, "block": "mlp", "proj": "gate", "h": 8.6224e-09, "hess": 2.3894e-06},
+   {"layer": 24, "block": "mlp", "proj": "up", "h": 1.6206e-08, "hess": 4.723e-06},
+   {"layer": 24, "block": "mlp", "proj": "down", "h": 1.173e-08, "hess": 3.1851e-06},
+   {"layer": 28, "block": "self_attn", "proj": "q", "h": 2.0948e-08, "hess": 3.7105e-06},
+   {"layer": 28, "block": "self_attn", "proj": "k", "h": 5.5223e-08, "hess": 5.8623e-06},
+   {"layer": 28, "block": "self_attn", "proj": "v", "h": 1.0055e-07, "hess": 1.2324e-05},
+   {"layer": 28, "block": "self_attn", "proj": "o", "h": 4.7703e-09, "hess": 1.387e-06},
+   {"layer": 28, "block": "mlp", "proj": "gate", "h": 7.1908e-09, "hess": 1.8763e-06},
+   {"layer": 28, "block": "mlp", "proj": "up", "h": 1.1029e-08, "hess": 3.7311e-06},
+   {"layer": 28, "block": "mlp", "proj": "down", "h": 6.1893e-09, "hess": 1.8718e-06},
+   {"layer": 32, "block": "self_attn", "proj": "k", "h": 1.0956e-07, "hess": 6.4564e-06},
+   {"layer": 32, "block": "self_attn", "proj": "v", "h": 8.9227e-08, "hess": 1.3005e-05},
+   {"layer": 32, "block": "self_attn", "proj": "o", "h": 4.0115e-09, "hess": 1.739e-06},
+   {"layer": 32, "block": "mlp", "proj": "gate", "h": 3.6891e-09, "hess": 1.0314e-06},
+   {"layer": 32, "block": "mlp", "proj": "up", "h": 5.6695e-09, "hess": 1.8721e-06},
+   {"layer": 32, "block": "mlp", "proj": "down", "h": 3.2047e-09, "hess": 4.5559e-07}
+  ],
+  "paper_axes": {
+   "xlim": [3e-10, 1.3e-06],
+   "ylim": [1.4e-07, 0.00016]
+  },
+  "axes": {
+   "xlim": [3e-10, 1.3e-06],
+   "ylim": [3e-07, 0.00016],
+   "xticks": [1e-09, 1e-08, 1e-07],
+   "yticks": [1e-06, 1e-05, 0.0001]
+  }
+ }
+}

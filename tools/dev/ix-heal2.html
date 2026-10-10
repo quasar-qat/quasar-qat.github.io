@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex, nofollow">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ix-heal2 dev</title>
+<script>
+  window.__errors = [];
+  window.onerror = function (msg, src, line, col) { window.__errors.push(msg + " @" + line + ":" + col); var e = document.getElementById("errs"); if (e) e.textContent = window.__errors.join("\n"); };
+  window.addEventListener("unhandledrejection", function (ev) { window.__errors.push("rejection: " + ev.reason); var e = document.getElementById("errs"); if (e) e.textContent = window.__errors.join("\n"); });
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Newsreader:ital,opsz,wght@0,6..72,400..600;1,6..72,400..500&display=swap">
+<link rel="stylesheet" href="../../assets/css/site.css">
+<link rel="stylesheet" href="../../assets/css/ix-heal2.css">
+<style>pre#errs{color:#b00;font:12px monospace;white-space:pre-wrap;margin:0 20px}</style>
+</head>
+<body>
+<pre id="errs"></pre>
+<main id="main">
+<section class="block" style="padding-top:24px">
+  <div class="fig">
+      <figure class="plate ix">
+        <div class="viz"><div class="viz-head"><span class="viz-kicker" data-label><b>per-task accuracy</b> · INT2</span></div><div class="viz-body"><div id="ix-fig22" class="chart ix-mount" style="min-height:393px"></div></div></div>
+        <figcaption><b>QUASAR preserves INT2 accuracy broadly across tasks.</b> Per-task accuracy normalized by the full-precision model for Qwen3-4B-Thinking-2507 (left) and Llama-3.1-8B-Instruct (right) on the eight benchmarks.</figcaption>
+      </figure>
+  </div>
+</section>
+</main>
+<script src="../../assets/js/viz.js" defer></script>
+<script src="../../assets/js/ix-heal2.js" defer></script>
+</body>
+</html>

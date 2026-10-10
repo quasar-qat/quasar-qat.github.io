@@ -1,0 +1,146 @@
+/* ix-realw2.css — interactive appendix Figures 6, 7 and 11 (assets/js/ix-realw2.js).
+   Figure content sits on the light card, so every color is a fixed light value.
+   Type: 12px (--fs-xs) for ticks, labels, axis titles, legends and pills; 14px (--fs-s) for tooltip body and the
+   live readout values; 24px (--fs-l) once, for the headline share in Fig. 6 (c).
+   Inter for labels, JetBrains Mono uppercase for axis titles and small kickers, Newsreader italic for math symbols. */
+
+.rw2 { color: #1d1f22; font-family: var(--sans); }
+.rw2 svg { display: block; overflow: visible; font-family: var(--sans); }
+.rw2 text { font-size: var(--fs-xs, 12px); fill: #44484f; }
+.rw2 .rw2-axis line, .rw2 .rw2-base { stroke: #c9c6c0; shape-rendering: crispEdges; }
+.rw2 .rw2-axis text { fill: #6b6f75; font-variant-numeric: tabular-nums; }
+.rw2 .rw2-grid line { stroke: #ecebe7; shape-rendering: crispEdges; }
+.rw2 .rw2-at { fill: #6b6f75; font: 600 var(--fs-xs, 12px) var(--mono); letter-spacing: .08em; text-transform: uppercase; }
+.rw2 .rw2-pl { fill: #1d1f22; font: 600 var(--fs-xs, 12px) var(--mono); letter-spacing: .04em; }
+.rw2 .rw2-ptitle { fill: #44484f; font: 600 var(--fs-xs, 12px) var(--mono); letter-spacing: .08em; text-transform: uppercase; }
+.rw2 .rw2-m { font-family: var(--serif); font-style: italic; text-transform: none; letter-spacing: 0; font-size: var(--fs-s, 13px); }
+.rw2 .rw2-at .rw2-m { font-size: var(--fs-s, 13px); }
+.rw2 .rw2-mi { font-family: var(--serif); font-style: italic; text-transform: none; letter-spacing: 0; font-size: var(--fs-s, 13px); line-height: 0; }
+.rw2 sub { font-size: var(--fs-xs, 12px); line-height: 0; vertical-align: -0.25em; }
+
+/* ---- controls ---- */
+.rw2 .pills button { font-size: var(--fs-xs, 12px); }
+.rw2-ctl { display: inline-flex; align-items: center; gap: 9px; flex: none; }
+.rw2-ctl-row { display: flex; flex-wrap: wrap; margin: 2px 0 12px; }
+.rw2-lab { font: 600 var(--fs-xs, 12px)/1 var(--mono); letter-spacing: .1em; text-transform: uppercase; color: #6b6f75; }
+.rw2 .rw2-sw { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 6px; vertical-align: -1px; }
+.rw2-short { display: none; }
+.rw2-narrow .rw2-long { display: none; }
+.rw2-narrow .rw2-short { display: inline; }
+
+/* ---- plots ---- */
+.rw2-plot { position: relative; width: 100%; border-radius: 8px; outline: none; -webkit-tap-highlight-color: transparent; }
+.rw2-plot:focus-visible { box-shadow: 0 0 0 2px #2e6f95; }
+/* vertical swipes scroll the page; taps and horizontal drags drive the figure */
+.rw2-plot svg { touch-action: pan-y pinch-zoom; }
+.rw2-ov, .rw2-hit, .rw2-hhit { cursor: crosshair; }
+
+/* hover / selection marks */
+.rw2-xh { stroke: #8a8d92; stroke-width: 1; stroke-dasharray: 2 3; shape-rendering: crispEdges; }
+.rw2-xh.pin { stroke: #1d1f22; stroke-opacity: .55; stroke-dasharray: none; }
+.rw2-hd { stroke: #fdfdfd; stroke-width: 1.6; }
+.rw2-band { fill: #1d1f22; fill-opacity: .05; transition: opacity .15s ease; pointer-events: none; }
+.rw2 .rw2-val { fill: #1d1f22; font-weight: 600; font-variant-numeric: tabular-nums; paint-order: stroke; stroke: #fdfdfd; stroke-width: 3.5px; stroke-linejoin: round; pointer-events: none; }
+.rw2 .rw2-val.dim { fill: #9a9da3; }
+
+/* first-view growth (bars and areas rise from their baseline) */
+.rw2-grow, .rw2-bars > rect { transform: scaleY(0); transform-box: fill-box; transform-origin: 50% 100%; }
+.rw2-grow { transition: transform .9s cubic-bezier(.3,.7,.2,1); }
+.rw2-bars > rect { transition: transform .6s cubic-bezier(.3,.7,.2,1), opacity .15s ease; }
+.rw2-grow.in, .rw2-bars.in > rect { transform: none; }
+.rw2-grow.now { transition: none; }
+.rw2-bars.now > rect { transition: opacity .15s ease; transition-delay: 0s !important; }
+@media (prefers-reduced-motion: reduce) {
+  .rw2-grow, .rw2-bars > rect, .rw2-med { transition: none !important; }
+}
+
+/* ---------------- Fig. 6 ---------------- */
+.rw2-top { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px 18px; margin: 2px 0 10px; }
+.rw2-read { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 16px; min-width: 0; font-size: var(--fs-xs, 12px); color: #44484f; }
+.rw2-ri { display: inline-flex; align-items: baseline; gap: 6px; white-space: nowrap; }
+.rw2-ri .rw2-sw { align-self: center; margin-right: 0; vertical-align: 0; }
+.rw2-rn { font: 500 var(--fs-xs, 12px)/1.3 var(--sans); color: #44484f; }
+.rw2-rv { font: 600 var(--fs-s, 13px)/1.3 var(--sans); color: #1d1f22; font-variant-numeric: tabular-nums; display: inline-block; min-width: 3.4em; }
+.rw2-ri-g { padding: 3px 9px 3px 8px; border-radius: 999px; background: #f1efea; }
+.rw2-ri-g .rw2-rn { font: 600 var(--fs-xs, 12px)/1.3 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: #6b6f75; }
+.rw2-ri-g .rw2-rv { min-width: 2.6em; }
+.rw2-ri-f .rw2-rv { min-width: 2.2em; }
+.rw2-ri-fs .rw2-rv, .rw2-ri-f .rw2-rv { color: #A13040; }
+.rw2-read.hov .rw2-ri-g { background: #e8e5df; }
+.rw2-sw-s0 { background: #d7dade; box-shadow: inset 0 2px 0 #1d1f22; }
+.rw2 .rw2-swl { width: 14px; height: 3px; border-radius: 2px; }
+
+.rw2-f6g { display: grid; grid-template-columns: minmax(0, 1fr); gap: 18px; }
+.rw2-wide .rw2-f6g { grid-template-columns: minmax(0, 3.3fr) minmax(0, 1fr); gap: 28px; }
+.rw2-s0 { fill: none; stroke: #1d1f22; stroke-width: .9; stroke-linejoin: round; }
+.rw2-fs { fill: none; stroke: #D1495B; stroke-width: 1.35; stroke-linejoin: round; }
+.rw2-dot { stroke: #fdfdfd; stroke-width: .8; }
+.rw2-clip { stroke: #D1495B; stroke-width: 3; stroke-linecap: round; stroke-opacity: .45; }
+
+/* overview strip with the window */
+.rw2-brush { outline: none; }
+.rw2-bhit { cursor: pointer; touch-action: pan-y; }
+.rw2-bspark { fill: none; stroke: #6b6f75; stroke-width: .7; }
+.rw2-bfs { fill: none; stroke: #D1495B; stroke-width: .7; stroke-opacity: .8; }
+.rw2-dim { fill: #fdfdfd; fill-opacity: .72; pointer-events: none; }
+.rw2-win { fill: none; stroke: #1d1f22; stroke-width: 1.2; pointer-events: none; }
+.rw2-handle { fill: #fdfdfd; stroke: #1d1f22; stroke-width: 1.2; pointer-events: none; }
+.rw2-pinmark { fill: #1d1f22; pointer-events: none; }
+.rw2-ring { fill: none; stroke: #2e6f95; stroke-width: 2; opacity: 0; pointer-events: none; }
+.rw2-ring.on { opacity: 1; }
+
+/* (c) */
+.rw2 .rw2-big { font: 600 var(--fs-l, 21px)/1 var(--sans); fill: #A13040; font-variant-numeric: tabular-nums; letter-spacing: -.01em; }
+.rw2 .rw2-bl { fill: #44484f; font: 500 var(--fs-xs, 12px) var(--sans); }
+.rw2 .rw2-bl .rw2-m { font-size: var(--fs-s, 13px); }
+.rw2-hbar.hb { stroke: #1d1f22; stroke-width: 1.2; }
+.rw2-binout { fill: none; stroke: #1d1f22; stroke-width: 1.4; pointer-events: none; shape-rendering: crispEdges; }
+.rw2 .rw2-binlab { fill: #1d1f22; font-weight: 600; font-variant-numeric: tabular-nums; paint-order: stroke; stroke: #fdfdfd; stroke-width: 3.5px; stroke-linejoin: round; pointer-events: none; }
+
+/* ---------------- Fig. 7 ---------------- */
+.rw2 .rw2-tag { fill: #1d1f22; font-weight: 700; }
+.rw2-med { opacity: 0; transition: opacity .4s ease; }
+.rw2-med.in { opacity: 1; }
+.rw2-med.now { transition: none; }
+.rw2-medl { stroke: #3F4245; stroke-width: 1.1; stroke-dasharray: 3 2.5; }
+.rw2 .rw2-medt { fill: #3F4245; font-variant-numeric: tabular-nums; paint-order: stroke; stroke: #fdfdfd; stroke-width: 3.5px; stroke-linejoin: round; }
+
+/* ---------------- Fig. 11 ---------------- */
+.rw2 .rw2-xl { fill: #44484f; }
+.rw2-vbar { transition: opacity .15s ease; }
+.rw2-ghostr { fill: none; stroke: #1d1f22; stroke-width: 1.1; stroke-dasharray: 3 2.5; pointer-events: none; shape-rendering: crispEdges; }
+
+/* ---- tooltip rows ---- */
+.rw2 .vtip { font: 400 var(--fs-s, 13px)/1.45 var(--sans); max-width: 300px; }
+.rw2 .vtip .tt { font: 600 var(--fs-xs, 12px)/1.3 var(--mono); letter-spacing: .08em; text-transform: uppercase; }
+.rw2 .vtip .tt .rw2-mi { font-size: var(--fs-s, 13px); }
+.rw2-tr { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(64px, auto); grid-template-columns: minmax(0, 1fr); gap: 14px; align-items: baseline; }
+.rw2-tr b { font-weight: 650; text-align: right; font-variant-numeric: tabular-nums; }
+.rw2-tr b.off { font-weight: 400; color: #6b6f75; }
+.rw2-tr.off { color: #9a9da3; }
+.rw2-tr.off b { color: #9a9da3; }
+.rw2-th { font: 500 var(--fs-xs, 12px)/1.4 var(--sans); color: #6b6f75; }
+.rw2-th span { text-align: right; }
+.rw2-th span.on { color: #1d1f22; font-weight: 600; }
+.rw2-tn { color: #44484f; white-space: nowrap; }
+.rw2-tk { display: inline-block; width: 9px; height: 9px; border-radius: 2px; margin-right: 7px; vertical-align: 0; }
+
+/* fetch failure: neutral data label in place of the figure */
+.rw2-fail { padding: 22px 0; text-align: center; font: 500 var(--fs-xs, 12px)/1.4 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: #6b6f75; }
+
+@media (max-width: 600px) {
+  .rw2-ctl .pills button, .rw2-ctl-row .pills button { padding: 7px 10px; }
+  .rw2-read { gap: 6px 12px; }
+}
+@media print {
+  .rw2 .vtip { display: none; }
+}
+.rw2 .rw2-xsel { fill: #1d1f22; font-weight: 700; font-variant-numeric: tabular-nums; transition: opacity .12s ease; }
+.rw2 .rw2-axis text, .rw2 .rw2-medt { transition: opacity .12s ease; }
+.rw2 .rw2-vhead { fill: #1d1f22; font: 600 var(--fs-xs, 12px) var(--mono); letter-spacing: .04em; }
+.rw2 .rw2-vnum { fill: #1d1f22; font-weight: 600; font-variant-numeric: tabular-nums; }
+.rw2 .rw2-vnum.off { fill: #9a9da3; font-weight: 500; }
+.rw2 .rw2-xl.on { fill: #1d1f22; font-weight: 700; }
+/* Fig. 6: the selected group's marks join once the areas have risen */
+.rw2-cur, .rw2-binmark, .rw2-pinmark { transition: opacity .45s ease; }
+.rw2-pre .rw2-cur, .rw2-pre .rw2-binmark, .rw2-pre .rw2-pinmark { opacity: 0; }

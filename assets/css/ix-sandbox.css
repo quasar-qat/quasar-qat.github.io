@@ -1,0 +1,59 @@
+/* ix-sandbox.css — Interactive · the borrowed gradient (assets/js/ix-sandbox.js).
+   Card content is always light: fixed light-theme values only.
+   Type: 12px (--fs-xs) for every label and button; 14px (--fs-s) for panel titles and math labels w / r.
+   Inter for labels, JetBrains Mono uppercase for the step counter, Newsreader italic for math symbols. */
+
+.ixs { position: relative; color: #1d1f22; }
+
+/* ---- controls ---- */
+.ixs-bar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px 16px; margin: 2px 0 14px; }
+.ixs-btns { display: inline-flex; flex-wrap: wrap; gap: 6px; }
+.ixs-btn {
+  appearance: none; display: inline-flex; align-items: center; gap: 7px; min-height: 32px; padding: 8px 14px 8px 12px;
+  border: 1px solid #dcd8d0; border-radius: 999px; background: #fdfdfd; color: #1d1f22; cursor: pointer;
+  font: 500 var(--fs-xs, 12px)/1 var(--sans); transition: background .15s ease, border-color .15s ease, opacity .15s ease;
+}
+.ixs-btn svg { width: 10px; height: 10px; flex: none; display: block; }
+.ixs-btn.on { background: #1d1f22; border-color: #1d1f22; color: #fdfdfd; }
+.ixs-btn:disabled { opacity: .4; cursor: default; }
+@media (hover: hover) {
+  .ixs-btn:hover:not(:disabled) { background: #f1efea; border-color: #cfcac0; }
+  .ixs-btn.on:hover:not(:disabled) { background: #33363b; border-color: #33363b; }
+}
+.ixs-btn:focus-visible { outline: 2px solid #2e6f95; outline-offset: 2px; }
+.ixs-count { font: 500 var(--fs-xs, 12px)/1 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: #6b6f75; white-space: nowrap; }
+.ixs-count b { font: 600 var(--fs-xs, 12px)/1 var(--sans); letter-spacing: 0; color: #1d1f22; font-variant-numeric: tabular-nums; margin-left: 6px; display: inline-block; min-width: 1.3em; text-align: right; }
+.ixs-count .ixs-of { font-family: var(--sans); letter-spacing: 0; margin-left: 4px; font-variant-numeric: tabular-nums; }
+
+/* ---- panels ---- */
+.ixs-panels { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
+.ixs-panels.stack { grid-template-columns: minmax(0, 1fr); gap: 18px; }
+.ixs-ph { display: flex; align-items: baseline; justify-content: space-between; gap: 8px 12px; flex-wrap: wrap; margin: 0 0 8px; min-height: 18px; }
+.ixs-title { font: 600 var(--fs-s, 13px)/1.25 var(--sans); color: #3F4245; }
+.ixs-title.q { color: #A13040; }
+.ixs-m { font-family: var(--serif); font-style: italic; font-size: var(--fs-s, 13px); text-transform: none; letter-spacing: 0; }
+
+.ixs-plot { position: relative; width: 100%; aspect-ratio: 1 / 1; border-radius: 8px; outline: none; cursor: crosshair; touch-action: pan-y pinch-zoom; -webkit-tap-highlight-color: transparent; user-select: none; -webkit-user-select: none; }
+.ixs-plot.on-pt { cursor: pointer; }
+.ixs-plot:focus-visible { box-shadow: 0 0 0 2px #fdfdfd, 0 0 0 4px #2e6f95; }
+.ixs-plot canvas { position: absolute; left: 0; top: 0; width: 100%; height: 100%; border-radius: 8px; display: block; }
+.ixs-plot svg { position: relative; display: block; width: 100%; height: 100%; overflow: visible; font-family: var(--sans); touch-action: pan-y pinch-zoom; }
+.ixs-iso { fill: none; stroke: #fff; stroke-opacity: .5; stroke-width: 1; vector-effect: non-scaling-stroke; }
+.ixs-lab { font: italic 400 var(--fs-s, 13px) var(--serif); fill: #1d1f22; paint-order: stroke; stroke: #fff; stroke-width: 3.5px; stroke-linejoin: round; pointer-events: none; }
+
+/* ---- key ---- */
+.ixs-legend { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px 20px; margin: 14px 0 6px; font: 500 var(--fs-xs, 12px)/1.3 var(--sans); color: #44484f; }
+.ixs-li { display: inline-flex; align-items: center; gap: 7px; white-space: nowrap; }
+.ixs-gl { display: inline-flex; align-items: center; }
+.ixs-gl svg { display: block; max-width: none; overflow: visible; }
+
+.ixs-fail { padding: 22px 0; text-align: center; font: 500 var(--fs-xs, 12px)/1.4 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: #6b6f75; }
+
+@media (max-width: 600px) {
+  .ixs-bar { margin-bottom: 12px; }
+  .ixs-btn { padding: 8px 12px 8px 10px; }
+  .ixs-legend { gap: 6px 14px; justify-content: flex-start; }
+}
+@media print {
+  .ixs-btns { display: none !important; }
+}

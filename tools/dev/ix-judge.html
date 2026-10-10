@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex, nofollow">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ix-judge dev</title>
+<script>
+  window.__errors = [];
+  window.onerror = function (msg, src, line, col) { window.__errors.push(msg + " @" + line + ":" + col); var e = document.getElementById("errs"); if (e) e.textContent = window.__errors.join("\n"); };
+  window.addEventListener("unhandledrejection", function (ev) { window.__errors.push("rejection: " + ev.reason); var e = document.getElementById("errs"); if (e) e.textContent = window.__errors.join("\n"); });
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Newsreader:ital,opsz,wght@0,6..72,400..600;1,6..72,400..500&display=swap">
+<link rel="stylesheet" href="../../assets/css/site.css">
+<link rel="stylesheet" href="../../assets/css/ix-judge.css">
+<style>pre#errs{color:#b00;font:12px monospace;white-space:pre-wrap;margin:0 20px}</style>
+</head>
+<body>
+<pre id="errs"></pre>
+<main id="main">
+<section class="block" style="padding-top:24px">
+  <div class="fig">
+    <div class="grid-2">
+      <figure class="plate ix">
+        <div class="viz"><div class="viz-head"><span class="viz-kicker" data-label>Fig. 27 · <b>LLM judge</b> · INT2</span></div><div class="viz-body"><div id="ix-fig27" class="chart ix-mount" style="min-height:360px"></div></div></div>
+        <figcaption><b>The judge prefers QUASAR to every INT2 quantized baseline.</b> Pairwise win, tie, and loss rates on responses to 128 WildChat prompts for Qwen3-4B-Thinking-2507 and Llama-3.1-8B-Instruct. Llama-3.3-70B-Instruct serves as the judge.</figcaption>
+      </figure>
+      <figure class="plate ix">
+        <div class="viz"><div class="viz-head"><span class="viz-kicker" data-label>Fig. 28 · <b>response stability</b> · INT2</span></div><div class="viz-body"><div id="ix-fig28" class="chart ix-mount" style="min-height:360px"></div></div></div>
+        <figcaption><b>QUASAR matches the full-precision models' response stability at INT2.</b> Mean word-repetition ratio over 128 WildChat prompts for Qwen3-4B-Thinking-2507 (left) and Llama-3.1-8B-Instruct (right), with greedy decoding.</figcaption>
+      </figure>
+    </div>
+  </div>
+  <div class="fig" style="margin-top:32px">
+      <figure class="plate ix">
+        <div class="viz"><div class="viz-head"><span class="viz-kicker" data-label>Fig. 29 · <b>responses</b></span></div><div class="viz-body"><div id="ix-fig29" class="chart ix-mount" style="min-height:420px"></div></div></div>
+        <figcaption><b>The beginning of each method's response to one held-out prompt, for Qwen3-4B-Thinking-2507 at INT2, INT3, and INT4 with greedy decoding.</b></figcaption>
+      </figure>
+  </div>
+</section>
+</main>
+<script src="../../assets/js/viz.js" defer></script>
+<script src="../../assets/js/ix-judge.js" defer></script>
+</body>
+</html>

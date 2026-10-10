@@ -1,0 +1,87 @@
+/* ix-nvfp4app.css — NVFP4 appendix figures (assets/js/ix-nvfp4app.js): Fig. 35, Table 10.
+   Figure content always sits on the light card, so every color here is a fixed light-theme value.
+   Type: 12px for every in-chart label; 14px for tooltip body and model names. Inter for labels,
+   JetBrains Mono (uppercase, .08em) for axis titles. */
+
+.nv { color: #1d1f22; }
+.nv svg { display: block; overflow: visible; font-family: var(--sans); }
+
+/* ---- key row ---- */
+.nv-top { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 16px; margin: 0 0 12px; }
+.nv-legend { display: flex; flex-wrap: wrap; gap: 2px 2px; margin-left: -6px; }
+.nv-li {
+  appearance: none; border: 0; background: transparent; cursor: pointer;
+  display: inline-flex; align-items: center; gap: 5px; min-height: 28px; padding: 4px 6px; border-radius: 999px;
+  font: 500 var(--fs-xs, 12px)/1.2 var(--sans); color: #44484f; white-space: nowrap;
+  transition: opacity .2s ease, background-color .15s ease;
+}
+.nv-li svg { width: 20px; height: 12px; flex: none; overflow: visible; }
+.nv-li.q { color: #A13040; font-weight: 700; }
+.nv-li:hover { background: #f1efea; }
+.nv-li[aria-pressed="true"] { background: #ebe7df; box-shadow: inset 0 0 0 1px #d8d2c6; }
+.nv-li.dim { opacity: .45; }
+.nv-li:focus-visible { outline: 2px solid #2e6f95; outline-offset: 1px; }
+
+/* ---- plot ---- */
+.nv-plot { position: relative; width: 100%; border-radius: 8px; outline: none; -webkit-tap-highlight-color: transparent; }
+.nv-plot:focus-visible { box-shadow: 0 0 0 5px #fdfdfd, 0 0 0 7px #2e6f95; }
+/* vertical swipes scroll the page; horizontal drags scrub (touch-action must sit on a box, not on an SVG shape) */
+.nv-plot svg, .nv-ov { touch-action: pan-y pinch-zoom; }
+.nv-ov { cursor: crosshair; }
+.nv-ov.rows { cursor: default; }
+
+.nv-axis line { stroke: #c9c6c0; shape-rendering: crispEdges; }
+.nv-axis text { fill: #6b6f75; font: 400 var(--fs-xs, 12px) var(--sans); font-variant-numeric: tabular-nums; }
+.nv-grid line { stroke: #ecebe7; shape-rendering: crispEdges; }
+.nv-grid line.zero { stroke: #c9c6c0; }
+.nv .nv-at { fill: #6b6f75; font: 600 var(--fs-xs, 12px) var(--mono); letter-spacing: .08em; text-transform: uppercase; }
+.nv-pt { fill: #1d1f22; font: 600 var(--fs-xs, 12px) var(--sans); }
+.nv-mh { fill: #1d1f22; font: 600 var(--fs-s, 13px) var(--sans); }
+.nv-gl { fill: #44484f; font: 500 var(--fs-xs, 12px) var(--sans); }
+.nv-bfl { fill: #7D6310; font: 500 var(--fs-xs, 12px) var(--sans); font-variant-numeric: tabular-nums; }
+.nv-bfk { font-weight: 600; }
+.nv-val { fill: #44484f; font: 500 var(--fs-xs, 12px) var(--sans); font-variant-numeric: tabular-nums;
+  paint-order: stroke; stroke: #fdfdfd; stroke-width: 3.5px; stroke-linejoin: round; }
+.nv-val.q { fill: #A13040; }
+.nv-val.b { font-weight: 700; }
+.nv-ser { transition: opacity .2s ease; }
+
+/* crosshair, hover marks, hover bands, BF16 reference */
+.nv-xh { stroke: #8a8d92; stroke-width: 1; stroke-dasharray: 2 3; shape-rendering: crispEdges; }
+.nv-hd { stroke: #fdfdfd; stroke-width: 1.6; }
+.nv-band { fill: #f1efea; }
+.nv-bf { stroke: #C9A227; stroke-width: 2; stroke-linecap: round; }
+
+/* entrances: bars grow from the axis, markers pop, labels fade (state class: .nv-in = revealed) */
+.nv-vbar { transform-box: fill-box; transform-origin: 50% 100%; transform: scaleY(0); transition: transform .75s cubic-bezier(.3, .7, .2, 1); }
+.nv-hbar { transform-box: fill-box; transform-origin: 0 50%; transform: scaleX(0); transition: transform .75s cubic-bezier(.3, .7, .2, 1); }
+.nv-pop { opacity: 0; transform: scale(.3); transform-box: fill-box; transform-origin: center; transition: opacity .3s ease, transform .5s cubic-bezier(.3, 1.45, .5, 1); }
+.nv-fade { opacity: 0; transition: opacity .45s ease .55s; }
+.nv-in .nv-vbar, .nv-in .nv-hbar, .nv-in .nv-pop { transform: none; opacity: 1; }
+.nv-in .nv-fade { opacity: 1; }
+.nv-now *, .nv-now { transition: none !important; }
+@media (prefers-reduced-motion: reduce) {
+  .nv-vbar, .nv-hbar, .nv-pop, .nv-fade, .nv-ser, .nv-li { transition: none; }
+}
+
+/* ---- tooltip ---- */
+.nv .vtip { font: 400 var(--fs-s, 13px)/1.45 var(--sans); min-width: 168px; }
+.nv .vtip .tt { font: 600 var(--fs-xs, 12px)/1.3 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: #6b6f75; }
+.nv .vtip .nv-nt { text-transform: none; letter-spacing: .02em; }
+.vtip .nv-row { align-items: baseline; }
+.vtip .nv-row b { font-weight: 650; font-variant-numeric: tabular-nums; }
+.vtip .nv-row.q .nv-n { color: #A13040; font-weight: 600; }
+.vtip .nv-row.hot { background: #f1efea; border-radius: 4px; margin-inline: -4px; padding-inline: 4px; }
+.vtip .nv-n { color: #44484f; white-space: nowrap; }
+.vtip .nv-k { display: inline-block; width: 12px; height: 3px; border-radius: 2px; margin-right: 7px; vertical-align: 3px; }
+.vtip .nv-k.ref { width: 3px; height: 11px; vertical-align: -1px; margin-left: 4px; margin-right: 12px; }
+
+.nv .sr-only { font: 400 var(--fs-xs, 12px)/1.3 var(--sans); }
+
+/* fetch failure: neutral data label in place of the chart */
+.nv-fail { padding: 22px 0; text-align: center; font: 500 var(--fs-xs, 12px)/1.4 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: #6b6f75; }
+
+@media (max-width: 600px) {
+  .nv-top { gap: 8px 10px; }
+  .nv-li { padding: 4px 5px; gap: 4px; }
+}

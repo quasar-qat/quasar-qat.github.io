@@ -1,0 +1,58 @@
+# QUASAR: Lowering the Loss Floor of Quantization-Aware Training with Loss-Aware Reconstruction
+
+> We introduce QUASAR, a QAT method that brings lightweight, loss-aware reconstruction into the training loop. At each training step, QUASAR reconstructs the latent weights by searching over a small set of clipping ranges and fitting dequantization parameters through saliency-weighted least squares.
+
+- **Authors:** [Vincent Counathe](https://vincentcounathe.github.io/) (Cornell University, Together AI), [Ben Athiwaratkun](https://benathi.github.io/) (Together AI), [Christopher De Sa](https://www.cs.cornell.edu/~cdesa/) (Cornell University, Together AI), [Tianyi Zhang](https://tonyzhang617.github.io/) (Together AI)
+- **arXiv:** 2608.13966 · **DOI:** 10.48550/arXiv.2608.13966
+
+As large language model inference shifts toward lower precision, post-training quantization (PTQ) becomes increasingly brittle, making quantization-aware training (QAT) essential for preserving model quality. However, QAT has a structural mismatch: gradient updates are applied to latent full-precision weights, while the loss and gradients are computed on lossy reconstructions of those weights. This mismatch can lead to suboptimal training trajectories and a higher loss floor. Second-order PTQ methods address a similar problem by minimizing loss-aware reconstruction error, but applying such expensive reconstruction repeatedly during QAT as the weights evolve is impractical.
+
+We use an exponential moving average of squared gradients as the per-parameter saliency signal. Our theoretical analysis shows that optimizing QUASAR's reconstruction objective tightens both the convergence and final-loss bounds of QAT.
+
+We evaluate QUASAR across four model families and across INT4, INT3, INT2, and NVFP4 quantization formats. QUASAR consistently achieves lower training and evaluation loss than competitive QAT methods and outperforms QAT and PTQ baselines on downstream benchmarks. At INT2, QUASAR improves average accuracy over the best QAT baseline by 13.3 points with quantization-aware distillation and by 10.9 points with QAT on mathematical reasoning data. Notably, after distillation on only ~600M tokens, QUASAR's INT4 Gemma-4 E4B checkpoint outperforms the corresponding QAT checkpoint released by Google, with 66% lower KL divergence and 1.8 points higher average accuracy.
+
+For healing, we apply QAD to Qwen3-4B-Thinking-2507 and Llama-3.1-8B-Instruct at INT2, INT3, and INT4 using Open-PerfectBlend data and logits from the full-precision teachers. For adaptation, we train all weights of Qwen3-4B-Base on OpenMathReasoning using cross-entropy. We also apply QAD in NVFP4 to Qwen3-8B, Qwen3.5-9B, and Muse-Glimmer-30B, and evaluate QUASAR against Google's QAT checkpoint, Gemma 4, and other independent checkpoints.
+
+Baselines in each experiment use the same data, objective, training budget, and tuned learning rate, with matched inference formats. Standard QAT uses fixed min–max ranges; LSQ learns the scales; Denoising QAT refits the dequantization parameters; BitDistiller combines clipping with self-distillation; RTN rounds to the nearest grid point; GPTQ minimizes a second-order reconstruction error; and AWQ protects activation-salient weights.
+
+Our benchmark suites cover standard language understanding (MMLU, ARC, HellaSwag, WinoGrande, TruthfulQA, and IFEval); mathematical and scientific reasoning (MATH-500, GSM8K, AIME, HMMT, MMLU-Pro, SuperGPQA, and GPQA-Diamond); coding (LiveCodeBench and OJBench); and long-context performance (LongBench-v2, RULER, MRCR, and LongProc).
+
+QUASAR checkpoints use standard layouts supported by vLLM's quantization backends. In vLLM, Marlin and Machete serve INT4 weights, NVFP4 runs natively on Blackwell GPUs, and MXFP4 weight-only checkpoints are supported. QUASAR only adds 1.4% wall-clock step time compared with Standard QAT (2.97 and 2.93 seconds per step, respectively), with the overhead only coming from the weight reconstruction.
+
+## Paper
+
+- [arXiv:2608.13966](https://arxiv.org/abs/2608.13966): arXiv abstract page
+- [PDF](https://quasar-qat.github.io/quasar.pdf): arXiv v2 PDF, project-page copy
+- [arXiv PDF](https://arxiv.org/pdf/2608.13966)
+- [arXiv HTML (full text)](https://arxiv.org/html/2608.13966v2)
+- [DOI 10.48550/arXiv.2608.13966](https://doi.org/10.48550/arXiv.2608.13966)
+- [Hugging Face paper page](https://huggingface.co/papers/2608.13966)
+
+## Code
+
+- [github.com/vincentcounathe/quasar-qat](https://github.com/vincentcounathe/quasar-qat): Apache-2.0
+
+## Models
+
+- [All QUASAR Models](https://huggingface.co/collections/QUASAR-QAT/all-quasar-models-6aab09fd2913ec22df0d5f15): Hugging Face collection
+- [huggingface.co/QUASAR-QAT](https://huggingface.co/QUASAR-QAT): Hugging Face organization
+- [QUASAR-QAT/Qwen3.5-4B-QUASAR-NVFP4](https://huggingface.co/QUASAR-QAT/Qwen3.5-4B-QUASAR-NVFP4): Qwen3.5-4B · NVFP4 · vLLM
+- [QUASAR-QAT/Qwen3.5-4B-QUASAR-NVFP4-W4A4](https://huggingface.co/QUASAR-QAT/Qwen3.5-4B-QUASAR-NVFP4-W4A4): Qwen3.5-4B · NVFP4 W4A4 · vLLM
+- [QUASAR-QAT/Qwen3.5-4B-QUASAR-Q4_0-GGUF](https://huggingface.co/QUASAR-QAT/Qwen3.5-4B-QUASAR-Q4_0-GGUF): Qwen3.5-4B · GGUF Q4_0 · llama.cpp
+- [QUASAR-QAT/Qwen3.8-27B-QUASAR-NVFP4](https://huggingface.co/QUASAR-QAT/Qwen3.8-27B-QUASAR-NVFP4): Qwen3.8-27B · NVFP4 · vLLM
+- [QUASAR-QAT/gemma-4-E4B-it-QUASAR-W4A16-G64](https://huggingface.co/QUASAR-QAT/gemma-4-E4B-it-QUASAR-W4A16-G64): Gemma-4 E4B · INT4 g64 · vLLM
+- [QUASAR-QAT/gemma-4-E4B-it-QUASAR-Q4_0-GGUF](https://huggingface.co/QUASAR-QAT/gemma-4-E4B-it-QUASAR-Q4_0-GGUF): Gemma-4 E4B · GGUF Q4_0 · llama.cpp
+- [QUASAR-QAT/gemma-4-12B-it-QUASAR-W4A16-G64](https://huggingface.co/QUASAR-QAT/gemma-4-12B-it-QUASAR-W4A16-G64): Gemma-4 12B · INT4 g64 · vLLM
+- [QUASAR-QAT/gemma-4-12B-it-QUASAR-Q4_0-GGUF](https://huggingface.co/QUASAR-QAT/gemma-4-12B-it-QUASAR-Q4_0-GGUF): Gemma-4 12B · GGUF Q4_0 · llama.cpp
+- [QUASAR-QAT/Muse-Glimmer-30B-QUASAR-NVFP4](https://huggingface.co/QUASAR-QAT/Muse-Glimmer-30B-QUASAR-NVFP4): Muse-Glimmer-30B · NVFP4 · vLLM
+- [QUASAR-QAT/Muse-Glimmer-30B-QUASAR-NVFP4-W4A4](https://huggingface.co/QUASAR-QAT/Muse-Glimmer-30B-QUASAR-NVFP4-W4A4): Muse-Glimmer-30B · NVFP4 W4A4 · vLLM
+- [QUASAR-QAT/Muse-Glimmer-30B-QUASAR-Q4_0-GGUF](https://huggingface.co/QUASAR-QAT/Muse-Glimmer-30B-QUASAR-Q4_0-GGUF): Muse-Glimmer-30B · GGUF Q4_0 · llama.cpp
+
+## Project page
+
+- [quasar-qat.github.io](https://quasar-qat.github.io/): QUASAR project page
+- [index.md](https://quasar-qat.github.io/index.md): full text and result tables
+
+## Optional
+
+- [quasar.bib](https://quasar-qat.github.io/quasar.bib): BibTeX

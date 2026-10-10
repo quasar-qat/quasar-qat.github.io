@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex, nofollow">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ix-realw1 dev</title>
+<script>
+  window.__errors = [];
+  window.onerror = function (msg, src, line, col) { window.__errors.push(msg + " @" + line + ":" + col); var e = document.getElementById("errs"); if (e) e.textContent = window.__errors.join("\n"); };
+  window.addEventListener("unhandledrejection", function (ev) { window.__errors.push("rejection: " + ev.reason); var e = document.getElementById("errs"); if (e) e.textContent = window.__errors.join("\n"); });
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Newsreader:ital,opsz,wght@0,6..72,400..600;1,6..72,400..500&display=swap">
+<link rel="stylesheet" href="../../assets/css/site.css">
+<link rel="stylesheet" href="../../assets/css/ix-realw1.css">
+<style>pre#errs{color:#b00;font:12px monospace;white-space:pre-wrap;margin:0 20px}</style>
+</head>
+<body>
+<pre id="errs"></pre>
+<main id="main">
+<section class="block" style="padding-top:24px">
+  <div class="wide">
+    <figure class="plate ix">
+      <div class="viz"><div class="viz-head"><span class="viz-kicker" data-label>Fig. 5 · <b>per-weight loss-aware reconstruction error</b> · INT3</span></div><div class="viz-body"><div id="ix-fig5" class="chart ix-mount" style="min-height:460px"></div></div></div>
+      <figcaption><b>Per-weight loss-aware reconstruction error for 14 Qwen3-4B weight groups at INT3.</b> Color shows |√<i>h</i> (<i>r</i>−<i>w</i>)| under (a) Standard QAT with min–max reconstruction and (b) QUASAR. Each row contains 128 weights ordered by saliency <i>h</i>.</figcaption>
+    </figure>
+  </div>
+  <div class="fig" style="margin-top:32px">
+    <div class="grid-2">
+      <figure class="plate ix">
+        <div class="viz"><div class="viz-head"><span class="viz-kicker" data-label>Fig. 7 · <b>neighbour placeholder</b></span></div><div class="viz-body"><div class="chart" style="min-height:360px"></div></div></div>
+        <figcaption>Placeholder for the paired card.</figcaption>
+      </figure>
+      <figure class="plate ix">
+        <div class="viz"><div class="viz-head"><span class="viz-kicker" data-label>Fig. 8 · <b>saliency in one layer</b></span></div><div class="viz-body"><div id="ix-fig8" class="chart ix-mount" style="min-height:420px"></div></div></div>
+        <figcaption><b>Saliency <i>h</i> in one Qwen3-4B layer.</b> Weight groups span 128 weights along the input dimension. The large variation within each group lets QUASAR prioritize the most salient weights.</figcaption>
+      </figure>
+    </div>
+  </div>
+</section>
+</main>
+<script>
+  // dev only: headless Chrome stalls rAF under --virtual-time-budget; ?raf drives it from timers instead
+  if (new URLSearchParams(location.search).has("raf")) window.requestAnimationFrame = function (cb) { return setTimeout(function () { cb(performance.now()); }, 16); };
+  // dev only: ?fail swaps the data URL so the fetch fails
+  // dev only: ?f8wide puts the paired cards in one column (Fig. 8 at the single-card width)
+  if (new URLSearchParams(location.search).has("f8wide")) document.write('<style>.grid-2{grid-template-columns:minmax(0,1fr)!important}</style>');
+  if (new URLSearchParams(location.search).has("fail")) { var _f = window.fetch; window.fetch = function (u) { return String(u).indexOf("ix-realw1") >= 0 ? Promise.resolve(new Response("", { status: 404 })) : _f.apply(this, arguments); }; }
+</script>
+<script src="../../assets/js/viz.js"></script>
+<script src="../../assets/js/quasar-core.js"></script>
+<script src="../../assets/js/ix-realw1.js"></script>
+</body>
+</html>

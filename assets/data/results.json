@@ -1,0 +1,6164 @@
+{
+ "meta": {
+  "title": "QUASAR: Lowering the Loss Floor of Quantization-Aware Training with Loss-Aware Reconstruction",
+  "authors": [
+   "Vincent Counathe",
+   "Ben Athiwaratkun",
+   "Christopher De Sa",
+   "Tianyi Zhang"
+  ],
+  "affiliations": {
+   "Vincent Counathe": [
+    "Cornell University",
+    "Together AI"
+   ],
+   "Ben Athiwaratkun": [
+    "Together AI"
+   ],
+   "Christopher De Sa": [
+    "Cornell University",
+    "Together AI"
+   ],
+   "Tianyi Zhang": [
+    "Together AI"
+   ]
+  },
+  "arxiv": "2608.13966",
+  "arxiv_version": "v2",
+  "code": "https://github.com/vincentcounathe/quasar-qat",
+  "checkpoints": "https://huggingface.co/QUASAR-QAT",
+  "canonical_source": "arXiv v2 LaTeX source; every table below is parsed from it by tools/build_results.py",
+  "source_convention": "Each block carries `source` {file, label, printed}; every row/value inside a block inherits it. `printed` is the number in the v2 PDF. `bold`/`underline` list the columns typeset best/second-best.",
+  "basis_warning": "Table KL (Tables 1, 3, 6) comes from a separate fidelity evaluation; curve JSONs and Table 8 (ablation) use the in-loop held-out KL. They differ (Qwen INT2 Standard QAT: 0.186 in Table 1 vs 0.175 in Table 8). Never mix bases in one comparison."
+ },
+ "healing": {
+  "setting": "QAD (quantization-aware distillation) on Open-PerfectBlend, 4,096 steps, asymmetric weight-only INT g128, forward-KL to the full-precision teacher",
+  "hard_tasks": {
+   "source": {
+    "file": "healing_hard_table.tex",
+    "label": "tab:heald-hard",
+    "printed": "Table 1"
+   },
+   "caption": "Reasoning, coding, and long-context results for Qwen3-4B-Thinking-2507 and Llama-3.1-8B-Instruct at INT2, INT3, and INT4. We report KL and top-1 agreement between quantized checkpoints and the BF16 original, as well as benchmark accuracy.",
+   "models": {
+    "Qwen3-4B-Thinking-2507": {
+     "full_precision": [
+      {
+       "method": "Teacher (BF16)",
+       "values": {
+        "KL": null,
+        "Top-1": null,
+        "HMMT '26": 43.1,
+        "AIME '25": 77.9,
+        "MATH-500": 98.2,
+        "MMLU-Pro": 72.7,
+        "SuperGPQA": 48.1,
+        "LCB v6": 74.6,
+        "LongBench-v2": 44.5,
+        "RULER": 87.9,
+        "Avg.": 68.4
+       }
+      }
+     ],
+     "INT2": [
+      {
+       "method": "RTN",
+       "values": {
+        "KL": 11.166,
+        "Top-1": 0.5,
+        "HMMT '26": 0.0,
+        "AIME '25": 0.0,
+        "MATH-500": 1.9,
+        "MMLU-Pro": 0.0,
+        "SuperGPQA": 10.0,
+        "LCB v6": 0.0,
+        "LongBench-v2": 0.0,
+        "RULER": 0.0,
+        "Avg.": 1.5
+       }
+      },
+      {
+       "method": "GPTQ",
+       "values": {
+        "KL": 1.14,
+        "Top-1": 67.7,
+        "HMMT '26": 0.0,
+        "AIME '25": 0.0,
+        "MATH-500": 2.6,
+        "MMLU-Pro": 3.2,
+        "SuperGPQA": 8.4,
+        "LCB v6": 0.0,
+        "LongBench-v2": 0.0,
+        "RULER": 0.3,
+        "Avg.": 1.8
+       }
+      },
+      {
+       "method": "AWQ",
+       "values": {
+        "KL": 3.016,
+        "Top-1": 37.0,
+        "HMMT '26": 0.0,
+        "AIME '25": 0.0,
+        "MATH-500": 2.4,
+        "MMLU-Pro": 0.0,
+        "SuperGPQA": 5.2,
+        "LCB v6": 0.0,
+        "LongBench-v2": 0.0,
+        "RULER": 0.0,
+        "Avg.": 1.0
+       }
+      },
+      {
+       "method": "Standard QAT",
+       "values": {
+        "KL": 0.186,
+        "Top-1": 89.9,
+        "HMMT '26": 1.0,
+        "AIME '25": 1.7,
+        "MATH-500": 49.5,
+        "MMLU-Pro": 26.6,
+        "SuperGPQA": 17.4,
+        "LCB v6": 8.2,
+        "LongBench-v2": 20.5,
+        "RULER": 39.3,
+        "Avg.": 20.5
+       },
+       "underline": [
+        "HMMT '26",
+        "AIME '25"
+       ]
+      },
+      {
+       "method": "LSQ",
+       "values": {
+        "KL": 0.205,
+        "Top-1": 89.2,
+        "HMMT '26": 0.8,
+        "AIME '25": 0.5,
+        "MATH-500": 47.2,
+        "MMLU-Pro": 26.2,
+        "SuperGPQA": 17.8,
+        "LCB v6": 7.4,
+        "LongBench-v2": 20.7,
+        "RULER": 41.7,
+        "Avg.": 20.3
+       },
+       "underline": [
+        "LongBench-v2"
+       ]
+      },
+      {
+       "method": "Denoising QAT",
+       "values": {
+        "KL": 0.179,
+        "Top-1": 90.1,
+        "HMMT '26": 1.0,
+        "AIME '25": 1.4,
+        "MATH-500": 51.8,
+        "MMLU-Pro": 27.4,
+        "SuperGPQA": 19.0,
+        "LCB v6": 9.2,
+        "LongBench-v2": 18.9,
+        "RULER": 39.4,
+        "Avg.": 21.0
+       },
+       "underline": [
+        "KL",
+        "Top-1",
+        "HMMT '26",
+        "MATH-500",
+        "SuperGPQA"
+       ]
+      },
+      {
+       "method": "BitDistiller",
+       "values": {
+        "KL": 0.209,
+        "Top-1": 89.1,
+        "HMMT '26": 0.6,
+        "AIME '25": 1.1,
+        "MATH-500": 51.4,
+        "MMLU-Pro": 29.3,
+        "SuperGPQA": 16.8,
+        "LCB v6": 9.4,
+        "LongBench-v2": 18.7,
+        "RULER": 44.9,
+        "Avg.": 21.5
+       },
+       "underline": [
+        "MMLU-Pro",
+        "LCB v6",
+        "RULER",
+        "Avg."
+       ]
+      },
+      {
+       "method": "QUASAR",
+       "values": {
+        "KL": 0.126,
+        "Top-1": 92.0,
+        "HMMT '26": 6.2,
+        "AIME '25": 14.4,
+        "MATH-500": 77.4,
+        "MMLU-Pro": 45.8,
+        "SuperGPQA": 25.4,
+        "LCB v6": 23.4,
+        "LongBench-v2": 26.6,
+        "RULER": 59.6,
+        "Avg.": 34.8
+       },
+       "bold": [
+        "KL",
+        "Top-1",
+        "HMMT '26",
+        "AIME '25",
+        "MATH-500",
+        "MMLU-Pro",
+        "SuperGPQA",
+        "LCB v6",
+        "LongBench-v2",
+        "RULER",
+        "Avg."
+       ]
+      }
+     ],
+     "INT3": [
+      {
+       "method": "RTN",
+       "values": {
+        "KL": 0.597,
+        "Top-1": 78.8,
+        "HMMT '26": 0.0,
+        "AIME '25": 0.7,
+        "MATH-500": 13.0,
+        "MMLU-Pro": 16.3,
+        "SuperGPQA": 15.6,
+        "LCB v6": 0.0,
+        "LongBench-v2": 8.7,
+        "RULER": 49.3,
+        "Avg.": 13.0
+       }
+      },
+      {
+       "method": "GPTQ",
+       "values": {
+        "KL": 0.13,
+        "Top-1": 91.5,
+        "HMMT '26": 31.2,
+        "AIME '25": 49.4,
+        "MATH-500": 95.8,
+        "MMLU-Pro": 63.7,
+        "SuperGPQA": 39.5,
+        "LCB v6": 49.4,
+        "LongBench-v2": 31.0,
+        "RULER": 73.3,
+        "Avg.": 54.1
+       },
+       "bold": [
+        "MATH-500"
+       ],
+       "underline": [
+        "HMMT '26"
+       ]
+      },
+      {
+       "method": "AWQ",
+       "values": {
+        "KL": 0.24,
+        "Top-1": 88.1,
+        "HMMT '26": 22.7,
+        "AIME '25": 31.0,
+        "MATH-500": 90.6,
+        "MMLU-Pro": 61.5,
+        "SuperGPQA": 37.0,
+        "LCB v6": 35.7,
+        "LongBench-v2": 30.2,
+        "RULER": 76.0,
+        "Avg.": 48.1
+       }
+      },
+      {
+       "method": "Standard QAT",
+       "values": {
+        "KL": 0.062,
+        "Top-1": 94.2,
+        "HMMT '26": 29.9,
+        "AIME '25": 47.4,
+        "MATH-500": 94.2,
+        "MMLU-Pro": 64.9,
+        "SuperGPQA": 40.0,
+        "LCB v6": 53.3,
+        "LongBench-v2": 29.6,
+        "RULER": 80.8,
+        "Avg.": 55.0
+       }
+      },
+      {
+       "method": "LSQ",
+       "values": {
+        "KL": 0.07,
+        "Top-1": 93.8,
+        "HMMT '26": 28.3,
+        "AIME '25": 45.5,
+        "MATH-500": 93.3,
+        "MMLU-Pro": 64.1,
+        "SuperGPQA": 38.2,
+        "LCB v6": 52.2,
+        "LongBench-v2": 32.8,
+        "RULER": 80.5,
+        "Avg.": 54.4
+       }
+      },
+      {
+       "method": "Denoising QAT",
+       "values": {
+        "KL": 0.06,
+        "Top-1": 94.3,
+        "HMMT '26": 29.3,
+        "AIME '25": 49.3,
+        "MATH-500": 94.7,
+        "MMLU-Pro": 64.5,
+        "SuperGPQA": 39.7,
+        "LCB v6": 52.3,
+        "LongBench-v2": 32.8,
+        "RULER": 79.0,
+        "Avg.": 55.2
+       },
+       "underline": [
+        "KL",
+        "Top-1"
+       ]
+      },
+      {
+       "method": "BitDistiller",
+       "values": {
+        "KL": 0.065,
+        "Top-1": 94.2,
+        "HMMT '26": 29.7,
+        "AIME '25": 52.5,
+        "MATH-500": 95.1,
+        "MMLU-Pro": 65.8,
+        "SuperGPQA": 40.6,
+        "LCB v6": 57.7,
+        "LongBench-v2": 33.0,
+        "RULER": 83.5,
+        "Avg.": 57.3
+       },
+       "underline": [
+        "AIME '25",
+        "MMLU-Pro",
+        "SuperGPQA",
+        "LCB v6",
+        "LongBench-v2",
+        "RULER",
+        "Avg."
+       ]
+      },
+      {
+       "method": "QUASAR",
+       "values": {
+        "KL": 0.054,
+        "Top-1": 94.9,
+        "HMMT '26": 31.7,
+        "AIME '25": 60.5,
+        "MATH-500": 95.2,
+        "MMLU-Pro": 66.7,
+        "SuperGPQA": 41.5,
+        "LCB v6": 60.2,
+        "LongBench-v2": 35.8,
+        "RULER": 84.4,
+        "Avg.": 59.5
+       },
+       "bold": [
+        "KL",
+        "Top-1",
+        "HMMT '26",
+        "AIME '25",
+        "MMLU-Pro",
+        "SuperGPQA",
+        "LCB v6",
+        "LongBench-v2",
+        "RULER",
+        "Avg."
+       ],
+       "underline": [
+        "MATH-500"
+       ]
+      }
+     ],
+     "INT4": [
+      {
+       "method": "RTN",
+       "values": {
+        "KL": 0.108,
+        "Top-1": 92.2,
+        "HMMT '26": 35.7,
+        "AIME '25": 62.1,
+        "MATH-500": 96.8,
+        "MMLU-Pro": 69.7,
+        "SuperGPQA": 44.4,
+        "LCB v6": 65.2,
+        "LongBench-v2": 38.8,
+        "RULER": 83.3,
+        "Avg.": 62.0
+       }
+      },
+      {
+       "method": "GPTQ",
+       "values": {
+        "KL": 0.027,
+        "Top-1": 96.2,
+        "HMMT '26": 38.8,
+        "AIME '25": 74.8,
+        "MATH-500": 97.8,
+        "MMLU-Pro": 71.4,
+        "SuperGPQA": 46.5,
+        "LCB v6": 70.6,
+        "LongBench-v2": 38.2,
+        "RULER": 87.4,
+        "Avg.": 65.7
+       },
+       "bold": [
+        "AIME '25",
+        "MATH-500",
+        "SuperGPQA"
+       ],
+       "underline": [
+        "HMMT '26",
+        "RULER"
+       ]
+      },
+      {
+       "method": "AWQ",
+       "values": {
+        "KL": 0.05,
+        "Top-1": 94.7,
+        "HMMT '26": 36.6,
+        "AIME '25": 70.6,
+        "MATH-500": 97.6,
+        "MMLU-Pro": 71.6,
+        "SuperGPQA": 45.7,
+        "LCB v6": 70.8,
+        "LongBench-v2": 39.0,
+        "RULER": 86.8,
+        "Avg.": 64.8
+       },
+       "underline": [
+        "MMLU-Pro"
+       ]
+      },
+      {
+       "method": "Standard QAT",
+       "values": {
+        "KL": 0.019,
+        "Top-1": 96.9,
+        "HMMT '26": 36.8,
+        "AIME '25": 72.1,
+        "MATH-500": 97.7,
+        "MMLU-Pro": 71.4,
+        "SuperGPQA": 46.5,
+        "LCB v6": 70.9,
+        "LongBench-v2": 39.0,
+        "RULER": 87.1,
+        "Avg.": 65.2
+       },
+       "bold": [
+        "SuperGPQA"
+       ],
+       "underline": [
+        "Top-1",
+        "MATH-500"
+       ]
+      },
+      {
+       "method": "LSQ",
+       "values": {
+        "KL": 0.024,
+        "Top-1": 96.4,
+        "HMMT '26": 39.3,
+        "AIME '25": 68.5,
+        "MATH-500": 97.5,
+        "MMLU-Pro": 70.8,
+        "SuperGPQA": 45.6,
+        "LCB v6": 69.3,
+        "LongBench-v2": 36.4,
+        "RULER": 87.3,
+        "Avg.": 64.3
+       },
+       "bold": [
+        "HMMT '26"
+       ]
+      },
+      {
+       "method": "Denoising QAT",
+       "values": {
+        "KL": 0.018,
+        "Top-1": 96.9,
+        "HMMT '26": 38.8,
+        "AIME '25": 71.5,
+        "MATH-500": 97.2,
+        "MMLU-Pro": 70.9,
+        "SuperGPQA": 46.4,
+        "LCB v6": 71.6,
+        "LongBench-v2": 42.9,
+        "RULER": 86.9,
+        "Avg.": 65.8
+       },
+       "bold": [
+        "LongBench-v2"
+       ],
+       "underline": [
+        "KL",
+        "Top-1",
+        "HMMT '26",
+        "SuperGPQA",
+        "LCB v6",
+        "Avg."
+       ]
+      },
+      {
+       "method": "BitDistiller",
+       "values": {
+        "KL": 0.018,
+        "Top-1": 96.9,
+        "HMMT '26": 38.5,
+        "AIME '25": 73.9,
+        "MATH-500": 97.3,
+        "MMLU-Pro": 71.4,
+        "SuperGPQA": 46.5,
+        "LCB v6": 71.1,
+        "LongBench-v2": 40.4,
+        "RULER": 86.8,
+        "Avg.": 65.7
+       },
+       "bold": [
+        "SuperGPQA"
+       ],
+       "underline": [
+        "KL",
+        "Top-1",
+        "AIME '25"
+       ]
+      },
+      {
+       "method": "QUASAR",
+       "values": {
+        "KL": 0.016,
+        "Top-1": 97.1,
+        "HMMT '26": 38.5,
+        "AIME '25": 73.8,
+        "MATH-500": 97.5,
+        "MMLU-Pro": 71.7,
+        "SuperGPQA": 46.2,
+        "LCB v6": 72.2,
+        "LongBench-v2": 41.0,
+        "RULER": 88.0,
+        "Avg.": 66.1
+       },
+       "bold": [
+        "KL",
+        "Top-1",
+        "MMLU-Pro",
+        "LCB v6",
+        "RULER",
+        "Avg."
+       ],
+       "underline": [
+        "LongBench-v2"
+       ]
+      }
+     ]
+    },
+    "Llama-3.1-8B-Instruct": {
+     "full_precision": [
+      {
+       "method": "Teacher (BF16)",
+       "values": {
+        "KL": null,
+        "Top-1": null,
+        "MATH-500": 49.6,
+        "MMLU-Pro": 42.3,
+        "SuperGPQA": 22.4,
+        "LCB v6": 17.0,
+        "LongBench-v2": 30.0,
+        "RULER": 89.6,
+        "Avg.": 41.8
+       }
+      }
+     ],
+     "INT2": [
+      {
+       "method": "RTN",
+       "values": {
+        "KL": 10.81,
+        "Top-1": 0.5,
+        "MATH-500": 0.0,
+        "MMLU-Pro": 0.0,
+        "SuperGPQA": 10.2,
+        "LCB v6": 0.0,
+        "LongBench-v2": 0.0,
+        "RULER": 0.0,
+        "Avg.": 1.7
+       }
+      },
+      {
+       "method": "GPTQ",
+       "values": {
+        "KL": 2.38,
+        "Top-1": 51.8,
+        "MATH-500": 2.9,
+        "MMLU-Pro": 1.8,
+        "SuperGPQA": 8.7,
+        "LCB v6": 0.0,
+        "LongBench-v2": 0.0,
+        "RULER": 0.1,
+        "Avg.": 2.3
+       }
+      },
+      {
+       "method": "AWQ",
+       "values": {
+        "KL": 6.769,
+        "Top-1": 12.9,
+        "MATH-500": 1.6,
+        "MMLU-Pro": 0.0,
+        "SuperGPQA": 10.7,
+        "LCB v6": 0.0,
+        "LongBench-v2": 0.0,
+        "RULER": 0.0,
+        "Avg.": 2.0
+       }
+      },
+      {
+       "method": "Standard QAT",
+       "values": {
+        "KL": 0.163,
+        "Top-1": 90.1,
+        "MATH-500": 21.6,
+        "MMLU-Pro": 16.8,
+        "SuperGPQA": 11.8,
+        "LCB v6": 4.0,
+        "LongBench-v2": 15.1,
+        "RULER": 5.5,
+        "Avg.": 12.5
+       },
+       "underline": [
+        "SuperGPQA"
+       ]
+      },
+      {
+       "method": "LSQ",
+       "values": {
+        "KL": 0.172,
+        "Top-1": 89.6,
+        "MATH-500": 19.9,
+        "MMLU-Pro": 15.7,
+        "SuperGPQA": 11.6,
+        "LCB v6": 2.3,
+        "LongBench-v2": 15.3,
+        "RULER": 52.9,
+        "Avg.": 19.6
+       }
+      },
+      {
+       "method": "Denoising QAT",
+       "values": {
+        "KL": 0.165,
+        "Top-1": 90.1,
+        "MATH-500": 20.8,
+        "MMLU-Pro": 16.5,
+        "SuperGPQA": 11.0,
+        "LCB v6": 3.6,
+        "LongBench-v2": 8.5,
+        "RULER": 0.0,
+        "Avg.": 10.1
+       }
+      },
+      {
+       "method": "BitDistiller",
+       "values": {
+        "KL": 0.151,
+        "Top-1": 90.2,
+        "MATH-500": 21.7,
+        "MMLU-Pro": 19.0,
+        "SuperGPQA": 11.8,
+        "LCB v6": 5.5,
+        "LongBench-v2": 20.5,
+        "RULER": 63.5,
+        "Avg.": 23.7
+       },
+       "bold": [
+        "LongBench-v2"
+       ],
+       "underline": [
+        "KL",
+        "Top-1",
+        "MATH-500",
+        "MMLU-Pro",
+        "SuperGPQA",
+        "LCB v6",
+        "RULER",
+        "Avg."
+       ]
+      },
+      {
+       "method": "QUASAR",
+       "values": {
+        "KL": 0.105,
+        "Top-1": 92.0,
+        "MATH-500": 30.0,
+        "MMLU-Pro": 22.6,
+        "SuperGPQA": 13.7,
+        "LCB v6": 7.0,
+        "LongBench-v2": 15.9,
+        "RULER": 66.4,
+        "Avg.": 25.9
+       },
+       "bold": [
+        "KL",
+        "Top-1",
+        "MATH-500",
+        "MMLU-Pro",
+        "SuperGPQA",
+        "LCB v6",
+        "RULER",
+        "Avg."
+       ],
+       "underline": [
+        "LongBench-v2"
+       ]
+      }
+     ],
+     "INT3": [
+      {
+       "method": "RTN",
+       "values": {
+        "KL": 0.276,
+        "Top-1": 85.6,
+        "MATH-500": 8.2,
+        "MMLU-Pro": 17.2,
+        "SuperGPQA": 12.5,
+        "LCB v6": 0.7,
+        "LongBench-v2": 21.1,
+        "RULER": 49.0,
+        "Avg.": 18.1
+       }
+      },
+      {
+       "method": "GPTQ",
+       "values": {
+        "KL": 0.076,
+        "Top-1": 92.8,
+        "MATH-500": 38.6,
+        "MMLU-Pro": 31.9,
+        "SuperGPQA": 18.4,
+        "LCB v6": 10.4,
+        "LongBench-v2": 27.6,
+        "RULER": 80.9,
+        "Avg.": 34.6
+       }
+      },
+      {
+       "method": "AWQ",
+       "values": {
+        "KL": 0.197,
+        "Top-1": 88.0,
+        "MATH-500": 16.2,
+        "MMLU-Pro": 15.3,
+        "SuperGPQA": 13.9,
+        "LCB v6": 2.4,
+        "LongBench-v2": 22.7,
+        "RULER": 69.0,
+        "Avg.": 23.3
+       }
+      },
+      {
+       "method": "Standard QAT",
+       "values": {
+        "KL": 0.046,
+        "Top-1": 94.7,
+        "MATH-500": 39.5,
+        "MMLU-Pro": 34.8,
+        "SuperGPQA": 18.6,
+        "LCB v6": 12.7,
+        "LongBench-v2": 30.2,
+        "RULER": 81.7,
+        "Avg.": 36.3
+       },
+       "underline": [
+        "LongBench-v2"
+       ]
+      },
+      {
+       "method": "LSQ",
+       "values": {
+        "KL": 0.052,
+        "Top-1": 94.2,
+        "MATH-500": 39.3,
+        "MMLU-Pro": 35.0,
+        "SuperGPQA": 17.1,
+        "LCB v6": 13.7,
+        "LongBench-v2": 27.2,
+        "RULER": 86.1,
+        "Avg.": 36.4
+       },
+       "bold": [
+        "RULER"
+       ],
+       "underline": [
+        "LCB v6"
+       ]
+      },
+      {
+       "method": "Denoising QAT",
+       "values": {
+        "KL": 0.046,
+        "Top-1": 94.7,
+        "MATH-500": 41.2,
+        "MMLU-Pro": 34.6,
+        "SuperGPQA": 18.2,
+        "LCB v6": 13.0,
+        "LongBench-v2": 29.2,
+        "RULER": 80.3,
+        "Avg.": 36.1
+       }
+      },
+      {
+       "method": "BitDistiller",
+       "values": {
+        "KL": 0.041,
+        "Top-1": 94.8,
+        "MATH-500": 42.5,
+        "MMLU-Pro": 35.9,
+        "SuperGPQA": 19.3,
+        "LCB v6": 13.1,
+        "LongBench-v2": 31.2,
+        "RULER": 84.4,
+        "Avg.": 37.7
+       },
+       "bold": [
+        "LongBench-v2"
+       ],
+       "underline": [
+        "KL",
+        "Top-1",
+        "MATH-500",
+        "MMLU-Pro",
+        "SuperGPQA",
+        "Avg."
+       ]
+      },
+      {
+       "method": "QUASAR",
+       "values": {
+        "KL": 0.036,
+        "Top-1": 95.2,
+        "MATH-500": 43.4,
+        "MMLU-Pro": 36.4,
+        "SuperGPQA": 19.7,
+        "LCB v6": 16.2,
+        "LongBench-v2": 26.0,
+        "RULER": 85.8,
+        "Avg.": 37.9
+       },
+       "bold": [
+        "KL",
+        "Top-1",
+        "MATH-500",
+        "MMLU-Pro",
+        "SuperGPQA",
+        "LCB v6",
+        "Avg."
+       ],
+       "underline": [
+        "RULER"
+       ]
+      }
+     ],
+     "INT4": [
+      {
+       "method": "RTN",
+       "values": {
+        "KL": 0.044,
+        "Top-1": 94.4,
+        "MATH-500": 44.5,
+        "MMLU-Pro": 35.5,
+        "SuperGPQA": 20.1,
+        "LCB v6": 14.2,
+        "LongBench-v2": 29.6,
+        "RULER": 89.0,
+        "Avg.": 38.8
+       },
+       "bold": [
+        "RULER"
+       ]
+      },
+      {
+       "method": "GPTQ",
+       "values": {
+        "KL": 0.015,
+        "Top-1": 96.8,
+        "MATH-500": 47.9,
+        "MMLU-Pro": 40.0,
+        "SuperGPQA": 20.6,
+        "LCB v6": 16.5,
+        "LongBench-v2": 31.2,
+        "RULER": 88.5,
+        "Avg.": 40.8
+       },
+       "bold": [
+        "LCB v6",
+        "LongBench-v2"
+       ]
+      },
+      {
+       "method": "AWQ",
+       "values": {
+        "KL": 0.032,
+        "Top-1": 95.2,
+        "MATH-500": 44.8,
+        "MMLU-Pro": 39.8,
+        "SuperGPQA": 21.3,
+        "LCB v6": 13.2,
+        "LongBench-v2": 30.8,
+        "RULER": 88.1,
+        "Avg.": 39.7
+       },
+       "underline": [
+        "SuperGPQA"
+       ]
+      },
+      {
+       "method": "Standard QAT",
+       "values": {
+        "KL": 0.014,
+        "Top-1": 97.0,
+        "MATH-500": 47.7,
+        "MMLU-Pro": 42.1,
+        "SuperGPQA": 21.1,
+        "LCB v6": 15.8,
+        "LongBench-v2": 31.0,
+        "RULER": 89.0,
+        "Avg.": 41.1
+       },
+       "bold": [
+        "RULER",
+        "Avg."
+       ],
+       "underline": [
+        "Top-1",
+        "MMLU-Pro",
+        "LongBench-v2"
+       ]
+      },
+      {
+       "method": "LSQ",
+       "values": {
+        "KL": 0.016,
+        "Top-1": 96.8,
+        "MATH-500": 48.3,
+        "MMLU-Pro": 41.9,
+        "SuperGPQA": 21.2,
+        "LCB v6": 15.5,
+        "LongBench-v2": 29.8,
+        "RULER": 87.5,
+        "Avg.": 40.7
+       },
+       "underline": [
+        "MATH-500"
+       ]
+      },
+      {
+       "method": "Denoising QAT",
+       "values": {
+        "KL": 0.014,
+        "Top-1": 97.0,
+        "MATH-500": 48.1,
+        "MMLU-Pro": 42.1,
+        "SuperGPQA": 21.7,
+        "LCB v6": 14.3,
+        "LongBench-v2": 31.2,
+        "RULER": 88.9,
+        "Avg.": 41.1
+       },
+       "bold": [
+        "SuperGPQA",
+        "LongBench-v2",
+        "Avg."
+       ],
+       "underline": [
+        "Top-1",
+        "MMLU-Pro",
+        "RULER"
+       ]
+      },
+      {
+       "method": "BitDistiller",
+       "values": {
+        "KL": 0.013,
+        "Top-1": 97.0,
+        "MATH-500": 48.4,
+        "MMLU-Pro": 41.0,
+        "SuperGPQA": 21.0,
+        "LCB v6": 15.7,
+        "LongBench-v2": 31.0,
+        "RULER": 88.9,
+        "Avg.": 41.0
+       },
+       "bold": [
+        "MATH-500"
+       ],
+       "underline": [
+        "KL",
+        "Top-1",
+        "LongBench-v2",
+        "RULER",
+        "Avg."
+       ]
+      },
+      {
+       "method": "QUASAR",
+       "values": {
+        "KL": 0.012,
+        "Top-1": 97.3,
+        "MATH-500": 47.6,
+        "MMLU-Pro": 42.2,
+        "SuperGPQA": 20.8,
+        "LCB v6": 16.4,
+        "LongBench-v2": 30.0,
+        "RULER": 89.0,
+        "Avg.": 41.0
+       },
+       "bold": [
+        "KL",
+        "Top-1",
+        "MMLU-Pro",
+        "RULER"
+       ],
+       "underline": [
+        "LCB v6",
+        "Avg."
+       ]
+      }
+     ]
+    }
+   },
+   "columns": {
+    "Qwen3-4B-Thinking-2507": [
+     "KL",
+     "Top-1",
+     "HMMT '26",
+     "AIME '25",
+     "MATH-500",
+     "MMLU-Pro",
+     "SuperGPQA",
+     "LCB v6",
+     "LongBench-v2",
+     "RULER",
+     "Avg."
+    ],
+    "Llama-3.1-8B-Instruct": [
+     "KL",
+     "Top-1",
+     "MATH-500",
+     "MMLU-Pro",
+     "SuperGPQA",
+     "LCB v6",
+     "LongBench-v2",
+     "RULER",
+     "Avg."
+    ]
+   },
+   "notes": "bold = best, underline = second best within each bit-width block (as typeset)"
+  },
+  "standard_tasks": {
+   "source": {
+    "file": "healing_tables.tex",
+    "label": "tab:heald-summary",
+    "printed": "Table 6"
+   },
+   "caption": "QUASAR gives the highest fidelity in all six model–bit-width settings. Held-out forward KL, top-1 agreement, and accuracy on eight benchmarks for QAD of Qwen3-4B-Thinking-2507 and Llama-3.1-8B-Instruct.",
+   "models": {
+    "Qwen3-4B-Thinking-2507": {
+     "full_precision": [
+      {
+       "method": "Teacher (FP16)",
+       "values": {
+        "KL": null,
+        "Top-1": null,
+        "GSM8K": 87.0,
+        "MMLU": 68.7,
+        "ARC-C": 53.1,
+        "ARC-E": 76.7,
+        "HellaSwag": 65.7,
+        "WinoGrande": 66.1,
+        "TruthfulQA": 57.5,
+        "IFEval": 54.3,
+        "Avg.": 66.1
+       }
+      }
+     ],
+     "INT2": [
+      {
+       "method": "RTN",
+       "values": {
+        "KL": 11.166,
+        "Top-1": 0.5,
+        "GSM8K": 0.0,
+        "MMLU": 25.4,
+        "ARC-C": 25.6,
+        "ARC-E": 25.9,
+        "HellaSwag": 26.0,
+        "WinoGrande": 52.0,
+        "TruthfulQA": 46.8,
+        "IFEval": 8.3,
+        "Avg.": 26.3
+       }
+      },
+      {
+       "method": "GPTQ",
+       "values": {
+        "KL": 1.14,
+        "Top-1": 67.7,
+        "GSM8K": 0.2,
+        "MMLU": 23.4,
+        "ARC-C": 25.1,
+        "ARC-E": 30.0,
+        "HellaSwag": 30.1,
+        "WinoGrande": 49.3,
+        "TruthfulQA": 52.9,
+        "IFEval": 8.9,
+        "Avg.": 27.5
+       },
+       "bold": [
+        "TruthfulQA"
+       ]
+      },
+      {
+       "method": "AWQ",
+       "values": {
+        "KL": 3.016,
+        "Top-1": 37.0,
+        "GSM8K": 0.0,
+        "MMLU": 23.4,
+        "ARC-C": 23.2,
+        "ARC-E": 31.6,
+        "HellaSwag": 29.1,
+        "WinoGrande": 51.1,
+        "TruthfulQA": 52.8,
+        "IFEval": 9.6,
+        "Avg.": 27.6
+       },
+       "underline": [
+        "TruthfulQA"
+       ]
+      },
+      {
+       "method": "Standard QAT",
+       "values": {
+        "KL": 0.186,
+        "Top-1": 89.9,
+        "GSM8K": 47.4,
+        "MMLU": 34.5,
+        "ARC-C": 31.2,
+        "ARC-E": 44.8,
+        "HellaSwag": 46.9,
+        "WinoGrande": 54.5,
+        "TruthfulQA": 51.1,
+        "IFEval": 33.5,
+        "Avg.": 43.0
+       }
+      },
+      {
+       "method": "LSQ",
+       "values": {
+        "KL": 0.205,
+        "Top-1": 89.2,
+        "GSM8K": 42.6,
+        "MMLU": 34.6,
+        "ARC-C": 30.6,
+        "ARC-E": 44.9,
+        "HellaSwag": 47.6,
+        "WinoGrande": 55.2,
+        "TruthfulQA": 47.2,
+        "IFEval": 35.1,
+        "Avg.": 42.2
+       }
+      },
+      {
+       "method": "Denoising QAT",
+       "values": {
+        "KL": 0.179,
+        "Top-1": 90.1,
+        "GSM8K": 45.6,
+        "MMLU": 36.0,
+        "ARC-C": 30.1,
+        "ARC-E": 47.9,
+        "HellaSwag": 46.7,
+        "WinoGrande": 56.1,
+        "TruthfulQA": 49.9,
+        "IFEval": 34.9,
+        "Avg.": 43.4
+       },
+       "underline": [
+        "KL",
+        "Top-1"
+       ]
+      },
+      {
+       "method": "BitDistiller",
+       "values": {
+        "KL": 0.209,
+        "Top-1": 89.1,
+        "GSM8K": 49.0,
+        "MMLU": 43.2,
+        "ARC-C": 38.0,
+        "ARC-E": 60.1,
+        "HellaSwag": 52.6,
+        "WinoGrande": 57.9,
+        "TruthfulQA": 52.6,
+        "IFEval": 37.7,
+        "Avg.": 48.9
+       },
+       "bold": [
+        "ARC-E"
+       ],
+       "underline": [
+        "GSM8K",
+        "MMLU",
+        "ARC-C",
+        "HellaSwag",
+        "WinoGrande",
+        "IFEval",
+        "Avg."
+       ]
+      },
+      {
+       "method": "QUASAR",
+       "values": {
+        "KL": 0.126,
+        "Top-1": 92.0,
+        "GSM8K": 68.8,
+        "MMLU": 48.9,
+        "ARC-C": 38.8,
+        "ARC-E": 55.9,
+        "HellaSwag": 56.4,
+        "WinoGrande": 59.2,
+        "TruthfulQA": 50.5,
+        "IFEval": 47.5,
+        "Avg.": 53.2
+       },
+       "bold": [
+        "KL",
+        "Top-1",
+        "GSM8K",
+        "MMLU",
+        "ARC-C",
+        "HellaSwag",
+        "WinoGrande",
+        "IFEval",
+        "Avg."
+       ],
+       "underline": [
+        "ARC-E"
+       ]
+      }
+     ],
+     "INT3": [
+      {
+       "method": "RTN",
+       "values": {
+        "KL": 0.597,
+        "Top-1": 78.8,
+        "GSM8K": 20.5,
+        "MMLU": 53.6,
+        "ARC-C": 39.4,
+        "ARC-E": 56.1,
+        "HellaSwag": 54.1,
+        "WinoGrande": 58.1,
+        "TruthfulQA": 51.4,
+        "IFEval": 18.9,
+        "Avg.": 44.0
+       }
+      },
+      {
+       "method": "GPTQ",
+       "values": {
+        "KL": 0.13,
+        "Top-1": 91.5,
+        "GSM8K": 77.3,
+        "MMLU": 61.0,
+        "ARC-C": 48.0,
+        "ARC-E": 75.5,
+        "HellaSwag": 61.0,
+        "WinoGrande": 61.8,
+        "TruthfulQA": 54.0,
+        "IFEval": 49.2,
+        "Avg.": 61.0
+       },
+       "underline": [
+        "ARC-E"
+       ]
+      },
+      {
+       "method": "AWQ",
+       "values": {
+        "KL": 0.24,
+        "Top-1": 88.1,
+        "GSM8K": 73.2,
+        "MMLU": 60.1,
+        "ARC-C": 46.4,
+        "ARC-E": 72.3,
+        "HellaSwag": 60.7,
+        "WinoGrande": 62.7,
+        "TruthfulQA": 49.2,
+        "IFEval": 41.8,
+        "Avg.": 58.3
+       }
+      },
+      {
+       "method": "Standard QAT",
+       "values": {
+        "KL": 0.062,
+        "Top-1": 94.2,
+        "GSM8K": 78.5,
+        "MMLU": 62.0,
+        "ARC-C": 46.8,
+        "ARC-E": 74.1,
+        "HellaSwag": 61.9,
+        "WinoGrande": 64.4,
+        "TruthfulQA": 56.1,
+        "IFEval": 53.2,
+        "Avg.": 62.1
+       },
+       "underline": [
+        "TruthfulQA",
+        "IFEval"
+       ]
+      },
+      {
+       "method": "LSQ",
+       "values": {
+        "KL": 0.07,
+        "Top-1": 93.8,
+        "GSM8K": 83.0,
+        "MMLU": 62.3,
+        "ARC-C": 49.4,
+        "ARC-E": 75.8,
+        "HellaSwag": 62.7,
+        "WinoGrande": 65.6,
+        "TruthfulQA": 55.4,
+        "IFEval": 52.9,
+        "Avg.": 63.4
+       },
+       "bold": [
+        "GSM8K",
+        "ARC-C",
+        "ARC-E",
+        "WinoGrande",
+        "Avg."
+       ]
+      },
+      {
+       "method": "Denoising QAT",
+       "values": {
+        "KL": 0.06,
+        "Top-1": 94.3,
+        "GSM8K": 80.4,
+        "MMLU": 62.7,
+        "ARC-C": 46.2,
+        "ARC-E": 73.5,
+        "HellaSwag": 61.6,
+        "WinoGrande": 64.2,
+        "TruthfulQA": 56.1,
+        "IFEval": 51.0,
+        "Avg.": 62.0
+       },
+       "underline": [
+        "KL",
+        "Top-1",
+        "TruthfulQA"
+       ]
+      },
+      {
+       "method": "BitDistiller",
+       "values": {
+        "KL": 0.065,
+        "Top-1": 94.2,
+        "GSM8K": 81.0,
+        "MMLU": 63.7,
+        "ARC-C": 47.0,
+        "ARC-E": 69.0,
+        "HellaSwag": 63.0,
+        "WinoGrande": 63.5,
+        "TruthfulQA": 56.3,
+        "IFEval": 53.4,
+        "Avg.": 62.1
+       },
+       "bold": [
+        "TruthfulQA",
+        "IFEval"
+       ],
+       "underline": [
+        "MMLU",
+        "HellaSwag"
+       ]
+      },
+      {
+       "method": "QUASAR",
+       "values": {
+        "KL": 0.054,
+        "Top-1": 94.9,
+        "GSM8K": 81.7,
+        "MMLU": 64.5,
+        "ARC-C": 48.3,
+        "ARC-E": 72.9,
+        "HellaSwag": 63.2,
+        "WinoGrande": 64.7,
+        "TruthfulQA": 55.5,
+        "IFEval": 50.6,
+        "Avg.": 62.7
+       },
+       "bold": [
+        "KL",
+        "Top-1",
+        "MMLU",
+        "HellaSwag"
+       ],
+       "underline": [
+        "GSM8K",
+        "ARC-C",
+        "WinoGrande",
+        "Avg."
+       ]
+      }
+     ],
+     "INT4": [
+      {
+       "method": "RTN",
+       "values": {
+        "KL": 0.108,
+        "Top-1": 92.2,
+        "GSM8K": 80.2,
+        "MMLU": 66.1,
+        "ARC-C": 48.8,
+        "ARC-E": 69.7,
+        "HellaSwag": 63.5,
+        "WinoGrande": 65.4,
+        "TruthfulQA": 58.4,
+        "IFEval": 54.2,
+        "Avg.": 63.3
+       },
+       "bold": [
+        "TruthfulQA"
+       ]
+      },
+      {
+       "method": "GPTQ",
+       "values": {
+        "KL": 0.027,
+        "Top-1": 96.2,
+        "GSM8K": 84.9,
+        "MMLU": 67.1,
+        "ARC-C": 51.4,
+        "ARC-E": 75.0,
+        "HellaSwag": 64.7,
+        "WinoGrande": 65.4,
+        "TruthfulQA": 56.5,
+        "IFEval": 51.4,
+        "Avg.": 64.6
+       },
+       "underline": [
+        "ARC-E"
+       ]
+      },
+      {
+       "method": "AWQ",
+       "values": {
+        "KL": 0.05,
+        "Top-1": 94.7,
+        "GSM8K": 84.6,
+        "MMLU": 67.6,
+        "ARC-C": 51.5,
+        "ARC-E": 74.9,
+        "HellaSwag": 65.2,
+        "WinoGrande": 66.6,
+        "TruthfulQA": 56.7,
+        "IFEval": 56.6,
+        "Avg.": 65.5
+       },
+       "bold": [
+        "HellaSwag",
+        "WinoGrande"
+       ],
+       "underline": [
+        "ARC-C",
+        "IFEval",
+        "Avg."
+       ]
+      },
+      {
+       "method": "Standard QAT",
+       "values": {
+        "KL": 0.019,
+        "Top-1": 96.9,
+        "GSM8K": 84.9,
+        "MMLU": 67.0,
+        "ARC-C": 49.7,
+        "ARC-E": 73.5,
+        "HellaSwag": 65.1,
+        "WinoGrande": 65.2,
+        "TruthfulQA": 56.7,
+        "IFEval": 54.3,
+        "Avg.": 64.6
+       },
+       "underline": [
+        "Top-1",
+        "HellaSwag"
+       ]
+      },
+      {
+       "method": "LSQ",
+       "values": {
+        "KL": 0.024,
+        "Top-1": 96.4,
+        "GSM8K": 86.0,
+        "MMLU": 66.8,
+        "ARC-C": 50.6,
+        "ARC-E": 75.0,
+        "HellaSwag": 65.2,
+        "WinoGrande": 65.6,
+        "TruthfulQA": 57.1,
+        "IFEval": 56.4,
+        "Avg.": 65.3
+       },
+       "bold": [
+        "HellaSwag"
+       ],
+       "underline": [
+        "GSM8K",
+        "ARC-E"
+       ]
+      },
+      {
+       "method": "Denoising QAT",
+       "values": {
+        "KL": 0.018,
+        "Top-1": 96.9,
+        "GSM8K": 85.0,
+        "MMLU": 67.1,
+        "ARC-C": 49.2,
+        "ARC-E": 72.9,
+        "HellaSwag": 64.7,
+        "WinoGrande": 65.7,
+        "TruthfulQA": 57.3,
+        "IFEval": 56.9,
+        "Avg.": 64.9
+       },
+       "bold": [
+        "IFEval"
+       ],
+       "underline": [
+        "KL",
+        "Top-1"
+       ]
+      },
+      {
+       "method": "BitDistiller",
+       "values": {
+        "KL": 0.018,
+        "Top-1": 96.9,
+        "GSM8K": 84.8,
+        "MMLU": 67.7,
+        "ARC-C": 52.6,
+        "ARC-E": 76.0,
+        "HellaSwag": 64.8,
+        "WinoGrande": 65.9,
+        "TruthfulQA": 57.3,
+        "IFEval": 54.3,
+        "Avg.": 65.4
+       },
+       "bold": [
+        "ARC-C",
+        "ARC-E"
+       ],
+       "underline": [
+        "KL",
+        "Top-1",
+        "MMLU",
+        "WinoGrande"
+       ]
+      },
+      {
+       "method": "QUASAR",
+       "values": {
+        "KL": 0.016,
+        "Top-1": 97.1,
+        "GSM8K": 86.4,
+        "MMLU": 68.0,
+        "ARC-C": 50.6,
+        "ARC-E": 76.0,
+        "HellaSwag": 65.1,
+        "WinoGrande": 65.2,
+        "TruthfulQA": 57.7,
+        "IFEval": 55.8,
+        "Avg.": 65.6
+       },
+       "bold": [
+        "KL",
+        "Top-1",
+        "GSM8K",
+        "MMLU",
+        "ARC-E",
+        "Avg."
+       ],
+       "underline": [
+        "HellaSwag",
+        "TruthfulQA"
+       ]
+      }
+     ]
+    },
+    "Llama-3.1-8B-Instruct": {
+     "full_precision": [
+      {
+       "method": "Teacher (FP16)",
+       "values": {
+        "KL": null,
+        "Top-1": null,
+        "GSM8K": 70.1,
+        "MMLU": 68.3,
+        "ARC-C": 55.6,
+        "ARC-E": 79.9,
+        "HellaSwag": 79.5,
+        "WinoGrande": 73.6,
+        "TruthfulQA": 54.5,
+        "IFEval": 73.9,
+        "Avg.": 69.4
+       }
+      }
+     ],
+     "INT2": [
+      {
+       "method": "RTN",
+       "values": {
+        "KL": 10.81,
+        "Top-1": 0.5,
+        "GSM8K": 0.0,
+        "MMLU": 25.5,
+        "ARC-C": 26.2,
+        "ARC-E": 26.1,
+        "HellaSwag": 26.1,
+        "WinoGrande": 51.8,
+        "TruthfulQA": 47.6,
+        "IFEval": 11.8,
+        "Avg.": 26.9
+       }
+      },
+      {
+       "method": "GPTQ",
+       "values": {
+        "KL": 2.38,
+        "Top-1": 51.8,
+        "GSM8K": 0.0,
+        "MMLU": 24.9,
+        "ARC-C": 23.3,
+        "ARC-E": 28.9,
+        "HellaSwag": 30.0,
+        "WinoGrande": 48.0,
+        "TruthfulQA": 49.0,
+        "IFEval": 9.1,
+        "Avg.": 26.7
+       }
+      },
+      {
+       "method": "AWQ",
+       "values": {
+        "KL": 6.769,
+        "Top-1": 12.9,
+        "GSM8K": 0.0,
+        "MMLU": 23.6,
+        "ARC-C": 23.3,
+        "ARC-E": 25.9,
+        "HellaSwag": 27.2,
+        "WinoGrande": 48.2,
+        "TruthfulQA": 48.8,
+        "IFEval": 7.9,
+        "Avg.": 25.6
+       }
+      },
+      {
+       "method": "Standard QAT",
+       "values": {
+        "KL": 0.163,
+        "Top-1": 90.1,
+        "GSM8K": 1.8,
+        "MMLU": 23.4,
+        "ARC-C": 22.9,
+        "ARC-E": 30.9,
+        "HellaSwag": 34.8,
+        "WinoGrande": 49.3,
+        "TruthfulQA": 46.8,
+        "IFEval": 44.4,
+        "Avg.": 31.8
+       }
+      },
+      {
+       "method": "LSQ",
+       "values": {
+        "KL": 0.172,
+        "Top-1": 89.6,
+        "GSM8K": 42.2,
+        "MMLU": 39.7,
+        "ARC-C": 32.8,
+        "ARC-E": 52.8,
+        "HellaSwag": 55.7,
+        "WinoGrande": 53.5,
+        "TruthfulQA": 47.4,
+        "IFEval": 42.1,
+        "Avg.": 45.8
+       }
+      },
+      {
+       "method": "Denoising QAT",
+       "values": {
+        "KL": 0.165,
+        "Top-1": 90.1,
+        "GSM8K": 0.0,
+        "MMLU": 24.6,
+        "ARC-C": 26.2,
+        "ARC-E": 25.6,
+        "HellaSwag": 26.9,
+        "WinoGrande": 50.0,
+        "TruthfulQA": 49.1,
+        "IFEval": 40.9,
+        "Avg.": 30.4
+       },
+       "underline": [
+        "TruthfulQA"
+       ]
+      },
+      {
+       "method": "BitDistiller",
+       "values": {
+        "KL": 0.151,
+        "Top-1": 90.2,
+        "GSM8K": 53.1,
+        "MMLU": 49.3,
+        "ARC-C": 43.5,
+        "ARC-E": 69.9,
+        "HellaSwag": 66.6,
+        "WinoGrande": 66.3,
+        "TruthfulQA": 47.7,
+        "IFEval": 51.8,
+        "Avg.": 56.0
+       },
+       "underline": [
+        "KL",
+        "Top-1",
+        "GSM8K",
+        "MMLU",
+        "ARC-C",
+        "ARC-E",
+        "HellaSwag",
+        "WinoGrande",
+        "IFEval",
+        "Avg."
+       ]
+      },
+      {
+       "method": "QUASAR",
+       "values": {
+        "KL": 0.105,
+        "Top-1": 92.0,
+        "GSM8K": 66.4,
+        "MMLU": 52.5,
+        "ARC-C": 43.8,
+        "ARC-E": 73.1,
+        "HellaSwag": 68.1,
+        "WinoGrande": 66.8,
+        "TruthfulQA": 49.5,
+        "IFEval": 56.0,
+        "Avg.": 59.5
+       },
+       "bold": [
+        "KL",
+        "Top-1",
+        "GSM8K",
+        "MMLU",
+        "ARC-C",
+        "ARC-E",
+        "HellaSwag",
+        "WinoGrande",
+        "TruthfulQA",
+        "IFEval",
+        "Avg."
+       ]
+      }
+     ],
+     "INT3": [
+      {
+       "method": "RTN",
+       "values": {
+        "KL": 0.276,
+        "Top-1": 85.6,
+        "GSM8K": 19.0,
+        "MMLU": 44.8,
+        "ARC-C": 40.2,
+        "ARC-E": 64.6,
+        "HellaSwag": 69.5,
+        "WinoGrande": 66.9,
+        "TruthfulQA": 47.0,
+        "IFEval": 52.9,
+        "Avg.": 50.6
+       }
+      },
+      {
+       "method": "GPTQ",
+       "values": {
+        "KL": 0.076,
+        "Top-1": 92.8,
+        "GSM8K": 61.4,
+        "MMLU": 59.2,
+        "ARC-C": 49.1,
+        "ARC-E": 71.6,
+        "HellaSwag": 75.7,
+        "WinoGrande": 71.0,
+        "TruthfulQA": 53.1,
+        "IFEval": 69.1,
+        "Avg.": 63.8
+       },
+       "bold": [
+        "TruthfulQA"
+       ]
+      },
+      {
+       "method": "AWQ",
+       "values": {
+        "KL": 0.197,
+        "Top-1": 88.0,
+        "GSM8K": 23.9,
+        "MMLU": 53.2,
+        "ARC-C": 43.0,
+        "ARC-E": 67.6,
+        "HellaSwag": 72.2,
+        "WinoGrande": 67.6,
+        "TruthfulQA": 42.1,
+        "IFEval": 58.6,
+        "Avg.": 53.5
+       }
+      },
+      {
+       "method": "Standard QAT",
+       "values": {
+        "KL": 0.046,
+        "Top-1": 94.7,
+        "GSM8K": 70.7,
+        "MMLU": 59.7,
+        "ARC-C": 47.4,
+        "ARC-E": 72.8,
+        "HellaSwag": 75.2,
+        "WinoGrande": 72.9,
+        "TruthfulQA": 52.1,
+        "IFEval": 69.9,
+        "Avg.": 65.1
+       },
+       "bold": [
+        "WinoGrande"
+       ]
+      },
+      {
+       "method": "LSQ",
+       "values": {
+        "KL": 0.052,
+        "Top-1": 94.2,
+        "GSM8K": 76.8,
+        "MMLU": 62.3,
+        "ARC-C": 51.8,
+        "ARC-E": 76.9,
+        "HellaSwag": 75.8,
+        "WinoGrande": 71.6,
+        "TruthfulQA": 50.9,
+        "IFEval": 67.5,
+        "Avg.": 66.7
+       },
+       "bold": [
+        "GSM8K"
+       ],
+       "underline": [
+        "MMLU"
+       ]
+      },
+      {
+       "method": "Denoising QAT",
+       "values": {
+        "KL": 0.046,
+        "Top-1": 94.7,
+        "GSM8K": 68.8,
+        "MMLU": 59.8,
+        "ARC-C": 48.0,
+        "ARC-E": 74.5,
+        "HellaSwag": 75.0,
+        "WinoGrande": 72.2,
+        "TruthfulQA": 51.0,
+        "IFEval": 70.2,
+        "Avg.": 64.9
+       },
+       "underline": [
+        "WinoGrande",
+        "IFEval"
+       ]
+      },
+      {
+       "method": "BitDistiller",
+       "values": {
+        "KL": 0.041,
+        "Top-1": 94.8,
+        "GSM8K": 74.2,
+        "MMLU": 61.6,
+        "ARC-C": 53.1,
+        "ARC-E": 79.0,
+        "HellaSwag": 76.4,
+        "WinoGrande": 71.9,
+        "TruthfulQA": 52.2,
+        "IFEval": 68.6,
+        "Avg.": 67.1
+       },
+       "underline": [
+        "KL",
+        "Top-1",
+        "GSM8K",
+        "ARC-C",
+        "ARC-E",
+        "HellaSwag",
+        "TruthfulQA",
+        "Avg."
+       ]
+      },
+      {
+       "method": "QUASAR",
+       "values": {
+        "KL": 0.036,
+        "Top-1": 95.2,
+        "GSM8K": 74.1,
+        "MMLU": 63.3,
+        "ARC-C": 54.9,
+        "ARC-E": 79.1,
+        "HellaSwag": 77.1,
+        "WinoGrande": 71.0,
+        "TruthfulQA": 51.6,
+        "IFEval": 71.5,
+        "Avg.": 67.9
+       },
+       "bold": [
+        "KL",
+        "Top-1",
+        "MMLU",
+        "ARC-C",
+        "ARC-E",
+        "HellaSwag",
+        "IFEval",
+        "Avg."
+       ]
+      }
+     ],
+     "INT4": [
+      {
+       "method": "RTN",
+       "values": {
+        "KL": 0.044,
+        "Top-1": 94.4,
+        "GSM8K": 70.7,
+        "MMLU": 64.1,
+        "ARC-C": 53.3,
+        "ARC-E": 76.9,
+        "HellaSwag": 78.0,
+        "WinoGrande": 73.9,
+        "TruthfulQA": 50.7,
+        "IFEval": 72.1,
+        "Avg.": 67.5
+       }
+      },
+      {
+       "method": "GPTQ",
+       "values": {
+        "KL": 0.015,
+        "Top-1": 96.8,
+        "GSM8K": 69.0,
+        "MMLU": 67.3,
+        "ARC-C": 52.0,
+        "ARC-E": 77.3,
+        "HellaSwag": 78.7,
+        "WinoGrande": 73.2,
+        "TruthfulQA": 55.1,
+        "IFEval": 73.6,
+        "Avg.": 68.3
+       },
+       "bold": [
+        "MMLU",
+        "TruthfulQA"
+       ],
+       "underline": [
+        "HellaSwag",
+        "IFEval"
+       ]
+      },
+      {
+       "method": "AWQ",
+       "values": {
+        "KL": 0.032,
+        "Top-1": 95.2,
+        "GSM8K": 65.6,
+        "MMLU": 66.6,
+        "ARC-C": 53.7,
+        "ARC-E": 78.3,
+        "HellaSwag": 78.7,
+        "WinoGrande": 72.4,
+        "TruthfulQA": 53.7,
+        "IFEval": 73.4,
+        "Avg.": 67.8
+       },
+       "underline": [
+        "HellaSwag"
+       ]
+      },
+      {
+       "method": "Standard QAT",
+       "values": {
+        "KL": 0.014,
+        "Top-1": 97.0,
+        "GSM8K": 76.3,
+        "MMLU": 66.3,
+        "ARC-C": 54.4,
+        "ARC-E": 77.7,
+        "HellaSwag": 78.4,
+        "WinoGrande": 73.8,
+        "TruthfulQA": 53.9,
+        "IFEval": 73.0,
+        "Avg.": 69.2
+       },
+       "underline": [
+        "Top-1",
+        "GSM8K"
+       ]
+      },
+      {
+       "method": "LSQ",
+       "values": {
+        "KL": 0.016,
+        "Top-1": 96.8,
+        "GSM8K": 73.2,
+        "MMLU": 66.5,
+        "ARC-C": 54.6,
+        "ARC-E": 80.1,
+        "HellaSwag": 78.7,
+        "WinoGrande": 74.1,
+        "TruthfulQA": 53.2,
+        "IFEval": 74.1,
+        "Avg.": 69.3
+       },
+       "bold": [
+        "ARC-E",
+        "IFEval"
+       ],
+       "underline": [
+        "HellaSwag",
+        "WinoGrande",
+        "Avg."
+       ]
+      },
+      {
+       "method": "Denoising QAT",
+       "values": {
+        "KL": 0.014,
+        "Top-1": 97.0,
+        "GSM8K": 77.0,
+        "MMLU": 66.2,
+        "ARC-C": 55.7,
+        "ARC-E": 77.8,
+        "HellaSwag": 78.6,
+        "WinoGrande": 73.9,
+        "TruthfulQA": 53.6,
+        "IFEval": 72.1,
+        "Avg.": 69.3
+       },
+       "bold": [
+        "GSM8K",
+        "ARC-C"
+       ],
+       "underline": [
+        "Top-1",
+        "Avg."
+       ]
+      },
+      {
+       "method": "BitDistiller",
+       "values": {
+        "KL": 0.013,
+        "Top-1": 97.0,
+        "GSM8K": 70.4,
+        "MMLU": 67.0,
+        "ARC-C": 55.1,
+        "ARC-E": 79.7,
+        "HellaSwag": 78.8,
+        "WinoGrande": 73.3,
+        "TruthfulQA": 53.8,
+        "IFEval": 74.1,
+        "Avg.": 69.0
+       },
+       "bold": [
+        "HellaSwag",
+        "IFEval"
+       ],
+       "underline": [
+        "KL",
+        "Top-1",
+        "MMLU",
+        "ARC-E"
+       ]
+      },
+      {
+       "method": "QUASAR",
+       "values": {
+        "KL": 0.012,
+        "Top-1": 97.3,
+        "GSM8K": 74.6,
+        "MMLU": 66.5,
+        "ARC-C": 55.5,
+        "ARC-E": 78.9,
+        "HellaSwag": 78.8,
+        "WinoGrande": 74.2,
+        "TruthfulQA": 54.2,
+        "IFEval": 72.5,
+        "Avg.": 69.4
+       },
+       "bold": [
+        "KL",
+        "Top-1",
+        "HellaSwag",
+        "WinoGrande",
+        "Avg."
+       ],
+       "underline": [
+        "ARC-C",
+        "TruthfulQA"
+       ]
+      }
+     ]
+    }
+   },
+   "columns": {
+    "Qwen3-4B-Thinking-2507": [
+     "KL",
+     "Top-1",
+     "GSM8K",
+     "MMLU",
+     "ARC-C",
+     "ARC-E",
+     "HellaSwag",
+     "WinoGrande",
+     "TruthfulQA",
+     "IFEval",
+     "Avg."
+    ],
+    "Llama-3.1-8B-Instruct": [
+     "KL",
+     "Top-1",
+     "GSM8K",
+     "MMLU",
+     "ARC-C",
+     "ARC-E",
+     "HellaSwag",
+     "WinoGrande",
+     "TruthfulQA",
+     "IFEval",
+     "Avg."
+    ]
+   },
+   "notes": "bold = best, underline = second best within each bit-width block (as typeset)"
+  }
+ },
+ "adaptation": {
+  "source": {
+   "file": "adaptation_table.tex",
+   "label": "tab:adapt-qwen",
+   "printed": "Table 2"
+  },
+  "caption": "Comparison of QAT and PTQ methods for adapting Qwen3-4B-Base on OpenMathReasoning at INT2, INT3, and INT4. We report held-out perplexity and accuracy on five math benchmarks.",
+  "model": "Qwen3-4B-Base",
+  "data": "OpenMathReasoning",
+  "columns": [
+   "PPL",
+   "MATH-500",
+   "GSM8K",
+   "AIME'24",
+   "AIME'25",
+   "HMMT'25",
+   "Avg."
+  ],
+  "bits": {
+   "INT2": [
+    {
+     "method": "RTN",
+     "values": {
+      "PPL": 350000.0,
+      "MATH-500": 0.9,
+      "GSM8K": 0.3,
+      "AIME'24": 0.0,
+      "AIME'25": 0.0,
+      "HMMT'25": 0.0,
+      "Avg.": 0.2
+     },
+     "underline": [
+      "HMMT'25"
+     ]
+    },
+    {
+     "method": "GPTQ",
+     "values": {
+      "PPL": 3.12,
+      "MATH-500": 2.1,
+      "GSM8K": 1.1,
+      "AIME'24": 0.0,
+      "AIME'25": 0.0,
+      "HMMT'25": 0.0,
+      "Avg.": 0.6
+     },
+     "underline": [
+      "HMMT'25"
+     ]
+    },
+    {
+     "method": "AWQ",
+     "values": {
+      "PPL": 130.0,
+      "MATH-500": 1.5,
+      "GSM8K": 1.2,
+      "AIME'24": 0.0,
+      "AIME'25": 0.0,
+      "HMMT'25": 0.0,
+      "Avg.": 0.5
+     },
+     "underline": [
+      "HMMT'25"
+     ]
+    },
+    {
+     "method": "Standard QAT",
+     "values": {
+      "PPL": 1.79,
+      "MATH-500": 38.7,
+      "GSM8K": 51.9,
+      "AIME'24": 2.1,
+      "AIME'25": 0.8,
+      "HMMT'25": 0.0,
+      "Avg.": 18.7
+     },
+     "underline": [
+      "AIME'24",
+      "AIME'25",
+      "HMMT'25",
+      "Avg."
+     ]
+    },
+    {
+     "method": "LSQ",
+     "values": {
+      "PPL": 1.82,
+      "MATH-500": 36.5,
+      "GSM8K": 49.9,
+      "AIME'24": 0.8,
+      "AIME'25": 0.4,
+      "HMMT'25": 0.0,
+      "Avg.": 17.5
+     },
+     "underline": [
+      "HMMT'25"
+     ]
+    },
+    {
+     "method": "Denoising QAT",
+     "values": {
+      "PPL": 1.78,
+      "MATH-500": 39.2,
+      "GSM8K": 52.5,
+      "AIME'24": 0.8,
+      "AIME'25": 0.8,
+      "HMMT'25": 0.0,
+      "Avg.": 18.7
+     },
+     "underline": [
+      "PPL",
+      "MATH-500",
+      "AIME'25",
+      "HMMT'25"
+     ]
+    },
+    {
+     "method": "BitDistiller",
+     "values": {
+      "PPL": 1.87,
+      "MATH-500": 33.6,
+      "GSM8K": 57.0,
+      "AIME'24": 1.2,
+      "AIME'25": 0.4,
+      "HMMT'25": 0.0,
+      "Avg.": 18.4
+     },
+     "underline": [
+      "GSM8K",
+      "HMMT'25"
+     ]
+    },
+    {
+     "method": "QUASAR",
+     "values": {
+      "PPL": 1.71,
+      "MATH-500": 60.7,
+      "GSM8K": 75.4,
+      "AIME'24": 4.0,
+      "AIME'25": 6.5,
+      "HMMT'25": 1.5,
+      "Avg.": 29.6
+     },
+     "bold": [
+      "PPL",
+      "MATH-500",
+      "GSM8K",
+      "AIME'24",
+      "AIME'25",
+      "HMMT'25",
+      "Avg."
+     ]
+    }
+   ],
+   "INT3": [
+    {
+     "method": "RTN",
+     "values": {
+      "PPL": 2.24,
+      "MATH-500": 12.8,
+      "GSM8K": 7.6,
+      "AIME'24": 0.0,
+      "AIME'25": 1.7,
+      "HMMT'25": 0.0,
+      "Avg.": 4.4
+     }
+    },
+    {
+     "method": "GPTQ",
+     "values": {
+      "PPL": 1.68,
+      "MATH-500": 71.0,
+      "GSM8K": 85.0,
+      "AIME'24": 11.2,
+      "AIME'25": 11.2,
+      "HMMT'25": 4.2,
+      "Avg.": 36.5
+     }
+    },
+    {
+     "method": "AWQ",
+     "values": {
+      "PPL": 1.83,
+      "MATH-500": 57.3,
+      "GSM8K": 65.1,
+      "AIME'24": 10.0,
+      "AIME'25": 8.3,
+      "HMMT'25": 1.7,
+      "Avg.": 28.5
+     }
+    },
+    {
+     "method": "Standard QAT",
+     "values": {
+      "PPL": 1.64,
+      "MATH-500": 75.8,
+      "GSM8K": 87.5,
+      "AIME'24": 15.0,
+      "AIME'25": 16.2,
+      "HMMT'25": 4.6,
+      "Avg.": 39.8
+     },
+     "bold": [
+      "AIME'25"
+     ]
+    },
+    {
+     "method": "LSQ",
+     "values": {
+      "PPL": 1.65,
+      "MATH-500": 73.7,
+      "GSM8K": 87.0,
+      "AIME'24": 12.5,
+      "AIME'25": 11.7,
+      "HMMT'25": 3.8,
+      "Avg.": 37.7
+     }
+    },
+    {
+     "method": "Denoising QAT",
+     "values": {
+      "PPL": 1.64,
+      "MATH-500": 75.9,
+      "GSM8K": 87.3,
+      "AIME'24": 14.2,
+      "AIME'25": 13.3,
+      "HMMT'25": 7.1,
+      "Avg.": 39.6
+     },
+     "bold": [
+      "HMMT'25"
+     ],
+     "underline": [
+      "PPL",
+      "MATH-500"
+     ]
+    },
+    {
+     "method": "BitDistiller",
+     "values": {
+      "PPL": 1.64,
+      "MATH-500": 75.7,
+      "GSM8K": 87.8,
+      "AIME'24": 16.2,
+      "AIME'25": 15.4,
+      "HMMT'25": 5.0,
+      "Avg.": 40.0
+     },
+     "bold": [
+      "AIME'24"
+     ],
+     "underline": [
+      "GSM8K",
+      "Avg."
+     ]
+    },
+    {
+     "method": "QUASAR",
+     "values": {
+      "PPL": 1.62,
+      "MATH-500": 78.5,
+      "GSM8K": 88.6,
+      "AIME'24": 15.9,
+      "AIME'25": 16.2,
+      "HMMT'25": 6.0,
+      "Avg.": 41.1
+     },
+     "bold": [
+      "PPL",
+      "MATH-500",
+      "GSM8K",
+      "AIME'25",
+      "Avg."
+     ],
+     "underline": [
+      "AIME'24",
+      "HMMT'25"
+     ]
+    }
+   ],
+   "INT4": [
+    {
+     "method": "RTN",
+     "values": {
+      "PPL": 1.66,
+      "MATH-500": 78.2,
+      "GSM8K": 90.0,
+      "AIME'24": 15.0,
+      "AIME'25": 13.3,
+      "HMMT'25": 7.5,
+      "Avg.": 40.8
+     }
+    },
+    {
+     "method": "GPTQ",
+     "values": {
+      "PPL": 1.61,
+      "MATH-500": 81.7,
+      "GSM8K": 90.6,
+      "AIME'24": 19.1,
+      "AIME'25": 20.5,
+      "HMMT'25": 8.5,
+      "Avg.": 44.1
+     }
+    },
+    {
+     "method": "AWQ",
+     "values": {
+      "PPL": 1.63,
+      "MATH-500": 80.3,
+      "GSM8K": 90.5,
+      "AIME'24": 15.8,
+      "AIME'25": 17.5,
+      "HMMT'25": 8.3,
+      "Avg.": 42.5
+     }
+    },
+    {
+     "method": "Standard QAT",
+     "values": {
+      "PPL": 1.6,
+      "MATH-500": 82.1,
+      "GSM8K": 90.8,
+      "AIME'24": 21.2,
+      "AIME'25": 20.6,
+      "HMMT'25": 10.7,
+      "Avg.": 45.1
+     },
+     "bold": [
+      "AIME'24"
+     ],
+     "underline": [
+      "GSM8K",
+      "HMMT'25",
+      "Avg."
+     ]
+    },
+    {
+     "method": "LSQ",
+     "values": {
+      "PPL": 1.62,
+      "MATH-500": 79.0,
+      "GSM8K": 89.1,
+      "AIME'24": 17.9,
+      "AIME'25": 17.1,
+      "HMMT'25": 6.7,
+      "Avg.": 42.0
+     }
+    },
+    {
+     "method": "Denoising QAT",
+     "values": {
+      "PPL": 1.6,
+      "MATH-500": 82.1,
+      "GSM8K": 90.4,
+      "AIME'24": 20.0,
+      "AIME'25": 21.4,
+      "HMMT'25": 9.9,
+      "Avg.": 44.8
+     },
+     "bold": [
+      "AIME'25"
+     ],
+     "underline": [
+      "PPL"
+     ]
+    },
+    {
+     "method": "BitDistiller",
+     "values": {
+      "PPL": 1.6,
+      "MATH-500": 82.7,
+      "GSM8K": 90.6,
+      "AIME'24": 20.3,
+      "AIME'25": 20.8,
+      "HMMT'25": 9.3,
+      "Avg.": 44.7
+     },
+     "underline": [
+      "MATH-500",
+      "AIME'25"
+     ]
+    },
+    {
+     "method": "QUASAR",
+     "values": {
+      "PPL": 1.6,
+      "MATH-500": 82.8,
+      "GSM8K": 90.9,
+      "AIME'24": 20.8,
+      "AIME'25": 19.8,
+      "HMMT'25": 11.2,
+      "Avg.": 45.1
+     },
+     "bold": [
+      "PPL",
+      "MATH-500",
+      "GSM8K",
+      "HMMT'25",
+      "Avg."
+     ],
+     "underline": [
+      "AIME'24"
+     ]
+    }
+   ]
+  },
+  "references": [
+   {
+    "method": "Base (no SFT)",
+    "values": {
+     "PPL": null,
+     "MATH-500": 41.0,
+     "GSM8K": 66.4,
+     "AIME'24": 9.6,
+     "AIME'25": 3.3,
+     "HMMT'25": 0.8,
+     "Avg.": 24.2
+    }
+   },
+   {
+    "method": "FP-SFT",
+    "values": {
+     "PPL": 1.59,
+     "MATH-500": 83.8,
+     "GSM8K": 91.3,
+     "AIME'24": 22.9,
+     "AIME'25": 22.5,
+     "HMMT'25": 10.0,
+     "Avg.": 46.1
+    }
+   }
+  ],
+  "notes": "PPL = held-out perplexity; Base (no SFT) and FP-SFT rows repeat across bit blocks"
+ },
+ "checkpoint_comparison_table3": {
+  "source": {
+   "file": "merged_table.tex",
+   "label": "tab:merged",
+   "printed": "Table 3"
+  },
+  "caption": "Comparison of QUASAR with QAT and PTQ baselines across NVFP4, INT4, and Q4\\_0 (llama.cpp GGUF format). We report fidelity to BF16 and accuracy on ten reasoning, coding, and long-horizon benchmarks.",
+  "columns": [
+   "bpw",
+   "KL",
+   "Top-1",
+   "HMMT'26",
+   "AIME'25",
+   "SuperGPQA",
+   "OJBench",
+   "MRCR",
+   "MRCR ≥64k",
+   "MRCR 8-needle",
+   "LongProc",
+   "LongBench-v2",
+   "RULER",
+   "Avg."
+  ],
+  "column_groups": {
+   "Fidelity": [
+    "KL",
+    "Top-1"
+   ],
+   "Hard reasoning and coding": [
+    "HMMT'26",
+    "AIME'25",
+    "SuperGPQA",
+    "OJBench"
+   ],
+   "Long horizon": [
+    "MRCR",
+    "MRCR ≥64k",
+    "MRCR 8-needle",
+    "LongProc",
+    "LongBench-v2",
+    "RULER"
+   ]
+  },
+  "blocks": [
+   {
+    "model": "Qwen3-8B",
+    "rows": [
+     {
+      "method": "BF16",
+      "values": {
+       "bpw": 16.0,
+       "KL": null,
+       "Top-1": null,
+       "HMMT'26": 44.6,
+       "AIME'25": 68.4,
+       "SuperGPQA": 48.8,
+       "OJBench": 22.4,
+       "MRCR": 25.8,
+       "MRCR ≥64k": 19.2,
+       "MRCR 8-needle": 16.2,
+       "LongProc": 48.9,
+       "LongBench-v2": 38.4,
+       "RULER": 80.5,
+       "Avg.": 41.3
+      },
+      "format": "BF16"
+     },
+     {
+      "method": "RTN",
+      "values": {
+       "bpw": 4.5,
+       "KL": 0.053,
+       "Top-1": 93.0,
+       "HMMT'26": 37.4,
+       "AIME'25": 64.6,
+       "SuperGPQA": 45.6,
+       "OJBench": 14.7,
+       "MRCR": 22.4,
+       "MRCR ≥64k": 15.2,
+       "MRCR 8-needle": 14.1,
+       "LongProc": 39.3,
+       "LongBench-v2": 36.0,
+       "RULER": 76.6,
+       "Avg.": 36.6
+      },
+      "bold": [
+       "AIME'25"
+      ],
+      "underline": [
+       "MRCR ≥64k",
+       "LongBench-v2"
+      ],
+      "format": "NVFP4 W4A4"
+     },
+     {
+      "method": "GPTQ",
+      "values": {
+       "bpw": 4.5,
+       "KL": 0.039,
+       "Top-1": 94.0,
+       "HMMT'26": 40.3,
+       "AIME'25": 64.0,
+       "SuperGPQA": 46.2,
+       "OJBench": 16.8,
+       "MRCR": 23.6,
+       "MRCR ≥64k": 14.6,
+       "MRCR 8-needle": 15.2,
+       "LongProc": 39.5,
+       "LongBench-v2": 36.0,
+       "RULER": 78.5,
+       "Avg.": 37.5
+      },
+      "underline": [
+       "KL",
+       "Top-1",
+       "HMMT'26",
+       "AIME'25",
+       "SuperGPQA",
+       "MRCR",
+       "MRCR 8-needle",
+       "LongProc",
+       "LongBench-v2",
+       "RULER",
+       "Avg."
+      ],
+      "format": "NVFP4 W4A4"
+     },
+     {
+      "method": "Standard QAT",
+      "values": {
+       "bpw": 4.5,
+       "KL": 0.041,
+       "Top-1": 94.0,
+       "HMMT'26": 39.0,
+       "AIME'25": 61.2,
+       "SuperGPQA": 45.7,
+       "OJBench": 19.4,
+       "MRCR": 21.6,
+       "MRCR ≥64k": 14.1,
+       "MRCR 8-needle": 12.9,
+       "LongProc": 36.5,
+       "LongBench-v2": 37.4,
+       "RULER": 77.9,
+       "Avg.": 36.6
+      },
+      "bold": [
+       "OJBench",
+       "LongBench-v2"
+      ],
+      "underline": [
+       "Top-1"
+      ],
+      "format": "NVFP4 W4A4"
+     },
+     {
+      "method": "QUASAR",
+      "values": {
+       "bpw": 4.5,
+       "KL": 0.036,
+       "Top-1": 94.3,
+       "HMMT'26": 40.8,
+       "AIME'25": 63.6,
+       "SuperGPQA": 46.8,
+       "OJBench": 18.5,
+       "MRCR": 24.3,
+       "MRCR ≥64k": 16.4,
+       "MRCR 8-needle": 15.8,
+       "LongProc": 40.3,
+       "LongBench-v2": 33.8,
+       "RULER": 78.9,
+       "Avg.": 37.9
+      },
+      "bold": [
+       "KL",
+       "Top-1",
+       "HMMT'26",
+       "SuperGPQA",
+       "MRCR",
+       "MRCR ≥64k",
+       "MRCR 8-needle",
+       "LongProc",
+       "RULER",
+       "Avg."
+      ],
+      "underline": [
+       "OJBench"
+      ],
+      "format": "NVFP4 W4A4"
+     }
+    ]
+   },
+   {
+    "model": "Qwen3.5-9B",
+    "rows": [
+     {
+      "method": "BF16",
+      "values": {
+       "bpw": 16.0,
+       "KL": null,
+       "Top-1": null,
+       "HMMT'26": 47.9,
+       "AIME'25": 74.5,
+       "SuperGPQA": 58.8,
+       "OJBench": 19.4,
+       "MRCR": 79.4,
+       "MRCR ≥64k": 74.5,
+       "MRCR 8-needle": 53.9,
+       "LongProc": 66.8,
+       "LongBench-v2": 43.7,
+       "RULER": 90.1,
+       "Avg.": 60.9
+      },
+      "format": "BF16"
+     },
+     {
+      "method": "RTN",
+      "values": {
+       "bpw": 4.5,
+       "KL": 0.044,
+       "Top-1": 93.2,
+       "HMMT'26": 21.9,
+       "AIME'25": 37.3,
+       "SuperGPQA": 49.1,
+       "OJBench": 6.5,
+       "MRCR": 54.4,
+       "MRCR ≥64k": 42.6,
+       "MRCR 8-needle": 32.1,
+       "LongProc": 35.5,
+       "LongBench-v2": 23.1,
+       "RULER": 91.4,
+       "Avg.": 39.4
+      },
+      "bold": [
+       "RULER"
+      ],
+      "underline": [
+       "OJBench"
+      ],
+      "format": "NVFP4 W4A4"
+     },
+     {
+      "method": "GPTQ",
+      "values": {
+       "bpw": 4.5,
+       "KL": 0.029,
+       "Top-1": 94.5,
+       "HMMT'26": 20.0,
+       "AIME'25": 29.9,
+       "SuperGPQA": 48.6,
+       "OJBench": 3.4,
+       "MRCR": 56.8,
+       "MRCR ≥64k": 44.6,
+       "MRCR 8-needle": 32.6,
+       "LongProc": 42.1,
+       "LongBench-v2": 24.3,
+       "RULER": 91.3,
+       "Avg.": 39.4
+      },
+      "underline": [
+       "KL",
+       "Top-1",
+       "RULER"
+      ],
+      "format": "NVFP4 W4A4"
+     },
+     {
+      "method": "Standard QAT",
+      "values": {
+       "bpw": 4.5,
+       "KL": 0.033,
+       "Top-1": 94.2,
+       "HMMT'26": 43.1,
+       "AIME'25": 65.3,
+       "SuperGPQA": 55.5,
+       "OJBench": 13.4,
+       "MRCR": 63.7,
+       "MRCR ≥64k": 52.3,
+       "MRCR 8-needle": 39.7,
+       "LongProc": 59.0,
+       "LongBench-v2": 43.9,
+       "RULER": 89.8,
+       "Avg.": 52.6
+      },
+      "bold": [
+       "OJBench"
+      ],
+      "underline": [
+       "HMMT'26",
+       "AIME'25",
+       "SuperGPQA",
+       "MRCR",
+       "MRCR ≥64k",
+       "MRCR 8-needle",
+       "LongProc",
+       "LongBench-v2",
+       "Avg."
+      ],
+      "format": "NVFP4 W4A4"
+     },
+     {
+      "method": "QUASAR",
+      "values": {
+       "bpw": 4.5,
+       "KL": 0.028,
+       "Top-1": 94.6,
+       "HMMT'26": 43.8,
+       "AIME'25": 68.8,
+       "SuperGPQA": 56.0,
+       "OJBench": 13.4,
+       "MRCR": 71.7,
+       "MRCR ≥64k": 63.8,
+       "MRCR 8-needle": 45.0,
+       "LongProc": 59.7,
+       "LongBench-v2": 44.1,
+       "RULER": 90.5,
+       "Avg.": 55.7
+      },
+      "bold": [
+       "KL",
+       "Top-1",
+       "HMMT'26",
+       "AIME'25",
+       "SuperGPQA",
+       "OJBench",
+       "MRCR",
+       "MRCR ≥64k",
+       "MRCR 8-needle",
+       "LongProc",
+       "LongBench-v2",
+       "Avg."
+      ],
+      "format": "NVFP4 W4A4"
+     }
+    ]
+   },
+   {
+    "model": "Muse-Glimmer-30B",
+    "rows": [
+     {
+      "method": "BF16",
+      "values": {
+       "bpw": 16.0,
+       "KL": null,
+       "Top-1": null,
+       "HMMT'26": 71.7,
+       "AIME'25": 92.2,
+       "SuperGPQA": 60.1,
+       "OJBench": 25.0,
+       "MRCR": 46.1,
+       "MRCR ≥64k": 38.0,
+       "MRCR 8-needle": 24.9,
+       "LongProc": 67.0,
+       "LongBench-v2": 60.4,
+       "RULER": 88.4,
+       "Avg.": 57.4
+      },
+      "format": "BF16"
+     },
+     {
+      "method": "RTN",
+      "values": {
+       "bpw": 4.5,
+       "KL": 0.054,
+       "Top-1": 93.2,
+       "HMMT'26": 69.5,
+       "AIME'25": 87.7,
+       "SuperGPQA": 58.9,
+       "OJBench": 25.0,
+       "MRCR": 44.3,
+       "MRCR ≥64k": 35.6,
+       "MRCR 8-needle": 26.2,
+       "LongProc": 55.7,
+       "LongBench-v2": 59.4,
+       "RULER": 88.3,
+       "Avg.": 55.1
+      },
+      "bold": [
+       "LongBench-v2"
+      ],
+      "underline": [
+       "Top-1",
+       "HMMT'26",
+       "SuperGPQA",
+       "MRCR",
+       "MRCR 8-needle"
+      ],
+      "format": "NVFP4 W4A16"
+     },
+     {
+      "method": "GPTQ",
+      "values": {
+       "bpw": 4.5,
+       "KL": 0.066,
+       "Top-1": 92.4,
+       "HMMT'26": 66.4,
+       "AIME'25": 90.3,
+       "SuperGPQA": 58.5,
+       "OJBench": 25.4,
+       "MRCR": 43.1,
+       "MRCR ≥64k": 40.7,
+       "MRCR 8-needle": 25.5,
+       "LongProc": 60.1,
+       "LongBench-v2": 57.3,
+       "RULER": 84.7,
+       "Avg.": 55.2
+      },
+      "bold": [
+       "MRCR ≥64k"
+      ],
+      "underline": [
+       "AIME'25"
+      ],
+      "format": "NVFP4 W4A4"
+     },
+     {
+      "method": "QUASAR",
+      "values": {
+       "bpw": 4.5,
+       "KL": 0.018,
+       "Top-1": 96.1,
+       "HMMT'26": 72.3,
+       "AIME'25": 90.8,
+       "SuperGPQA": 59.3,
+       "OJBench": 27.2,
+       "MRCR": 48.5,
+       "MRCR ≥64k": 40.0,
+       "MRCR 8-needle": 28.5,
+       "LongProc": 67.3,
+       "LongBench-v2": 58.4,
+       "RULER": 90.2,
+       "Avg.": 58.2
+      },
+      "bold": [
+       "KL",
+       "Top-1",
+       "HMMT'26",
+       "AIME'25",
+       "SuperGPQA",
+       "OJBench",
+       "MRCR",
+       "MRCR 8-needle",
+       "LongProc",
+       "RULER",
+       "Avg."
+      ],
+      "underline": [
+       "MRCR ≥64k",
+       "LongBench-v2"
+      ],
+      "format": "NVFP4 W4A16"
+     },
+     {
+      "method": "QUASAR",
+      "values": {
+       "bpw": 4.5,
+       "KL": 0.053,
+       "Top-1": 93.2,
+       "HMMT'26": 68.3,
+       "AIME'25": 88.0,
+       "SuperGPQA": 58.9,
+       "OJBench": 26.3,
+       "MRCR": 44.1,
+       "MRCR ≥64k": 35.4,
+       "MRCR 8-needle": 25.5,
+       "LongProc": 62.8,
+       "LongBench-v2": 54.5,
+       "RULER": 89.7,
+       "Avg.": 55.3
+      },
+      "underline": [
+       "KL",
+       "Top-1",
+       "OJBench",
+       "LongProc",
+       "RULER",
+       "Avg."
+      ],
+      "format": "NVFP4 W4A4"
+     }
+    ]
+   },
+   {
+    "model": "Gemma-4 E4B",
+    "rows": [
+     {
+      "method": "BF16",
+      "values": {
+       "bpw": 16.0,
+       "KL": null,
+       "Top-1": null,
+       "HMMT'26": 32.8,
+       "AIME'25": 40.9,
+       "SuperGPQA": 42.1,
+       "OJBench": 21.6,
+       "MRCR": 26.7,
+       "MRCR ≥64k": 15.4,
+       "MRCR 8-needle": 12.6,
+       "LongProc": 56.7,
+       "LongBench-v2": 42.9,
+       "RULER": 89.7,
+       "Avg.": 38.1
+      },
+      "format": "BF16"
+     },
+     {
+      "method": "RTN",
+      "values": {
+       "bpw": 4.25,
+       "KL": 0.079,
+       "Top-1": 91.5,
+       "HMMT'26": 24.4,
+       "AIME'25": 31.8,
+       "SuperGPQA": 39.0,
+       "OJBench": 16.4,
+       "MRCR": 22.0,
+       "MRCR ≥64k": 9.3,
+       "MRCR 8-needle": 11.8,
+       "LongProc": 35.1,
+       "LongBench-v2": 41.7,
+       "RULER": 87.5,
+       "Avg.": 31.9
+      },
+      "bold": [
+       "LongBench-v2"
+      ],
+      "underline": [
+       "MRCR",
+       "MRCR ≥64k",
+       "MRCR 8-needle"
+      ],
+      "format": "INT4 g64"
+     },
+     {
+      "method": "Google QAT",
+      "values": {
+       "bpw": 4.5,
+       "KL": 0.064,
+       "Top-1": 92.6,
+       "HMMT'26": 28.6,
+       "AIME'25": 33.3,
+       "SuperGPQA": 39.7,
+       "OJBench": 17.7,
+       "MRCR": 21.0,
+       "MRCR ≥64k": 8.0,
+       "MRCR 8-needle": 11.5,
+       "LongProc": 51.1,
+       "LongBench-v2": 39.8,
+       "RULER": 89.6,
+       "Avg.": 34.0
+      },
+      "bold": [
+       "RULER"
+      ],
+      "underline": [
+       "KL",
+       "Top-1",
+       "HMMT'26",
+       "AIME'25",
+       "SuperGPQA",
+       "OJBench",
+       "LongProc",
+       "Avg."
+      ],
+      "format": "INT4 g32"
+     },
+     {
+      "method": "QUASAR",
+      "values": {
+       "bpw": 4.25,
+       "KL": 0.022,
+       "Top-1": 95.5,
+       "HMMT'26": 29.0,
+       "AIME'25": 37.5,
+       "SuperGPQA": 40.5,
+       "OJBench": 18.1,
+       "MRCR": 24.4,
+       "MRCR ≥64k": 12.0,
+       "MRCR 8-needle": 12.7,
+       "LongProc": 53.6,
+       "LongBench-v2": 40.4,
+       "RULER": 89.5,
+       "Avg.": 35.8
+      },
+      "bold": [
+       "KL",
+       "Top-1",
+       "HMMT'26",
+       "AIME'25",
+       "SuperGPQA",
+       "OJBench",
+       "MRCR",
+       "MRCR ≥64k",
+       "MRCR 8-needle",
+       "LongProc",
+       "Avg."
+      ],
+      "underline": [
+       "LongBench-v2",
+       "RULER"
+      ],
+      "format": "INT4 g64"
+     },
+     {
+      "method": "RTN",
+      "values": {
+       "bpw": 4.5,
+       "KL": 0.194,
+       "Top-1": 85.7,
+       "HMMT'26": 18.8,
+       "AIME'25": 32.8,
+       "SuperGPQA": 36.5,
+       "OJBench": 14.2,
+       "MRCR": 22.9,
+       "MRCR ≥64k": 9.1,
+       "MRCR 8-needle": 11.0,
+       "LongProc": 39.0,
+       "LongBench-v2": 38.0,
+       "RULER": 83.8,
+       "Avg.": 30.6
+      },
+      "format": "GGUF Q4_0"
+     },
+     {
+      "method": "Google QAT",
+      "values": {
+       "bpw": 4.5,
+       "KL": 0.088,
+       "Top-1": 90.6,
+       "HMMT'26": 29.0,
+       "AIME'25": 35.9,
+       "SuperGPQA": 40.8,
+       "OJBench": 19.4,
+       "MRCR": 22.9,
+       "MRCR ≥64k": 9.4,
+       "MRCR 8-needle": 12.8,
+       "LongProc": 57.8,
+       "LongBench-v2": 39.0,
+       "RULER": 89.3,
+       "Avg.": 35.6
+      },
+      "bold": [
+       "HMMT'26",
+       "OJBench",
+       "LongProc"
+      ],
+      "underline": [
+       "SuperGPQA",
+       "MRCR 8-needle",
+       "LongBench-v2",
+       "RULER",
+       "Avg."
+      ],
+      "format": "GGUF Q4_0"
+     },
+     {
+      "method": "imatrix (PTQ)",
+      "values": {
+       "bpw": 4.52,
+       "KL": 0.067,
+       "Top-1": 91.1,
+       "HMMT'26": 28.3,
+       "AIME'25": 40.1,
+       "SuperGPQA": 40.9,
+       "OJBench": 19.0,
+       "MRCR": 24.7,
+       "MRCR ≥64k": 11.7,
+       "MRCR 8-needle": 13.0,
+       "LongProc": 46.2,
+       "LongBench-v2": 39.0,
+       "RULER": 88.9,
+       "Avg.": 35.2
+      },
+      "bold": [
+       "AIME'25",
+       "SuperGPQA",
+       "MRCR",
+       "MRCR 8-needle"
+      ],
+      "underline": [
+       "KL",
+       "Top-1",
+       "HMMT'26",
+       "OJBench",
+       "MRCR ≥64k",
+       "LongBench-v2"
+      ],
+      "format": "GGUF Q4_0"
+     },
+     {
+      "method": "QUASAR",
+      "values": {
+       "bpw": 4.5,
+       "KL": 0.044,
+       "Top-1": 92.8,
+       "HMMT'26": 27.8,
+       "AIME'25": 37.6,
+       "SuperGPQA": 39.6,
+       "OJBench": 19.4,
+       "MRCR": 24.4,
+       "MRCR ≥64k": 11.8,
+       "MRCR 8-needle": 12.7,
+       "LongProc": 53.1,
+       "LongBench-v2": 40.4,
+       "RULER": 89.6,
+       "Avg.": 35.6
+      },
+      "bold": [
+       "KL",
+       "Top-1",
+       "OJBench",
+       "MRCR ≥64k",
+       "LongBench-v2",
+       "RULER",
+       "Avg."
+      ],
+      "underline": [
+       "AIME'25",
+       "MRCR",
+       "LongProc"
+      ],
+      "format": "GGUF Q4_0"
+     }
+    ]
+   }
+  ]
+ },
+ "nvfp4": {
+  "setup": {
+   "lr": "1e-6",
+   "global_batch": 32,
+   "evaluated_through": "vLLM native NVFP4 path",
+   "source": {
+    "file": "appendix_setup.tex",
+    "where": "NVFP4 paragraph"
+   }
+  },
+  "table3_rows": [
+   {
+    "model": "Qwen3-8B",
+    "rows": [
+     {
+      "method": "BF16",
+      "values": {
+       "bpw": 16.0,
+       "KL": null,
+       "Top-1": null,
+       "HMMT'26": 44.6,
+       "AIME'25": 68.4,
+       "SuperGPQA": 48.8,
+       "OJBench": 22.4,
+       "MRCR": 25.8,
+       "MRCR ≥64k": 19.2,
+       "MRCR 8-needle": 16.2,
+       "LongProc": 48.9,
+       "LongBench-v2": 38.4,
+       "RULER": 80.5,
+       "Avg.": 41.3
+      },
+      "format": "BF16"
+     },
+     {
+      "method": "RTN",
+      "values": {
+       "bpw": 4.5,
+       "KL": 0.053,
+       "Top-1": 93.0,
+       "HMMT'26": 37.4,
+       "AIME'25": 64.6,
+       "SuperGPQA": 45.6,
+       "OJBench": 14.7,
+       "MRCR": 22.4,
+       "MRCR ≥64k": 15.2,
+       "MRCR 8-needle": 14.1,
+       "LongProc": 39.3,
+       "LongBench-v2": 36.0,
+       "RULER": 76.6,
+       "Avg.": 36.6
+      },
+      "bold": [
+       "AIME'25"
+      ],
+      "underline": [
+       "MRCR ≥64k",
+       "LongBench-v2"
+      ],
+      "format": "NVFP4 W4A4"
+     },
+     {
+      "method": "GPTQ",
+      "values": {
+       "bpw": 4.5,
+       "KL": 0.039,
+       "Top-1": 94.0,
+       "HMMT'26": 40.3,
+       "AIME'25": 64.0,
+       "SuperGPQA": 46.2,
+       "OJBench": 16.8,
+       "MRCR": 23.6,
+       "MRCR ≥64k": 14.6,
+       "MRCR 8-needle": 15.2,
+       "LongProc": 39.5,
+       "LongBench-v2": 36.0,
+       "RULER": 78.5,
+       "Avg.": 37.5
+      },
+      "underline": [
+       "KL",
+       "Top-1",
+       "HMMT'26",
+       "AIME'25",
+       "SuperGPQA",
+       "MRCR",
+       "MRCR 8-needle",
+       "LongProc",
+       "LongBench-v2",
+       "RULER",
+       "Avg."
+      ],
+      "format": "NVFP4 W4A4"
+     },
+     {
+      "method": "Standard QAT",
+      "values": {
+       "bpw": 4.5,
+       "KL": 0.041,
+       "Top-1": 94.0,
+       "HMMT'26": 39.0,
+       "AIME'25": 61.2,
+       "SuperGPQA": 45.7,
+       "OJBench": 19.4,
+       "MRCR": 21.6,
+       "MRCR ≥64k": 14.1,
+       "MRCR 8-needle": 12.9,
+       "LongProc": 36.5,
+       "LongBench-v2": 37.4,
+       "RULER": 77.9,
+       "Avg.": 36.6
+      },
+      "bold": [
+       "OJBench",
+       "LongBench-v2"
+      ],
+      "underline": [
+       "Top-1"
+      ],
+      "format": "NVFP4 W4A4"
+     },
+     {
+      "method": "QUASAR",
+      "values": {
+       "bpw": 4.5,
+       "KL": 0.036,
+       "Top-1": 94.3,
+       "HMMT'26": 40.8,
+       "AIME'25": 63.6,
+       "SuperGPQA": 46.8,
+       "OJBench": 18.5,
+       "MRCR": 24.3,
+       "MRCR ≥64k": 16.4,
+       "MRCR 8-needle": 15.8,
+       "LongProc": 40.3,
+       "LongBench-v2": 33.8,
+       "RULER": 78.9,
+       "Avg.": 37.9
+      },
+      "bold": [
+       "KL",
+       "Top-1",
+       "HMMT'26",
+       "SuperGPQA",
+       "MRCR",
+       "MRCR ≥64k",
+       "MRCR 8-needle",
+       "LongProc",
+       "RULER",
+       "Avg."
+      ],
+      "underline": [
+       "OJBench"
+      ],
+      "format": "NVFP4 W4A4"
+     }
+    ]
+   },
+   {
+    "model": "Qwen3.5-9B",
+    "rows": [
+     {
+      "method": "BF16",
+      "values": {
+       "bpw": 16.0,
+       "KL": null,
+       "Top-1": null,
+       "HMMT'26": 47.9,
+       "AIME'25": 74.5,
+       "SuperGPQA": 58.8,
+       "OJBench": 19.4,
+       "MRCR": 79.4,
+       "MRCR ≥64k": 74.5,
+       "MRCR 8-needle": 53.9,
+       "LongProc": 66.8,
+       "LongBench-v2": 43.7,
+       "RULER": 90.1,
+       "Avg.": 60.9
+      },
+      "format": "BF16"
+     },
+     {
+      "method": "RTN",
+      "values": {
+       "bpw": 4.5,
+       "KL": 0.044,
+       "Top-1": 93.2,
+       "HMMT'26": 21.9,
+       "AIME'25": 37.3,
+       "SuperGPQA": 49.1,
+       "OJBench": 6.5,
+       "MRCR": 54.4,
+       "MRCR ≥64k": 42.6,
+       "MRCR 8-needle": 32.1,
+       "LongProc": 35.5,
+       "LongBench-v2": 23.1,
+       "RULER": 91.4,
+       "Avg.": 39.4
+      },
+      "bold": [
+       "RULER"
+      ],
+      "underline": [
+       "OJBench"
+      ],
+      "format": "NVFP4 W4A4"
+     },
+     {
+      "method": "GPTQ",
+      "values": {
+       "bpw": 4.5,
+       "KL": 0.029,
+       "Top-1": 94.5,
+       "HMMT'26": 20.0,
+       "AIME'25": 29.9,
+       "SuperGPQA": 48.6,
+       "OJBench": 3.4,
+       "MRCR": 56.8,
+       "MRCR ≥64k": 44.6,
+       "MRCR 8-needle": 32.6,
+       "LongProc": 42.1,
+       "LongBench-v2": 24.3,
+       "RULER": 91.3,
+       "Avg.": 39.4
+      },
+      "underline": [
+       "KL",
+       "Top-1",
+       "RULER"
+      ],
+      "format": "NVFP4 W4A4"
+     },
+     {
+      "method": "Standard QAT",
+      "values": {
+       "bpw": 4.5,
+       "KL": 0.033,
+       "Top-1": 94.2,
+       "HMMT'26": 43.1,
+       "AIME'25": 65.3,
+       "SuperGPQA": 55.5,
+       "OJBench": 13.4,
+       "MRCR": 63.7,
+       "MRCR ≥64k": 52.3,
+       "MRCR 8-needle": 39.7,
+       "LongProc": 59.0,
+       "LongBench-v2": 43.9,
+       "RULER": 89.8,
+       "Avg.": 52.6
+      },
+      "bold": [
+       "OJBench"
+      ],
+      "underline": [
+       "HMMT'26",
+       "AIME'25",
+       "SuperGPQA",
+       "MRCR",
+       "MRCR ≥64k",
+       "MRCR 8-needle",
+       "LongProc",
+       "LongBench-v2",
+       "Avg."
+      ],
+      "format": "NVFP4 W4A4"
+     },
+     {
+      "method": "QUASAR",
+      "values": {
+       "bpw": 4.5,
+       "KL": 0.028,
+       "Top-1": 94.6,
+       "HMMT'26": 43.8,
+       "AIME'25": 68.8,
+       "SuperGPQA": 56.0,
+       "OJBench": 13.4,
+       "MRCR": 71.7,
+       "MRCR ≥64k": 63.8,
+       "MRCR 8-needle": 45.0,
+       "LongProc": 59.7,
+       "LongBench-v2": 44.1,
+       "RULER": 90.5,
+       "Avg.": 55.7
+      },
+      "bold": [
+       "KL",
+       "Top-1",
+       "HMMT'26",
+       "AIME'25",
+       "SuperGPQA",
+       "OJBench",
+       "MRCR",
+       "MRCR ≥64k",
+       "MRCR 8-needle",
+       "LongProc",
+       "LongBench-v2",
+       "Avg."
+      ],
+      "format": "NVFP4 W4A4"
+     }
+    ]
+   },
+   {
+    "model": "Muse-Glimmer-30B",
+    "rows": [
+     {
+      "method": "BF16",
+      "values": {
+       "bpw": 16.0,
+       "KL": null,
+       "Top-1": null,
+       "HMMT'26": 71.7,
+       "AIME'25": 92.2,
+       "SuperGPQA": 60.1,
+       "OJBench": 25.0,
+       "MRCR": 46.1,
+       "MRCR ≥64k": 38.0,
+       "MRCR 8-needle": 24.9,
+       "LongProc": 67.0,
+       "LongBench-v2": 60.4,
+       "RULER": 88.4,
+       "Avg.": 57.4
+      },
+      "format": "BF16"
+     },
+     {
+      "method": "RTN",
+      "values": {
+       "bpw": 4.5,
+       "KL": 0.054,
+       "Top-1": 93.2,
+       "HMMT'26": 69.5,
+       "AIME'25": 87.7,
+       "SuperGPQA": 58.9,
+       "OJBench": 25.0,
+       "MRCR": 44.3,
+       "MRCR ≥64k": 35.6,
+       "MRCR 8-needle": 26.2,
+       "LongProc": 55.7,
+       "LongBench-v2": 59.4,
+       "RULER": 88.3,
+       "Avg.": 55.1
+      },
+      "bold": [
+       "LongBench-v2"
+      ],
+      "underline": [
+       "Top-1",
+       "HMMT'26",
+       "SuperGPQA",
+       "MRCR",
+       "MRCR 8-needle"
+      ],
+      "format": "NVFP4 W4A16"
+     },
+     {
+      "method": "GPTQ",
+      "values": {
+       "bpw": 4.5,
+       "KL": 0.066,
+       "Top-1": 92.4,
+       "HMMT'26": 66.4,
+       "AIME'25": 90.3,
+       "SuperGPQA": 58.5,
+       "OJBench": 25.4,
+       "MRCR": 43.1,
+       "MRCR ≥64k": 40.7,
+       "MRCR 8-needle": 25.5,
+       "LongProc": 60.1,
+       "LongBench-v2": 57.3,
+       "RULER": 84.7,
+       "Avg.": 55.2
+      },
+      "bold": [
+       "MRCR ≥64k"
+      ],
+      "underline": [
+       "AIME'25"
+      ],
+      "format": "NVFP4 W4A4"
+     },
+     {
+      "method": "QUASAR",
+      "values": {
+       "bpw": 4.5,
+       "KL": 0.018,
+       "Top-1": 96.1,
+       "HMMT'26": 72.3,
+       "AIME'25": 90.8,
+       "SuperGPQA": 59.3,
+       "OJBench": 27.2,
+       "MRCR": 48.5,
+       "MRCR ≥64k": 40.0,
+       "MRCR 8-needle": 28.5,
+       "LongProc": 67.3,
+       "LongBench-v2": 58.4,
+       "RULER": 90.2,
+       "Avg.": 58.2
+      },
+      "bold": [
+       "KL",
+       "Top-1",
+       "HMMT'26",
+       "AIME'25",
+       "SuperGPQA",
+       "OJBench",
+       "MRCR",
+       "MRCR 8-needle",
+       "LongProc",
+       "RULER",
+       "Avg."
+      ],
+      "underline": [
+       "MRCR ≥64k",
+       "LongBench-v2"
+      ],
+      "format": "NVFP4 W4A16"
+     },
+     {
+      "method": "QUASAR",
+      "values": {
+       "bpw": 4.5,
+       "KL": 0.053,
+       "Top-1": 93.2,
+       "HMMT'26": 68.3,
+       "AIME'25": 88.0,
+       "SuperGPQA": 58.9,
+       "OJBench": 26.3,
+       "MRCR": 44.1,
+       "MRCR ≥64k": 35.4,
+       "MRCR 8-needle": 25.5,
+       "LongProc": 62.8,
+       "LongBench-v2": 54.5,
+       "RULER": 89.7,
+       "Avg.": 55.3
+      },
+      "underline": [
+       "KL",
+       "Top-1",
+       "OJBench",
+       "LongProc",
+       "RULER",
+       "Avg."
+      ],
+      "format": "NVFP4 W4A4"
+     }
+    ]
+   }
+  ],
+  "table3_source": {
+   "file": "merged_table.tex",
+   "label": "tab:merged",
+   "printed": "Table 3"
+  },
+  "standard_tasks": {
+   "source": {
+    "file": "appendix_nvfp4.tex",
+    "label": "tab:nvfp4-checkpoints-full",
+    "printed": "Table 9"
+   },
+   "caption": "QUASAR gives the best average accuracy among the quantized checkpoints. Accuracy on nine downstream benchmarks for Qwen3-8B and Qwen3.5-9B. The materialized NVFP4 checkpoints are evaluated through vLLM's native W4A4 path.",
+   "columns": [
+    "Avg.",
+    "GSM8K",
+    "MMLU",
+    "ARC-C",
+    "ARC-E",
+    "Hella.",
+    "WinoG.",
+    "TQA",
+    "IFEval",
+    "GPQA-D"
+   ],
+   "models": {
+    "Qwen3-8B": [
+     {
+      "method": "BF16",
+      "values": {
+       "Avg.": 68.6,
+       "GSM8K": 86.7,
+       "MMLU": 72.9,
+       "ARC-C": 56.7,
+       "ARC-E": 80.9,
+       "Hella.": 75.0,
+       "WinoG.": 67.7,
+       "TQA": 54.4,
+       "IFEval": 84.8,
+       "GPQA-D": 38.4
+      }
+     },
+     {
+      "method": "Standard QAT",
+      "values": {
+       "Avg.": 67.1,
+       "GSM8K": 83.9,
+       "MMLU": 70.8,
+       "ARC-C": 55.4,
+       "ARC-E": 80.3,
+       "Hella.": 73.6,
+       "WinoG.": 67.1,
+       "TQA": 53.9,
+       "IFEval": 80.6,
+       "GPQA-D": 37.9
+      },
+      "bold": [
+       "Hella.",
+       "WinoG."
+      ]
+     },
+     {
+      "method": "QUASAR",
+      "values": {
+       "Avg.": 67.6,
+       "GSM8K": 87.0,
+       "MMLU": 71.1,
+       "ARC-C": 55.7,
+       "ARC-E": 80.4,
+       "Hella.": 73.6,
+       "WinoG.": 66.8,
+       "TQA": 54.2,
+       "IFEval": 81.2,
+       "GPQA-D": 38.4
+      },
+      "bold": [
+       "Avg.",
+       "GSM8K",
+       "MMLU",
+       "ARC-C",
+       "ARC-E",
+       "Hella.",
+       "TQA",
+       "IFEval",
+       "GPQA-D"
+      ]
+     }
+    ],
+    "Qwen3.5-9B": [
+     {
+      "method": "BF16",
+      "values": {
+       "Avg.": 71.2,
+       "GSM8K": 74.4,
+       "MMLU": 78.6,
+       "ARC-C": 55.7,
+       "ARC-E": 74.2,
+       "Hella.": 78.1,
+       "WinoG.": 72.8,
+       "TQA": 53.7,
+       "IFEval": 74.4,
+       "GPQA-D": 79.1
+      }
+     },
+     {
+      "method": "Standard QAT",
+      "values": {
+       "Avg.": 69.4,
+       "GSM8K": 73.3,
+       "MMLU": 76.7,
+       "ARC-C": 56.3,
+       "ARC-E": 75.6,
+       "Hella.": 76.7,
+       "WinoG.": 70.8,
+       "TQA": 52.8,
+       "IFEval": 66.0,
+       "GPQA-D": 76.1
+      },
+      "bold": [
+       "ARC-E"
+      ]
+     },
+     {
+      "method": "QUASAR",
+      "values": {
+       "Avg.": 70.2,
+       "GSM8K": 73.7,
+       "MMLU": 77.0,
+       "ARC-C": 56.6,
+       "ARC-E": 75.6,
+       "Hella.": 77.2,
+       "WinoG.": 70.9,
+       "TQA": 53.9,
+       "IFEval": 68.5,
+       "GPQA-D": 78.1
+      },
+      "bold": [
+       "Avg.",
+       "GSM8K",
+       "MMLU",
+       "ARC-C",
+       "ARC-E",
+       "Hella.",
+       "WinoG.",
+       "TQA",
+       "IFEval",
+       "GPQA-D"
+      ]
+     }
+    ]
+   }
+  },
+  "non_termination": {
+   "source": {
+    "file": "nvfp4_longctx_tables.tex",
+    "label": "tab:nvfp4-budget",
+    "printed": "Table 10"
+   },
+   "caption": "QUASAR has the lowest or tied-lowest non-termination rate among the quantized checkpoints. Percentage of generations that reach the 32,768-token output budget without stopping, using the same generations as Table \\ref{tab:merged}. Lower is better.",
+   "columns": [
+    "MATH-500",
+    "LiveCodeBench v6",
+    "OJBench (C++)",
+    "OJBench (Python)"
+   ],
+   "models": {
+    "Qwen3-8B": [
+     {
+      "method": "BF16",
+      "values": {
+       "MATH-500": 0.5,
+       "LiveCodeBench v6": 13.6,
+       "OJBench (C++)": 1.3,
+       "OJBench (Python)": 2.2
+      }
+     },
+     {
+      "method": "RTN",
+      "values": {
+       "MATH-500": 1.4,
+       "LiveCodeBench v6": 40.8,
+       "OJBench (C++)": 20.3,
+       "OJBench (Python)": 26.7
+      }
+     },
+     {
+      "method": "GPTQ",
+      "values": {
+       "MATH-500": 0.5,
+       "LiveCodeBench v6": 24.3,
+       "OJBench (C++)": 11.6,
+       "OJBench (Python)": 10.3
+      },
+      "bold": [
+       "MATH-500"
+      ]
+     },
+     {
+      "method": "Standard QAT",
+      "values": {
+       "MATH-500": 0.5,
+       "LiveCodeBench v6": 21.6,
+       "OJBench (C++)": 4.7,
+       "OJBench (Python)": 5.6
+      },
+      "bold": [
+       "MATH-500"
+      ]
+     },
+     {
+      "method": "QUASAR",
+      "values": {
+       "MATH-500": 0.5,
+       "LiveCodeBench v6": 18.4,
+       "OJBench (C++)": 3.0,
+       "OJBench (Python)": 2.2
+      },
+      "bold": [
+       "MATH-500",
+       "LiveCodeBench v6",
+       "OJBench (C++)",
+       "OJBench (Python)"
+      ]
+     }
+    ],
+    "Qwen3.5-9B": [
+     {
+      "method": "BF16",
+      "values": {
+       "MATH-500": 13.9,
+       "LiveCodeBench v6": 54.6,
+       "OJBench (C++)": 71.5,
+       "OJBench (Python)": 80.2
+      }
+     },
+     {
+      "method": "RTN",
+      "values": {
+       "MATH-500": 37.8,
+       "LiveCodeBench v6": 78.1,
+       "OJBench (C++)": 94.4,
+       "OJBench (Python)": 91.8
+      }
+     },
+     {
+      "method": "GPTQ",
+      "values": {
+       "MATH-500": 41.1,
+       "LiveCodeBench v6": 82.8,
+       "OJBench (C++)": 96.1,
+       "OJBench (Python)": 96.1
+      }
+     },
+     {
+      "method": "Standard QAT",
+      "values": {
+       "MATH-500": 16.0,
+       "LiveCodeBench v6": 59.2,
+       "OJBench (C++)": 82.8,
+       "OJBench (Python)": 81.9
+      }
+     },
+     {
+      "method": "QUASAR",
+      "values": {
+       "MATH-500": 14.8,
+       "LiveCodeBench v6": 52.9,
+       "OJBench (C++)": 79.7,
+       "OJBench (Python)": 79.3
+      },
+      "bold": [
+       "MATH-500",
+       "LiveCodeBench v6",
+       "OJBench (C++)",
+       "OJBench (Python)"
+      ]
+     }
+    ]
+   },
+   "unit": "% of generations reaching the 32,768-token output budget without stopping (lower is better)"
+  },
+  "kl_reduction_vs_standard_qat": {
+   "Qwen3-8B": {
+    "QUASAR_KL": 0.036,
+    "Standard_QAT_KL": 0.041,
+    "computed_pct": 12.2
+   },
+   "Qwen3.5-9B": {
+    "QUASAR_KL": 0.028,
+    "Standard_QAT_KL": 0.033,
+    "computed_pct": 15.2
+   }
+  },
+  "curve_basis_note": "The NVFP4 training curves (Figure 34) use in-loop held-out KL (e.g. Qwen3-8B final 0.0114 vs 0.0155); the 12%/15% figures are on the Table 3 basis (materialized checkpoints via vLLM). Do not compute percentages from the curves."
+ },
+ "gemma4_e4b_vs_google": {
+  "source": {
+   "file": "merged_table.tex",
+   "label": "tab:merged",
+   "printed": "Table 3"
+  },
+  "model": "Gemma-4 E4B",
+  "format": "INT4 (W4A16)",
+  "quasar": {
+   "KL": 0.022,
+   "Top-1": 95.5,
+   "avg_acc_10": 35.8,
+   "bpw": 4.25,
+   "group_size": 64,
+   "distillation_tokens": "~600M",
+   "training_hours": 5
+  },
+  "google_qat": {
+   "KL": 0.064,
+   "Top-1": 92.6,
+   "avg_acc_10": 34.0,
+   "bpw": 4.5,
+   "group_size": 32,
+   "training_data_compute": "undisclosed",
+   "artifact": "google/gemma-4-E4B-it-qat-w4a16-ct"
+  },
+  "derived": {
+   "kl_reduction_pct": 65.6,
+   "acc_gain_pts": 1.8
+  },
+  "stated": {
+   "kl_reduction": "66%",
+   "acc_gain": "1.8 points"
+  },
+  "gguf_q4_0": {
+   "RTN": {
+    "bpw": 4.5,
+    "KL": 0.194,
+    "Top-1": 85.7,
+    "HMMT'26": 18.8,
+    "AIME'25": 32.8,
+    "SuperGPQA": 36.5,
+    "OJBench": 14.2,
+    "MRCR": 22.9,
+    "MRCR ≥64k": 9.1,
+    "MRCR 8-needle": 11.0,
+    "LongProc": 39.0,
+    "LongBench-v2": 38.0,
+    "RULER": 83.8,
+    "Avg.": 30.6
+   },
+   "Google QAT": {
+    "bpw": 4.5,
+    "KL": 0.088,
+    "Top-1": 90.6,
+    "HMMT'26": 29.0,
+    "AIME'25": 35.9,
+    "SuperGPQA": 40.8,
+    "OJBench": 19.4,
+    "MRCR": 22.9,
+    "MRCR ≥64k": 9.4,
+    "MRCR 8-needle": 12.8,
+    "LongProc": 57.8,
+    "LongBench-v2": 39.0,
+    "RULER": 89.3,
+    "Avg.": 35.6
+   },
+   "imatrix (PTQ)": {
+    "bpw": 4.52,
+    "KL": 0.067,
+    "Top-1": 91.1,
+    "HMMT'26": 28.3,
+    "AIME'25": 40.1,
+    "SuperGPQA": 40.9,
+    "OJBench": 19.0,
+    "MRCR": 24.7,
+    "MRCR ≥64k": 11.7,
+    "MRCR 8-needle": 13.0,
+    "LongProc": 46.2,
+    "LongBench-v2": 39.0,
+    "RULER": 88.9,
+    "Avg.": 35.2
+   },
+   "QUASAR": {
+    "bpw": 4.5,
+    "KL": 0.044,
+    "Top-1": 92.8,
+    "HMMT'26": 27.8,
+    "AIME'25": 37.6,
+    "SuperGPQA": 39.6,
+    "OJBench": 19.4,
+    "MRCR": 24.4,
+    "MRCR ≥64k": 11.8,
+    "MRCR 8-needle": 12.7,
+    "LongProc": 53.1,
+    "LongBench-v2": 40.4,
+    "RULER": 89.6,
+    "Avg.": 35.6
+   }
+  },
+  "other_suite_table11": {
+   "BF16 (BF16)": {
+    "bpw": 16.0,
+    "KL": null,
+    "Top-1": null,
+    "TrivQA": 23.6,
+    "NQ": 3.9,
+    "TQA": 59.1,
+    "ARC-E": 79.7,
+    "ARC-C": 56.5,
+    "GSM8K": 84.1,
+    "IFEval": 85.2,
+    "MATH-h": 63.4,
+    "Avg.": 56.9
+   },
+   "RTN (INT4 g64)": {
+    "bpw": 4.25,
+    "KL": 0.079,
+    "Top-1": 91.5,
+    "TrivQA": 25.2,
+    "NQ": 3.0,
+    "TQA": 59.3,
+    "ARC-E": 78.3,
+    "ARC-C": 55.2,
+    "GSM8K": 79.7,
+    "IFEval": 83.0,
+    "MATH-h": 56.1,
+    "Avg.": 55.0
+   },
+   "GPTQ (INT4 g64)": {
+    "bpw": 4.25,
+    "KL": 0.031,
+    "Top-1": 94.7,
+    "TrivQA": 21.3,
+    "NQ": 3.3,
+    "TQA": 56.1,
+    "ARC-E": 78.2,
+    "ARC-C": 54.9,
+    "GSM8K": 83.5,
+    "IFEval": 83.4,
+    "MATH-h": 59.4,
+    "Avg.": 55.0
+   },
+   "Google QAT (INT4 g32)": {
+    "bpw": 4.5,
+    "KL": 0.064,
+    "Top-1": 92.6,
+    "TrivQA": 20.1,
+    "NQ": 2.4,
+    "TQA": 55.4,
+    "ARC-E": 78.3,
+    "ARC-C": 56.0,
+    "GSM8K": 81.5,
+    "IFEval": 81.9,
+    "MATH-h": 59.4,
+    "Avg.": 54.4
+   },
+   "QUASAR (INT4 g64)": {
+    "bpw": 4.25,
+    "KL": 0.022,
+    "Top-1": 95.5,
+    "TrivQA": 23.8,
+    "NQ": 4.7,
+    "TQA": 58.2,
+    "ARC-E": 79.8,
+    "ARC-C": 56.2,
+    "GSM8K": 82.0,
+    "IFEval": 82.6,
+    "MATH-h": 60.7,
+    "Avg.": 56.0
+   },
+   "RTN (GGUF Q4_0)": {
+    "bpw": 4.5,
+    "KL": 0.194,
+    "Top-1": 85.7,
+    "TrivQA": 17.3,
+    "NQ": 2.0,
+    "TQA": 58.5,
+    "ARC-E": 76.2,
+    "ARC-C": 53.8,
+    "GSM8K": 75.8,
+    "IFEval": 80.2,
+    "MATH-h": 48.7,
+    "Avg.": 51.6
+   },
+   "Google QAT (GGUF Q4_0)": {
+    "bpw": 4.5,
+    "KL": 0.088,
+    "Top-1": 90.6,
+    "TrivQA": 18.5,
+    "NQ": 2.3,
+    "TQA": 55.5,
+    "ARC-E": 78.7,
+    "ARC-C": 56.1,
+    "GSM8K": 81.4,
+    "IFEval": 81.7,
+    "MATH-h": 58.7,
+    "Avg.": 54.1
+   },
+   "Google QAT repack (GGUF Q4_0)": {
+    "bpw": 4.5,
+    "KL": 0.071,
+    "Top-1": 91.8,
+    "TrivQA": 20.0,
+    "NQ": 2.2,
+    "TQA": 56.2,
+    "ARC-E": 79.1,
+    "ARC-C": 55.4,
+    "GSM8K": 83.5,
+    "IFEval": 83.2,
+    "MATH-h": 61.8,
+    "Avg.": 55.2
+   },
+   "imatrix (PTQ) (GGUF Q4_0)": {
+    "bpw": 4.52,
+    "KL": 0.067,
+    "Top-1": 91.1,
+    "TrivQA": 20.6,
+    "NQ": 3.0,
+    "TQA": 58.8,
+    "ARC-E": 79.3,
+    "ARC-C": 53.8,
+    "GSM8K": 80.4,
+    "IFEval": 83.2,
+    "MATH-h": 59.7,
+    "Avg.": 54.9
+   },
+   "QUASAR (GGUF Q4_0)": {
+    "bpw": 4.5,
+    "KL": 0.044,
+    "Top-1": 92.8,
+    "TrivQA": 24.0,
+    "NQ": 4.7,
+    "TQA": 58.2,
+    "ARC-E": 79.7,
+    "ARC-C": 56.1,
+    "GSM8K": 81.8,
+    "IFEval": 82.4,
+    "MATH-h": 60.5,
+    "Avg.": 55.9
+   }
+  },
+  "gemma4_12b_table11": {
+   "BF16 (BF16)": {
+    "bpw": 16.0,
+    "KL": null,
+    "Top-1": null,
+    "MMLU": 72.8,
+    "IFEval": 88.0,
+    "ARC-C": 50.2,
+    "AGIEval": 24.3,
+    "MMLU-P": 49.9,
+    "TQA": 62.1,
+    "MATH-h": 74.7,
+    "Avg.": 60.3
+   },
+   "RTN (INT4 g64)": {
+    "bpw": 4.25,
+    "KL": 0.194,
+    "Top-1": 89.2,
+    "MMLU": 60.6,
+    "IFEval": 79.7,
+    "ARC-C": 46.4,
+    "AGIEval": 19.4,
+    "MMLU-P": 39.0,
+    "TQA": 60.6,
+    "MATH-h": 50.5,
+    "Avg.": 50.9
+   },
+   "GPTQ (INT4 g64)": {
+    "bpw": 4.25,
+    "KL": 0.041,
+    "Top-1": 95.2,
+    "MMLU": 68.5,
+    "IFEval": 86.9,
+    "ARC-C": 47.8,
+    "AGIEval": 22.7,
+    "MMLU-P": 48.2,
+    "TQA": 62.1,
+    "MATH-h": 70.9,
+    "Avg.": 58.2
+   },
+   "Google QAT (INT4 g32)": {
+    "bpw": 4.5,
+    "KL": 0.044,
+    "Top-1": 94.8,
+    "MMLU": 67.8,
+    "IFEval": 87.2,
+    "ARC-C": 50.1,
+    "AGIEval": 22.6,
+    "MMLU-P": 47.9,
+    "TQA": 60.0,
+    "MATH-h": 73.2,
+    "Avg.": 58.4
+   },
+   "QUASAR (INT4 g64)": {
+    "bpw": 4.25,
+    "KL": 0.034,
+    "Top-1": 95.5,
+    "MMLU": 70.4,
+    "IFEval": 87.6,
+    "ARC-C": 51.3,
+    "AGIEval": 24.2,
+    "MMLU-P": 45.8,
+    "TQA": 59.2,
+    "MATH-h": 71.9,
+    "Avg.": 58.6
+   },
+   "RTN (GGUF Q4_0)": {
+    "bpw": 4.5,
+    "KL": 0.156,
+    "Top-1": 89.8,
+    "MMLU": 59.2,
+    "IFEval": 87.4,
+    "ARC-C": 47.8,
+    "AGIEval": 22.7,
+    "MMLU-P": 38.4,
+    "TQA": 60.2,
+    "MATH-h": 62.3,
+    "Avg.": 54.0
+   },
+   "Google QAT (GGUF Q4_0)": {
+    "bpw": 4.5,
+    "KL": 0.069,
+    "Top-1": 93.5,
+    "MMLU": 71.0,
+    "IFEval": 89.1,
+    "ARC-C": 48.9,
+    "AGIEval": 22.8,
+    "MMLU-P": 45.6,
+    "TQA": 61.3,
+    "MATH-h": 74.8,
+    "Avg.": 59.1
+   },
+   "imatrix (PTQ) (GGUF Q4_0)": {
+    "bpw": 4.52,
+    "KL": 0.108,
+    "Top-1": 91.6,
+    "MMLU": 64.9,
+    "IFEval": 87.1,
+    "ARC-C": 48.6,
+    "AGIEval": 23.5,
+    "MMLU-P": 43.4,
+    "TQA": 60.3,
+    "MATH-h": 66.8,
+    "Avg.": 56.4
+   },
+   "QUASAR (GGUF Q4_0)": {
+    "bpw": 4.5,
+    "KL": 0.048,
+    "Top-1": 94.3,
+    "MMLU": 70.3,
+    "IFEval": 87.6,
+    "ARC-C": 51.5,
+    "AGIEval": 24.2,
+    "MMLU-P": 45.5,
+    "TQA": 59.1,
+    "MATH-h": 72.5,
+    "Avg.": 58.7
+   }
+  }
+ },
+ "released_checkpoints_table11": {
+  "source": {
+   "file": "released_table_full.tex",
+   "label": "tab:released-full",
+   "printed": "Table 11"
+  },
+  "caption": "Comparison with released 4-bit checkpoints across four model families. We report fidelity to BF16 and accuracy on each model's benchmark suite. GGUF KL values are comparable only within each block. \\ddagger denotes mixed NVFP4, FP8, and BF16 precision.",
+  "models": {
+   "Qwen3.5-4B": {
+    "columns": [
+     "bpw",
+     "KL",
+     "Top-1",
+     "GSM8K-P",
+     "MMLU-P",
+     "IFEval",
+     "MATH",
+     "AIME25",
+     "GPQA-D",
+     "Avg."
+    ],
+    "blocks": {
+     "main": [
+      {
+       "method": "BF16",
+       "values": {
+        "bpw": 16.0,
+        "KL": null,
+        "Top-1": null,
+        "GSM8K-P": 94.0,
+        "MMLU-P": 78.9,
+        "IFEval": 88.0,
+        "MATH": 84.4,
+        "AIME25": 79.2,
+        "GPQA-D": 77.3,
+        "Avg.": 83.6
+       },
+       "format": "BF16"
+      },
+      {
+       "method": "RTN",
+       "values": {
+        "bpw": 4.5,
+        "KL": 0.042,
+        "Top-1": 93.8,
+        "GSM8K-P": 94.9,
+        "MMLU-P": 77.5,
+        "IFEval": 86.3,
+        "MATH": 83.8,
+        "AIME25": 67.1,
+        "GPQA-D": 74.1,
+        "Avg.": 80.6
+       },
+       "underline": [
+        "GSM8K-P"
+       ],
+       "format": "NVFP4 W4A16"
+      },
+      {
+       "method": "GPTQ",
+       "values": {
+        "bpw": 4.5,
+        "KL": 0.023,
+        "Top-1": 95.7,
+        "GSM8K-P": 95.1,
+        "MMLU-P": 75.2,
+        "IFEval": 84.5,
+        "MATH": 83.2,
+        "AIME25": 52.9,
+        "GPQA-D": 69.9,
+        "Avg.": 76.8
+       },
+       "bold": [
+        "GSM8K-P"
+       ],
+       "underline": [
+        "KL",
+        "Top-1"
+       ],
+       "format": "NVFP4 W4A16"
+      },
+      {
+       "method": "GPTQ",
+       "values": {
+        "bpw": 7.49,
+        "KL": 0.049,
+        "Top-1": 93.1,
+        "GSM8K-P": 94.0,
+        "MMLU-P": 77.5,
+        "IFEval": 87.1,
+        "MATH": 83.0,
+        "AIME25": 65.0,
+        "GPQA-D": 71.2,
+        "Avg.": 79.6
+       },
+       "format": "INT4 g128"
+      },
+      {
+       "method": "AWQ",
+       "values": {
+        "bpw": 4.5,
+        "KL": 0.042,
+        "Top-1": 93.9,
+        "GSM8K-P": 93.9,
+        "MMLU-P": 77.6,
+        "IFEval": 87.6,
+        "MATH": 84.2,
+        "AIME25": 72.5,
+        "GPQA-D": 74.6,
+        "Avg.": 81.7
+       },
+       "underline": [
+        "IFEval",
+        "MATH",
+        "AIME25",
+        "GPQA-D",
+        "Avg."
+       ],
+       "format": "INT4 g32"
+      },
+      {
+       "method": "ModelOpt PTQ",
+       "values": {
+        "bpw": 4.5,
+        "KL": 0.043,
+        "Top-1": 93.7,
+        "GSM8K-P": 94.2,
+        "MMLU-P": 77.9,
+        "IFEval": 88.2,
+        "MATH": 84.6,
+        "AIME25": 65.8,
+        "GPQA-D": 73.6,
+        "Avg.": 80.7
+       },
+       "bold": [
+        "IFEval",
+        "MATH"
+       ],
+       "underline": [
+        "MMLU-P"
+       ],
+       "format": "NVFP4 W4A4"
+      },
+      {
+       "method": "QUASAR",
+       "values": {
+        "bpw": 4.5,
+        "KL": 0.018,
+        "Top-1": 96.2,
+        "GSM8K-P": 94.7,
+        "MMLU-P": 78.5,
+        "IFEval": 87.2,
+        "MATH": 83.8,
+        "AIME25": 74.2,
+        "GPQA-D": 77.9,
+        "Avg.": 82.7
+       },
+       "bold": [
+        "KL",
+        "Top-1",
+        "MMLU-P",
+        "AIME25",
+        "GPQA-D",
+        "Avg."
+       ],
+       "format": "NVFP4 W4A16"
+      }
+     ],
+     "GGUF (llama.cpp)": [
+      {
+       "method": "RTN",
+       "values": {
+        "bpw": 4.5,
+        "KL": 0.372,
+        "Top-1": 89.0,
+        "GSM8K-P": 94.3,
+        "MMLU-P": 77.2,
+        "IFEval": 90.6,
+        "MATH": 84.2,
+        "AIME25": 64.2,
+        "GPQA-D": 73.7,
+        "Avg.": 80.7
+       },
+       "underline": [
+        "GSM8K-P",
+        "IFEval"
+       ],
+       "format": "GGUF Q4_0"
+      },
+      {
+       "method": "KD-QAT g64",
+       "values": {
+        "bpw": 4.5,
+        "KL": 0.363,
+        "Top-1": 88.4,
+        "GSM8K-P": 94.9,
+        "MMLU-P": 77.4,
+        "IFEval": 84.5,
+        "MATH": 84.4,
+        "AIME25": 64.6,
+        "GPQA-D": 73.9,
+        "Avg.": 80.0
+       },
+       "bold": [
+        "GSM8K-P"
+       ],
+       "underline": [
+        "MATH"
+       ],
+       "format": "GGUF Q4_0"
+      },
+      {
+       "method": "imatrix (PTQ)",
+       "values": {
+        "bpw": 4.84,
+        "KL": 0.284,
+        "Top-1": 90.4,
+        "GSM8K-P": 94.3,
+        "MMLU-P": 78.0,
+        "IFEval": 90.6,
+        "MATH": 86.0,
+        "AIME25": 70.8,
+        "GPQA-D": 76.1,
+        "Avg.": 82.6
+       },
+       "bold": [
+        "MATH",
+        "GPQA-D"
+       ],
+       "underline": [
+        "KL",
+        "Top-1",
+        "GSM8K-P",
+        "MMLU-P",
+        "IFEval",
+        "AIME25",
+        "Avg."
+       ],
+       "format": "GGUF Q4_0"
+      },
+      {
+       "method": "QUASAR",
+       "values": {
+        "bpw": 4.5,
+        "KL": 0.235,
+        "Top-1": 91.3,
+        "GSM8K-P": 94.9,
+        "MMLU-P": 78.2,
+        "IFEval": 90.9,
+        "MATH": 83.8,
+        "AIME25": 77.9,
+        "GPQA-D": 74.6,
+        "Avg.": 83.4
+       },
+       "bold": [
+        "KL",
+        "Top-1",
+        "GSM8K-P",
+        "MMLU-P",
+        "IFEval",
+        "AIME25",
+        "Avg."
+       ],
+       "underline": [
+        "GPQA-D"
+       ],
+       "format": "GGUF Q4_0"
+      }
+     ]
+    }
+   },
+   "Muse-Glimmer-30B": {
+    "columns": [
+     "bpw",
+     "KL",
+     "Top-1",
+     "GPQA-D",
+     "MMLU-P",
+     "AIME25",
+     "LCB",
+     "RUL32K",
+     "RUL64K",
+     "RUL128K",
+     "Avg."
+    ],
+    "blocks": {
+     "main": [
+      {
+       "method": "BF16",
+       "values": {
+        "bpw": 16.0,
+        "KL": null,
+        "Top-1": null,
+        "GPQA-D": 62.1,
+        "MMLU-P": 83.1,
+        "AIME25": 86.7,
+        "LCB": 53.4,
+        "RUL32K": 86.6,
+        "RUL64K": 85.2,
+        "RUL128K": 81.0,
+        "Avg.": 76.9
+       },
+       "format": "BF16"
+      },
+      {
+       "method": "RTN",
+       "values": {
+        "bpw": 4.5,
+        "KL": 0.054,
+        "Top-1": 93.2,
+        "GPQA-D": 63.6,
+        "MMLU-P": 82.9,
+        "AIME25": 83.3,
+        "LCB": 48.1,
+        "RUL32K": 84.5,
+        "RUL64K": 84.0,
+        "RUL128K": 83.6,
+        "Avg.": 75.7
+       },
+       "bold": [
+        "GPQA-D"
+       ],
+       "underline": [
+        "RUL128K"
+       ],
+       "format": "NVFP4 W4A16"
+      },
+      {
+       "method": "GPTQ",
+       "values": {
+        "bpw": 4.5,
+        "KL": 0.066,
+        "Top-1": 92.4,
+        "GPQA-D": 63.1,
+        "MMLU-P": 83.0,
+        "AIME25": 86.7,
+        "LCB": 54.2,
+        "RUL32K": 86.2,
+        "RUL64K": 82.4,
+        "RUL128K": 80.6,
+        "Avg.": 76.6
+       },
+       "bold": [
+        "LCB"
+       ],
+       "underline": [
+        "GPQA-D",
+        "MMLU-P",
+        "AIME25",
+        "RUL32K"
+       ],
+       "format": "NVFP4 W4A4"
+      },
+      {
+       "method": "AutoQuantize",
+       "values": {
+        "bpw": 5.52,
+        "KL": 0.03,
+        "Top-1": 94.9,
+        "GPQA-D": 63.1,
+        "MMLU-P": 82.9,
+        "AIME25": 83.3,
+        "LCB": 52.7,
+        "RUL32K": 85.6,
+        "RUL64K": 84.8,
+        "RUL128K": 83.5,
+        "Avg.": 76.6
+       },
+       "underline": [
+        "KL",
+        "Top-1",
+        "GPQA-D",
+        "LCB",
+        "RUL64K"
+       ],
+       "format": "NVFP4+FP8‡"
+      },
+      {
+       "method": "QUASAR",
+       "values": {
+        "bpw": 4.5,
+        "KL": 0.018,
+        "Top-1": 96.1,
+        "GPQA-D": 63.6,
+        "MMLU-P": 83.3,
+        "AIME25": 90.0,
+        "LCB": 49.6,
+        "RUL32K": 87.2,
+        "RUL64K": 86.4,
+        "RUL128K": 84.1,
+        "Avg.": 77.7
+       },
+       "bold": [
+        "KL",
+        "Top-1",
+        "GPQA-D",
+        "MMLU-P",
+        "AIME25",
+        "RUL32K",
+        "RUL64K",
+        "RUL128K",
+        "Avg."
+       ],
+       "format": "NVFP4 W4A16"
+      },
+      {
+       "method": "QUASAR",
+       "values": {
+        "bpw": 4.5,
+        "KL": 0.053,
+        "Top-1": 93.2,
+        "GPQA-D": 63.1,
+        "MMLU-P": 82.7,
+        "AIME25": 83.3,
+        "LCB": 52.7,
+        "RUL32K": 87.2,
+        "RUL64K": 86.4,
+        "RUL128K": 83.5,
+        "Avg.": 77.0
+       },
+       "bold": [
+        "RUL32K",
+        "RUL64K"
+       ],
+       "underline": [
+        "GPQA-D",
+        "LCB",
+        "Avg."
+       ],
+       "format": "NVFP4 W4A4"
+      }
+     ]
+    }
+   },
+   "Gemma-4 12B": {
+    "columns": [
+     "bpw",
+     "KL",
+     "Top-1",
+     "MMLU",
+     "IFEval",
+     "ARC-C",
+     "AGIEval",
+     "MMLU-P",
+     "TQA",
+     "MATH-h",
+     "Avg."
+    ],
+    "blocks": {
+     "main": [
+      {
+       "method": "BF16",
+       "values": {
+        "bpw": 16.0,
+        "KL": null,
+        "Top-1": null,
+        "MMLU": 72.8,
+        "IFEval": 88.0,
+        "ARC-C": 50.2,
+        "AGIEval": 24.3,
+        "MMLU-P": 49.9,
+        "TQA": 62.1,
+        "MATH-h": 74.7,
+        "Avg.": 60.3
+       },
+       "format": "BF16"
+      },
+      {
+       "method": "RTN",
+       "values": {
+        "bpw": 4.25,
+        "KL": 0.194,
+        "Top-1": 89.2,
+        "MMLU": 60.6,
+        "IFEval": 79.7,
+        "ARC-C": 46.4,
+        "AGIEval": 19.4,
+        "MMLU-P": 39.0,
+        "TQA": 60.6,
+        "MATH-h": 50.5,
+        "Avg.": 50.9
+       },
+       "underline": [
+        "TQA"
+       ],
+       "format": "INT4 g64"
+      },
+      {
+       "method": "GPTQ",
+       "values": {
+        "bpw": 4.25,
+        "KL": 0.041,
+        "Top-1": 95.2,
+        "MMLU": 68.5,
+        "IFEval": 86.9,
+        "ARC-C": 47.8,
+        "AGIEval": 22.7,
+        "MMLU-P": 48.2,
+        "TQA": 62.1,
+        "MATH-h": 70.9,
+        "Avg.": 58.2
+       },
+       "bold": [
+        "MMLU-P",
+        "TQA"
+       ],
+       "underline": [
+        "KL",
+        "Top-1",
+        "MMLU",
+        "AGIEval"
+       ],
+       "format": "INT4 g64"
+      },
+      {
+       "method": "Google QAT",
+       "values": {
+        "bpw": 4.5,
+        "KL": 0.044,
+        "Top-1": 94.8,
+        "MMLU": 67.8,
+        "IFEval": 87.2,
+        "ARC-C": 50.1,
+        "AGIEval": 22.6,
+        "MMLU-P": 47.9,
+        "TQA": 60.0,
+        "MATH-h": 73.2,
+        "Avg.": 58.4
+       },
+       "bold": [
+        "MATH-h"
+       ],
+       "underline": [
+        "IFEval",
+        "ARC-C",
+        "MMLU-P",
+        "Avg."
+       ],
+       "format": "INT4 g32"
+      },
+      {
+       "method": "QUASAR",
+       "values": {
+        "bpw": 4.25,
+        "KL": 0.034,
+        "Top-1": 95.5,
+        "MMLU": 70.4,
+        "IFEval": 87.6,
+        "ARC-C": 51.3,
+        "AGIEval": 24.2,
+        "MMLU-P": 45.8,
+        "TQA": 59.2,
+        "MATH-h": 71.9,
+        "Avg.": 58.6
+       },
+       "bold": [
+        "KL",
+        "Top-1",
+        "MMLU",
+        "IFEval",
+        "ARC-C",
+        "AGIEval",
+        "Avg."
+       ],
+       "underline": [
+        "MATH-h"
+       ],
+       "format": "INT4 g64"
+      }
+     ],
+     "GGUF (llama.cpp)": [
+      {
+       "method": "RTN",
+       "values": {
+        "bpw": 4.5,
+        "KL": 0.156,
+        "Top-1": 89.8,
+        "MMLU": 59.2,
+        "IFEval": 87.4,
+        "ARC-C": 47.8,
+        "AGIEval": 22.7,
+        "MMLU-P": 38.4,
+        "TQA": 60.2,
+        "MATH-h": 62.3,
+        "Avg.": 54.0
+       },
+       "format": "GGUF Q4_0"
+      },
+      {
+       "method": "Google QAT",
+       "values": {
+        "bpw": 4.5,
+        "KL": 0.069,
+        "Top-1": 93.5,
+        "MMLU": 71.0,
+        "IFEval": 89.1,
+        "ARC-C": 48.9,
+        "AGIEval": 22.8,
+        "MMLU-P": 45.6,
+        "TQA": 61.3,
+        "MATH-h": 74.8,
+        "Avg.": 59.1
+       },
+       "bold": [
+        "MMLU",
+        "IFEval",
+        "MMLU-P",
+        "TQA",
+        "MATH-h",
+        "Avg."
+       ],
+       "underline": [
+        "KL",
+        "Top-1",
+        "ARC-C"
+       ],
+       "format": "GGUF Q4_0"
+      },
+      {
+       "method": "imatrix (PTQ)",
+       "values": {
+        "bpw": 4.52,
+        "KL": 0.108,
+        "Top-1": 91.6,
+        "MMLU": 64.9,
+        "IFEval": 87.1,
+        "ARC-C": 48.6,
+        "AGIEval": 23.5,
+        "MMLU-P": 43.4,
+        "TQA": 60.3,
+        "MATH-h": 66.8,
+        "Avg.": 56.4
+       },
+       "underline": [
+        "AGIEval",
+        "TQA"
+       ],
+       "format": "GGUF Q4_0"
+      },
+      {
+       "method": "QUASAR",
+       "values": {
+        "bpw": 4.5,
+        "KL": 0.048,
+        "Top-1": 94.3,
+        "MMLU": 70.3,
+        "IFEval": 87.6,
+        "ARC-C": 51.5,
+        "AGIEval": 24.2,
+        "MMLU-P": 45.5,
+        "TQA": 59.1,
+        "MATH-h": 72.5,
+        "Avg.": 58.7
+       },
+       "bold": [
+        "KL",
+        "Top-1",
+        "ARC-C",
+        "AGIEval"
+       ],
+       "underline": [
+        "MMLU",
+        "IFEval",
+        "MMLU-P",
+        "MATH-h",
+        "Avg."
+       ],
+       "format": "GGUF Q4_0"
+      }
+     ]
+    }
+   },
+   "Gemma-4 E4B": {
+    "columns": [
+     "bpw",
+     "KL",
+     "Top-1",
+     "TrivQA",
+     "NQ",
+     "TQA",
+     "ARC-E",
+     "ARC-C",
+     "GSM8K",
+     "IFEval",
+     "MATH-h",
+     "Avg."
+    ],
+    "blocks": {
+     "main": [
+      {
+       "method": "BF16",
+       "values": {
+        "bpw": 16.0,
+        "KL": null,
+        "Top-1": null,
+        "TrivQA": 23.6,
+        "NQ": 3.9,
+        "TQA": 59.1,
+        "ARC-E": 79.7,
+        "ARC-C": 56.5,
+        "GSM8K": 84.1,
+        "IFEval": 85.2,
+        "MATH-h": 63.4,
+        "Avg.": 56.9
+       },
+       "format": "BF16"
+      },
+      {
+       "method": "RTN",
+       "values": {
+        "bpw": 4.25,
+        "KL": 0.079,
+        "Top-1": 91.5,
+        "TrivQA": 25.2,
+        "NQ": 3.0,
+        "TQA": 59.3,
+        "ARC-E": 78.3,
+        "ARC-C": 55.2,
+        "GSM8K": 79.7,
+        "IFEval": 83.0,
+        "MATH-h": 56.1,
+        "Avg.": 55.0
+       },
+       "bold": [
+        "TrivQA",
+        "TQA"
+       ],
+       "underline": [
+        "ARC-E",
+        "IFEval"
+       ],
+       "format": "INT4 g64"
+      },
+      {
+       "method": "GPTQ",
+       "values": {
+        "bpw": 4.25,
+        "KL": 0.031,
+        "Top-1": 94.7,
+        "TrivQA": 21.3,
+        "NQ": 3.3,
+        "TQA": 56.1,
+        "ARC-E": 78.2,
+        "ARC-C": 54.9,
+        "GSM8K": 83.5,
+        "IFEval": 83.4,
+        "MATH-h": 59.4,
+        "Avg.": 55.0
+       },
+       "bold": [
+        "GSM8K",
+        "IFEval"
+       ],
+       "underline": [
+        "KL",
+        "Top-1",
+        "NQ",
+        "MATH-h",
+        "Avg."
+       ],
+       "format": "INT4 g64"
+      },
+      {
+       "method": "Google QAT",
+       "values": {
+        "bpw": 4.5,
+        "KL": 0.064,
+        "Top-1": 92.6,
+        "TrivQA": 20.1,
+        "NQ": 2.4,
+        "TQA": 55.4,
+        "ARC-E": 78.3,
+        "ARC-C": 56.0,
+        "GSM8K": 81.5,
+        "IFEval": 81.9,
+        "MATH-h": 59.4,
+        "Avg.": 54.4
+       },
+       "underline": [
+        "ARC-E",
+        "ARC-C",
+        "MATH-h"
+       ],
+       "format": "INT4 g32"
+      },
+      {
+       "method": "QUASAR",
+       "values": {
+        "bpw": 4.25,
+        "KL": 0.022,
+        "Top-1": 95.5,
+        "TrivQA": 23.8,
+        "NQ": 4.7,
+        "TQA": 58.2,
+        "ARC-E": 79.8,
+        "ARC-C": 56.2,
+        "GSM8K": 82.0,
+        "IFEval": 82.6,
+        "MATH-h": 60.7,
+        "Avg.": 56.0
+       },
+       "bold": [
+        "KL",
+        "Top-1",
+        "NQ",
+        "ARC-E",
+        "ARC-C",
+        "MATH-h",
+        "Avg."
+       ],
+       "underline": [
+        "TrivQA",
+        "TQA",
+        "GSM8K"
+       ],
+       "format": "INT4 g64"
+      }
+     ],
+     "GGUF (llama.cpp)": [
+      {
+       "method": "RTN",
+       "values": {
+        "bpw": 4.5,
+        "KL": 0.194,
+        "Top-1": 85.7,
+        "TrivQA": 17.3,
+        "NQ": 2.0,
+        "TQA": 58.5,
+        "ARC-E": 76.2,
+        "ARC-C": 53.8,
+        "GSM8K": 75.8,
+        "IFEval": 80.2,
+        "MATH-h": 48.7,
+        "Avg.": 51.6
+       },
+       "underline": [
+        "TQA"
+       ],
+       "format": "GGUF Q4_0"
+      },
+      {
+       "method": "Google QAT",
+       "values": {
+        "bpw": 4.5,
+        "KL": 0.088,
+        "Top-1": 90.6,
+        "TrivQA": 18.5,
+        "NQ": 2.3,
+        "TQA": 55.5,
+        "ARC-E": 78.7,
+        "ARC-C": 56.1,
+        "GSM8K": 81.4,
+        "IFEval": 81.7,
+        "MATH-h": 58.7,
+        "Avg.": 54.1
+       },
+       "bold": [
+        "ARC-C"
+       ],
+       "format": "GGUF Q4_0"
+      },
+      {
+       "method": "Google QAT repack",
+       "values": {
+        "bpw": 4.5,
+        "KL": 0.071,
+        "Top-1": 91.8,
+        "TrivQA": 20.0,
+        "NQ": 2.2,
+        "TQA": 56.2,
+        "ARC-E": 79.1,
+        "ARC-C": 55.4,
+        "GSM8K": 83.5,
+        "IFEval": 83.2,
+        "MATH-h": 61.8,
+        "Avg.": 55.2
+       },
+       "bold": [
+        "GSM8K",
+        "IFEval",
+        "MATH-h"
+       ],
+       "underline": [
+        "Top-1",
+        "ARC-C",
+        "Avg."
+       ],
+       "format": "GGUF Q4_0"
+      },
+      {
+       "method": "imatrix (PTQ)",
+       "values": {
+        "bpw": 4.52,
+        "KL": 0.067,
+        "Top-1": 91.1,
+        "TrivQA": 20.6,
+        "NQ": 3.0,
+        "TQA": 58.8,
+        "ARC-E": 79.3,
+        "ARC-C": 53.8,
+        "GSM8K": 80.4,
+        "IFEval": 83.2,
+        "MATH-h": 59.7,
+        "Avg.": 54.9
+       },
+       "bold": [
+        "TQA",
+        "IFEval"
+       ],
+       "underline": [
+        "KL",
+        "TrivQA",
+        "NQ",
+        "ARC-E"
+       ],
+       "format": "GGUF Q4_0"
+      },
+      {
+       "method": "QUASAR",
+       "values": {
+        "bpw": 4.5,
+        "KL": 0.044,
+        "Top-1": 92.8,
+        "TrivQA": 24.0,
+        "NQ": 4.7,
+        "TQA": 58.2,
+        "ARC-E": 79.7,
+        "ARC-C": 56.1,
+        "GSM8K": 81.8,
+        "IFEval": 82.4,
+        "MATH-h": 60.5,
+        "Avg.": 55.9
+       },
+       "bold": [
+        "KL",
+        "Top-1",
+        "TrivQA",
+        "NQ",
+        "ARC-E",
+        "ARC-C",
+        "Avg."
+       ],
+       "underline": [
+        "GSM8K",
+        "IFEval",
+        "MATH-h"
+       ],
+       "format": "GGUF Q4_0"
+      }
+     ]
+    }
+   }
+  },
+  "notes": "bpw includes the quantized transformer-block weights, scales, and zero-points. GGUF KL values are comparable only within each block. ‡ = mixed NVFP4, FP8, and BF16 precision."
+ },
+ "released_artifacts_table12": {
+  "source": {
+   "file": "appendix_released.tex",
+   "label": "tab:released-artifacts",
+   "printed": "Table 12"
+  },
+  "rows": [
+   {
+    "model": "Qwen3.5-4B",
+    "row": "BF16",
+    "artifact": "Qwen/Qwen3.5-4B"
+   },
+   {
+    "model": "Qwen3.5-4B",
+    "row": "GPTQ (INT4 g128)",
+    "artifact": "RedHatAI/Qwen3.5-4B-quantized.w4a16"
+   },
+   {
+    "model": "Qwen3.5-4B",
+    "row": "AWQ (INT4 g32)",
+    "artifact": "cyankiwi/Qwen3.5-4B-AWQ-4bit"
+   },
+   {
+    "model": "Qwen3.5-4B",
+    "row": "ModelOpt PTQ",
+    "artifact": "cosmicproc/Qwen3.5-4B-NVFP4"
+   },
+   {
+    "model": "Qwen3.5-4B",
+    "row": "imatrix (GGUF)",
+    "artifact": "bartowski/Qwen_Qwen3.5-4B-GGUF"
+   },
+   {
+    "model": "Qwen3.5-4B",
+    "row": "KD-QAT g64 (GGUF)",
+    "artifact": "YoozLabs/Qwen3.5-4B-qat-GGUF"
+   },
+   {
+    "model": "Muse-Glimmer-30B",
+    "row": "BF16",
+    "artifact": "meta-models/Muse-Glimmer-30B"
+   },
+   {
+    "model": "Muse-Glimmer-30B",
+    "row": "AutoQuantize",
+    "artifact": "nvidia/Muse-Glimmer-30B-NVFP4"
+   },
+   {
+    "model": "Muse-Glimmer-30B",
+    "row": "GPTQ (NVFP4 W4A4)",
+    "artifact": "RedHatAI/Muse-Glimmer-30B-NVFP4"
+   },
+   {
+    "model": "Gemma-4 E4B",
+    "row": "BF16",
+    "artifact": "google/gemma-4-E4B-it"
+   },
+   {
+    "model": "Gemma-4 E4B",
+    "row": "Google QAT",
+    "artifact": "google/gemma-4-E4B-it-qat-w4a16-ct"
+   },
+   {
+    "model": "Gemma-4 E4B",
+    "row": "Google QAT (GGUF)",
+    "artifact": "google/gemma-4-E4B-it-qat-q4_0-gguf"
+   },
+   {
+    "model": "Gemma-4 E4B",
+    "row": "Google QAT repack (GGUF)",
+    "artifact": "unsloth/gemma-4-E4B-it-qat-GGUF"
+   },
+   {
+    "model": "Gemma-4 E4B",
+    "row": "imatrix (GGUF)",
+    "artifact": "unsloth/gemma-4-E4B-it-GGUF"
+   },
+   {
+    "model": "Gemma-4 12B",
+    "row": "BF16",
+    "artifact": "google/gemma-4-12B-it"
+   },
+   {
+    "model": "Gemma-4 12B",
+    "row": "Google QAT",
+    "artifact": "google/gemma-4-12B-it-qat-w4a16-ct"
+   },
+   {
+    "model": "Gemma-4 12B",
+    "row": "Google QAT (GGUF)",
+    "artifact": "google/gemma-4-12B-it-qat-q4_0-gguf"
+   },
+   {
+    "model": "Gemma-4 12B",
+    "row": "Google QAT repack (GGUF)",
+    "artifact": "unsloth/gemma-4-12B-it-qat-GGUF"
+   },
+   {
+    "model": "Gemma-4 12B",
+    "row": "imatrix (GGUF)",
+    "artifact": "unsloth/gemma-4-12b-it-GGUF"
+   }
+  ]
+ },
+ "lr_sweep": {
+  "source": {
+   "data": "arXiv 2608.13966v2, plot data of Figure 25 (also holds DSQ cells)",
+   "v2_figure": {
+    "file": "appendix_healing.tex",
+    "label": "fig:lr-robustness",
+    "printed": "Figure 25"
+   }
+  },
+  "setting": "INT2 QAD, Qwen3-4B-Thinking-2507, 1,000 steps, global batch 32, AdamW, final held-out KL",
+  "v2_statements": [
+   "Final held-out KL after 1,000 steps of INT2 QAD of Qwen3-4B-Thinking-2507 across a 50× learning-rate range.",
+   "QUASAR attains the lowest KL at every tested rate; Standard QAT diverges at high rates, while BitDistiller degrades at low rates."
+  ],
+  "learning_rates": [
+   1e-05,
+   2e-05,
+   5e-05,
+   0.0001,
+   0.0002,
+   0.0005
+  ],
+  "methods_in_v2_figure": [
+   "QUASAR",
+   "Standard QAT",
+   "LSQ",
+   "Denoising QAT",
+   "BitDistiller"
+  ],
+  "summary": {
+   "v2_figure_cells": 30,
+   "v2_pairwise_wins": "24/24",
+   "quasar_lowest_at_every_lr_v2": true,
+   "tsv_cells_incl_dsq": 36,
+   "pairwise_wins_incl_dsq": "30/30",
+   "note": "v2 plots 5 methods (30 cells) and says QUASAR is lowest at every rate. The 36-cell / 30-of-30 counts include DSQ, which is not a baseline anywhere in v2."
+  },
+  "per_lr": [
+   {
+    "lr": 1e-05,
+    "quasar_kl": 0.2523,
+    "best_baseline_v2": "LSQ",
+    "best_baseline_v2_kl": 0.449,
+    "quasar_lowest_v2": true,
+    "best_baseline_incl_dsq": "DSQ",
+    "quasar_lowest_incl_dsq": true
+   },
+   {
+    "lr": 2e-05,
+    "quasar_kl": 0.2013,
+    "best_baseline_v2": "LSQ",
+    "best_baseline_v2_kl": 0.3489,
+    "quasar_lowest_v2": true,
+    "best_baseline_incl_dsq": "DSQ",
+    "quasar_lowest_incl_dsq": true
+   },
+   {
+    "lr": 5e-05,
+    "quasar_kl": 0.1516,
+    "best_baseline_v2": "BitDistiller",
+    "best_baseline_v2_kl": 0.2451,
+    "quasar_lowest_v2": true,
+    "best_baseline_incl_dsq": "BitDistiller",
+    "quasar_lowest_incl_dsq": true
+   },
+   {
+    "lr": 0.0001,
+    "quasar_kl": 0.1403,
+    "best_baseline_v2": "BitDistiller",
+    "best_baseline_v2_kl": 0.177,
+    "quasar_lowest_v2": true,
+    "best_baseline_incl_dsq": "BitDistiller",
+    "quasar_lowest_incl_dsq": true
+   },
+   {
+    "lr": 0.0002,
+    "quasar_kl": 0.1675,
+    "best_baseline_v2": "BitDistiller",
+    "best_baseline_v2_kl": 0.202,
+    "quasar_lowest_v2": true,
+    "best_baseline_incl_dsq": "BitDistiller",
+    "quasar_lowest_incl_dsq": true
+   },
+   {
+    "lr": 0.0005,
+    "quasar_kl": 0.2604,
+    "best_baseline_v2": "BitDistiller",
+    "best_baseline_v2_kl": 0.2963,
+    "quasar_lowest_v2": true,
+    "best_baseline_incl_dsq": "BitDistiller",
+    "quasar_lowest_incl_dsq": true
+   }
+  ],
+  "cells": [
+   {
+    "arm": "laware",
+    "lr": 1e-05,
+    "eval_kl": 0.2523,
+    "eval_ce": 0.4012,
+    "method": "QUASAR",
+    "in_v2_figure": true
+   },
+   {
+    "arm": "laware",
+    "lr": 2e-05,
+    "eval_kl": 0.2013,
+    "eval_ce": 0.3468,
+    "method": "QUASAR",
+    "in_v2_figure": true
+   },
+   {
+    "arm": "laware",
+    "lr": 5e-05,
+    "eval_kl": 0.1516,
+    "eval_ce": 0.293,
+    "method": "QUASAR",
+    "in_v2_figure": true
+   },
+   {
+    "arm": "laware",
+    "lr": 0.0001,
+    "eval_kl": 0.1403,
+    "eval_ce": 0.2809,
+    "method": "QUASAR",
+    "in_v2_figure": true
+   },
+   {
+    "arm": "laware",
+    "lr": 0.0002,
+    "eval_kl": 0.1675,
+    "eval_ce": 0.3087,
+    "method": "QUASAR",
+    "in_v2_figure": true
+   },
+   {
+    "arm": "laware",
+    "lr": 0.0005,
+    "eval_kl": 0.2604,
+    "eval_ce": 0.407,
+    "method": "QUASAR",
+    "in_v2_figure": true
+   },
+   {
+    "arm": "ste",
+    "lr": 1e-05,
+    "eval_kl": 0.5007,
+    "eval_ce": 0.658,
+    "method": "Standard QAT",
+    "in_v2_figure": true
+   },
+   {
+    "arm": "ste",
+    "lr": 2e-05,
+    "eval_kl": 0.3607,
+    "eval_ce": 0.513,
+    "method": "Standard QAT",
+    "in_v2_figure": true
+   },
+   {
+    "arm": "ste",
+    "lr": 5e-05,
+    "eval_kl": 0.2533,
+    "eval_ce": 0.4006,
+    "method": "Standard QAT",
+    "in_v2_figure": true
+   },
+   {
+    "arm": "ste",
+    "lr": 0.0001,
+    "eval_kl": 0.217,
+    "eval_ce": 0.3625,
+    "method": "Standard QAT",
+    "in_v2_figure": true
+   },
+   {
+    "arm": "ste",
+    "lr": 0.0002,
+    "eval_kl": 0.2399,
+    "eval_ce": 0.3863,
+    "method": "Standard QAT",
+    "in_v2_figure": true
+   },
+   {
+    "arm": "ste",
+    "lr": 0.0005,
+    "eval_kl": 1.5226,
+    "eval_ce": 1.6872,
+    "method": "Standard QAT",
+    "in_v2_figure": true
+   },
+   {
+    "arm": "gdm",
+    "lr": 1e-05,
+    "eval_kl": 0.4746,
+    "eval_ce": 0.6308,
+    "method": "Denoising QAT",
+    "in_v2_figure": true
+   },
+   {
+    "arm": "gdm",
+    "lr": 2e-05,
+    "eval_kl": 0.3497,
+    "eval_ce": 0.5015,
+    "method": "Denoising QAT",
+    "in_v2_figure": true
+   },
+   {
+    "arm": "gdm",
+    "lr": 5e-05,
+    "eval_kl": 0.2456,
+    "eval_ce": 0.3927,
+    "method": "Denoising QAT",
+    "in_v2_figure": true
+   },
+   {
+    "arm": "gdm",
+    "lr": 0.0001,
+    "eval_kl": 0.2128,
+    "eval_ce": 0.3574,
+    "method": "Denoising QAT",
+    "in_v2_figure": true
+   },
+   {
+    "arm": "gdm",
+    "lr": 0.0002,
+    "eval_kl": 0.2446,
+    "eval_ce": 0.3907,
+    "method": "Denoising QAT",
+    "in_v2_figure": true
+   },
+   {
+    "arm": "gdm",
+    "lr": 0.0005,
+    "eval_kl": 0.7311,
+    "eval_ce": 0.8897,
+    "method": "Denoising QAT",
+    "in_v2_figure": true
+   },
+   {
+    "arm": "lsq",
+    "lr": 1e-05,
+    "eval_kl": 0.449,
+    "eval_ce": 0.6046,
+    "method": "LSQ",
+    "in_v2_figure": true
+   },
+   {
+    "arm": "lsq",
+    "lr": 2e-05,
+    "eval_kl": 0.3489,
+    "eval_ce": 0.5012,
+    "method": "LSQ",
+    "in_v2_figure": true
+   },
+   {
+    "arm": "lsq",
+    "lr": 5e-05,
+    "eval_kl": 0.2615,
+    "eval_ce": 0.4097,
+    "method": "LSQ",
+    "in_v2_figure": true
+   },
+   {
+    "arm": "lsq",
+    "lr": 0.0001,
+    "eval_kl": 0.2293,
+    "eval_ce": 0.3761,
+    "method": "LSQ",
+    "in_v2_figure": true
+   },
+   {
+    "arm": "lsq",
+    "lr": 0.0002,
+    "eval_kl": 0.2368,
+    "eval_ce": 0.3823,
+    "method": "LSQ",
+    "in_v2_figure": true
+   },
+   {
+    "arm": "lsq",
+    "lr": 0.0005,
+    "eval_kl": 0.7611,
+    "eval_ce": 0.9203,
+    "method": "LSQ",
+    "in_v2_figure": true
+   },
+   {
+    "arm": "bitdistiller",
+    "lr": 1e-05,
+    "eval_kl": 1.2288,
+    "eval_ce": 1.3941,
+    "method": "BitDistiller",
+    "in_v2_figure": true
+   },
+   {
+    "arm": "bitdistiller",
+    "lr": 2e-05,
+    "eval_kl": 0.5241,
+    "eval_ce": 0.6812,
+    "method": "BitDistiller",
+    "in_v2_figure": true
+   },
+   {
+    "arm": "bitdistiller",
+    "lr": 5e-05,
+    "eval_kl": 0.2451,
+    "eval_ce": 0.3923,
+    "method": "BitDistiller",
+    "in_v2_figure": true
+   },
+   {
+    "arm": "bitdistiller",
+    "lr": 0.0001,
+    "eval_kl": 0.177,
+    "eval_ce": 0.3198,
+    "method": "BitDistiller",
+    "in_v2_figure": true
+   },
+   {
+    "arm": "bitdistiller",
+    "lr": 0.0002,
+    "eval_kl": 0.202,
+    "eval_ce": 0.3461,
+    "method": "BitDistiller",
+    "in_v2_figure": true
+   },
+   {
+    "arm": "bitdistiller",
+    "lr": 0.0005,
+    "eval_kl": 0.2963,
+    "eval_ce": 0.4442,
+    "method": "BitDistiller",
+    "in_v2_figure": true
+   },
+   {
+    "arm": "dsq",
+    "lr": 1e-05,
+    "eval_kl": 0.4189,
+    "eval_ce": 0.5734,
+    "method": "DSQ",
+    "in_v2_figure": false
+   },
+   {
+    "arm": "dsq",
+    "lr": 2e-05,
+    "eval_kl": 0.3277,
+    "eval_ce": 0.4784,
+    "method": "DSQ",
+    "in_v2_figure": false
+   },
+   {
+    "arm": "dsq",
+    "lr": 5e-05,
+    "eval_kl": 0.2471,
+    "eval_ce": 0.3944,
+    "method": "DSQ",
+    "in_v2_figure": false
+   },
+   {
+    "arm": "dsq",
+    "lr": 0.0001,
+    "eval_kl": 0.2237,
+    "eval_ce": 0.3692,
+    "method": "DSQ",
+    "in_v2_figure": false
+   },
+   {
+    "arm": "dsq",
+    "lr": 0.0002,
+    "eval_kl": 0.252,
+    "eval_ce": 0.399,
+    "method": "DSQ",
+    "in_v2_figure": false
+   },
+   {
+    "arm": "dsq",
+    "lr": 0.0005,
+    "eval_kl": 0.9077,
+    "eval_ce": 1.068,
+    "method": "DSQ",
+    "in_v2_figure": false
+   }
+  ]
+ },
+ "ablation": {
+  "source": {
+   "file": "ablation_table_main.tex",
+   "label": "tab:abl-main",
+   "printed": "Table 8"
+  },
+  "caption": "Ablation Study: Effect of QUASAR's scale search and weighted dequantization fit on Qwen3-4B-Thinking-2507 with INT2 QAD. We report final held-out KL and its change from Standard QAT.",
+  "model": "Qwen3-4B-Thinking-2507",
+  "bits": "INT2",
+  "basis": "final held-out KL from the in-loop evaluation (curve basis; matches ablation_curves.json eval_raw)",
+  "variants": [
+   {
+    "variant": "Standard QAT",
+    "scale_search": "none",
+    "saliency": "none",
+    "KL": 0.175,
+    "delta_vs_standard_qat_pct": null,
+    "mark": null
+   },
+   {
+    "variant": "Adam fit",
+    "scale_search": "none",
+    "saliency": "Adam 2nd moment",
+    "KL": 0.164,
+    "delta_vs_standard_qat_pct": -6.1,
+    "mark": null
+   },
+   {
+    "variant": "Init. only",
+    "scale_search": "at init.",
+    "saliency": "uniform",
+    "KL": 0.172,
+    "delta_vs_standard_qat_pct": -1.6,
+    "mark": null
+   },
+   {
+    "variant": "Uniform fit",
+    "scale_search": "every step",
+    "saliency": "uniform",
+    "KL": 0.114,
+    "delta_vs_standard_qat_pct": -34.7,
+    "mark": null
+   },
+   {
+    "variant": "Fisher fit",
+    "scale_search": "every step",
+    "saliency": "Fisher",
+    "KL": 0.113,
+    "delta_vs_standard_qat_pct": -35.5,
+    "mark": "second"
+   },
+   {
+    "variant": "QUASAR",
+    "scale_search": "every step",
+    "saliency": "Adam 2nd moment",
+    "KL": 0.112,
+    "delta_vs_standard_qat_pct": -35.9,
+    "mark": "best"
+   }
+  ]
+ },
+ "training_overhead": {
+  "source": {
+   "file": "appendix_method.tex",
+   "label": "tab:heald-training-overhead",
+   "printed": "Table 4"
+  },
+  "caption": "Wall-clock time of one training step, per component and in seconds: quantization-aware distillation of Qwen3-4B-Thinking-2507 at INT3 on 8x H100 GPUs. QUASAR differs from Standard QAT only in the weight reconstruction row.",
+  "setting": "QAD of Qwen3-4B-Thinking-2507 at INT3 on 8x H100 GPUs",
+  "rows": [
+   {
+    "component": "Teacher forward",
+    "standard_qat_s": 0.373,
+    "quasar_s": 0.373
+   },
+   {
+    "component": "Student compute",
+    "standard_qat_s": 0.366,
+    "quasar_s": 0.366
+   },
+   {
+    "component": "Weight reconstruction",
+    "standard_qat_s": 0.294,
+    "quasar_s": 0.335
+   },
+   {
+    "component": "Loss computation",
+    "standard_qat_s": 0.065,
+    "quasar_s": 0.065
+   },
+   {
+    "component": "Backward",
+    "standard_qat_s": 1.805,
+    "quasar_s": 1.805
+   },
+   {
+    "component": "Optimizer update",
+    "standard_qat_s": 0.021,
+    "quasar_s": 0.022
+   },
+   {
+    "component": "Other + synchronization",
+    "standard_qat_s": 0.006,
+    "quasar_s": 0.006
+   },
+   {
+    "component": "Total step",
+    "standard_qat_s": 2.93,
+    "quasar_s": 2.972
+   },
+   {
+    "component": "% vs. Standard QAT",
+    "standard_qat_s": null,
+    "quasar_s": 1.4
+   }
+  ],
+  "derived_pct": 1.43,
+  "memory": {
+   "value": "no memory overhead",
+   "quote": "Compared with Standard QAT, QUASAR introduces no memory overhead.",
+   "why": "Adam and AdamW already maintain this quantity as the second-moment estimate v_t, allowing QUASAR to reuse it without additional memory overhead."
+  },
+  "inference": "incurs no inference overhead"
+ },
+ "llm_judge_int2": {
+  "source": {
+   "file": "appendix_healing.tex",
+   "label": "tab:judge-w2",
+   "printed": "Table 7"
+  },
+  "caption": "QUASAR wins all 14 comparisons with quantized baselines. Mean per-prompt preference in [-1,1], with 95% bootstrap confidence intervals over 128 prompts. Positive values favor QUASAR. The final row compares QUASAR with the full-precision model.",
+  "judge": "Llama-3.3-70B-Instruct",
+  "prompts": 128,
+  "scale": "mean per-prompt preference in [-1, 1]; positive favors QUASAR",
+  "rows": [
+   {
+    "vs": "RTN",
+    "Qwen3-4B-Thinking-2507": {
+     "mean": 1.0,
+     "ci95": [
+      1.0,
+      1.0
+     ]
+    },
+    "Llama-3.1-8B-Instruct": {
+     "mean": 0.98,
+     "ci95": [
+      0.96,
+      1.0
+     ]
+    }
+   },
+   {
+    "vs": "GPTQ",
+    "Qwen3-4B-Thinking-2507": {
+     "mean": 1.0,
+     "ci95": [
+      1.0,
+      1.0
+     ]
+    },
+    "Llama-3.1-8B-Instruct": {
+     "mean": 0.97,
+     "ci95": [
+      0.94,
+      0.99
+     ]
+    }
+   },
+   {
+    "vs": "AWQ",
+    "Qwen3-4B-Thinking-2507": {
+     "mean": 1.0,
+     "ci95": [
+      1.0,
+      1.0
+     ]
+    },
+    "Llama-3.1-8B-Instruct": {
+     "mean": 0.99,
+     "ci95": [
+      0.97,
+      1.0
+     ]
+    }
+   },
+   {
+    "vs": "Standard QAT",
+    "Qwen3-4B-Thinking-2507": {
+     "mean": 0.32,
+     "ci95": [
+      0.21,
+      0.42
+     ]
+    },
+    "Llama-3.1-8B-Instruct": {
+     "mean": 0.97,
+     "ci95": [
+      0.94,
+      0.99
+     ]
+    }
+   },
+   {
+    "vs": "LSQ",
+    "Qwen3-4B-Thinking-2507": {
+     "mean": 0.27,
+     "ci95": [
+      0.15,
+      0.38
+     ]
+    },
+    "Llama-3.1-8B-Instruct": {
+     "mean": 0.37,
+     "ci95": [
+      0.25,
+      0.49
+     ]
+    }
+   },
+   {
+    "vs": "Denoising QAT",
+    "Qwen3-4B-Thinking-2507": {
+     "mean": 0.31,
+     "ci95": [
+      0.21,
+      0.41
+     ]
+    },
+    "Llama-3.1-8B-Instruct": {
+     "mean": 0.98,
+     "ci95": [
+      0.95,
+      1.0
+     ]
+    }
+   },
+   {
+    "vs": "BitDistiller",
+    "Qwen3-4B-Thinking-2507": {
+     "mean": 0.24,
+     "ci95": [
+      0.12,
+      0.35
+     ]
+    },
+    "Llama-3.1-8B-Instruct": {
+     "mean": 0.29,
+     "ci95": [
+      0.17,
+      0.41
+     ]
+    }
+   },
+   {
+    "vs": "FP16",
+    "Qwen3-4B-Thinking-2507": {
+     "mean": -0.3,
+     "ci95": [
+      -0.4,
+      -0.2
+     ]
+    },
+    "Llama-3.1-8B-Instruct": {
+     "mean": -0.46,
+     "ci95": [
+      -0.56,
+      -0.37
+     ]
+    }
+   }
+  ]
+ }
+}

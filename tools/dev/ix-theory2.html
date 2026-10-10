@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex, nofollow">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ix-theory2 dev</title>
+<script>
+  window.__errors = [];
+  window.onerror = function (msg, src, line, col) { window.__errors.push(msg + " @" + line + ":" + col); var e = document.getElementById("errs"); if (e) e.textContent = window.__errors.join("\n"); };
+  window.addEventListener("unhandledrejection", function (ev) { window.__errors.push("rejection: " + ev.reason); var e = document.getElementById("errs"); if (e) e.textContent = window.__errors.join("\n"); });
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Newsreader:ital,opsz,wght@0,6..72,400..600;1,6..72,400..500&display=swap">
+<link rel="stylesheet" href="../../assets/css/site.css">
+<link rel="stylesheet" href="../../assets/css/ix-theory2.css">
+<style>pre#errs{color:#b00;font:12px monospace;white-space:pre-wrap;margin:0 20px}</style>
+</head>
+<body>
+<pre id="errs"></pre>
+<script>
+  // dev only: ?spacer=N pushes the figures N px down (first-view animations start offscreen)
+  (function () { var n = +new URLSearchParams(location.search).get("spacer"); if (n) document.write('<div style="height:' + n + 'px"></div>'); })();
+</script>
+<main id="main">
+<section class="block" id="theory" style="padding-top:24px">
+  <div class="fig">
+    <div class="grid-2">
+      <figure class="plate ix">
+        <div class="viz"><div class="viz-head"><span class="viz-kicker" data-label>Fig. 15 · <b>saliency and curvature</b></span></div><div class="viz-body"><div id="ix-fig15" class="chart ix-mount" style="min-height:320px"></div></div></div>
+        <figcaption><b>QUASAR's saliency tracks curvature.</b> Each point represents one weight matrix from a trained INT2 Qwen3-4B-Thinking checkpoint and compares its mean saliency <i>h</i> (Adam's second moment) with a 32-sample Hutchinson estimate of its mean Hessian diagonal. The log-scale correlation is <i>r</i>=0.81.</figcaption>
+      </figure>
+      <figure class="plate ix">
+        <div class="viz"><div class="viz-head"><span class="viz-kicker" data-label>Fig. 16 · <b>PL relation</b> · INT2</span></div><div class="viz-body"><div id="ix-fig16" class="chart ix-mount" style="min-height:320px"></div></div></div>
+        <figcaption><b>Training trajectories support a PL relation.</b> Each point is one step of an INT2 Qwen3-4B-Thinking run, with loss and gradient measured at the reconstruction <i>r</i>. For all three methods, the squared gradient norm scales with the gap above the trajectory minimum.</figcaption>
+      </figure>
+    </div>
+  </div>
+  <div class="fig">
+    <div class="grid-2">
+      <figure class="plate ix">
+        <div class="viz"><div class="viz-head"><span class="viz-kicker" data-label>Fig. 17 · <b>bound terms</b> · INT2 · SGD</span></div><div class="viz-body"><div id="ix-fig17" class="chart ix-mount" style="min-height:320px"></div></div></div>
+        <figcaption><b>Reconstruction error dominates the measured bound.</b> We evaluate each term of Theorem 1(i) on an INT2 QUASAR run with plain SGD and learning rate 10⁻³.</figcaption>
+      </figure>
+      <figure class="plate ix">
+        <div class="viz"><div class="viz-head"><span class="viz-kicker" data-label>Fig. 18 · <b>plain SGD</b> · INT2</span></div><div class="viz-body"><div id="ix-fig18" class="chart ix-mount" style="min-height:320px"></div></div></div>
+        <figcaption><b>QUASAR retains its advantage under plain SGD.</b> Training (top) and held-out (bottom) loss for Standard QAT and QUASAR at INT2 across three constant learning rates. QUASAR reaches lower loss floors at every stable learning rate.</figcaption>
+      </figure>
+    </div>
+  </div>
+</section>
+</main>
+<script>
+  // dev only: headless Chrome stalls rAF under --virtual-time-budget; ?raf drives it from timers instead
+  if (new URLSearchParams(location.search).has("raf")) window.requestAnimationFrame = function (cb) { return setTimeout(function () { cb(performance.now()); }, 16); };
+</script>
+<script>
+  // dev only: ?fail makes the figure data request fail (checks the "data unavailable" fallback)
+  if (new URLSearchParams(location.search).has("fail")) { var f0 = window.fetch; window.fetch = function (u) { return /ix-theory2/.test(String(u)) ? Promise.resolve(new Response("", { status: 404 })) : f0.apply(this, arguments); }; }
+</script>
+<script src="../../assets/js/viz.js"></script>
+<script src="../../assets/js/ix-theory2.js"></script>
+</body>
+</html>

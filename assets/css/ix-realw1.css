@@ -1,0 +1,137 @@
+/* ix-realw1.css — Figures 5 and 8 (assets/js/ix-realw1.js).
+   Figure content sits on the light card, so every color is a fixed light-theme value.
+   Type: 12px (--fs-xs) for ticks, labels, axis titles, legends and pills; 14px (--fs-s) for tooltip body
+   and the emphasized labels (panel titles, the max/min ratio). Inter for labels, JetBrains Mono uppercase for
+   axis titles, Newsreader italic for math symbols. */
+
+.xr { color: #1d1f22; }
+/* math symbols: Newsreader italic at 14px (matches the 12px Inter x-height), never uppercased */
+.xr .xr-m, .xr .xr-mt, .xr-tip .xr-m { font-family: var(--serif); font-style: italic; font-size: var(--fs-s, 13px); text-transform: none; letter-spacing: 0; }
+
+/* ---- header: controls + color legend ---- */
+.xr-head { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 28px; margin: 2px 0 12px; }
+.xr-head .xr-legs, .xr-head .xr-legh { margin-left: auto; }
+.xr-ctl { display: inline-flex; align-items: center; gap: 9px; }
+.xr-ctl .lab { font: 600 var(--fs-xs, 12px)/1 var(--mono); letter-spacing: .1em; text-transform: uppercase; color: #6b6f75; }
+.xr .pills button { font-size: var(--fs-xs, 12px); }
+.xr-legs { display: flex; flex-wrap: wrap; gap: 8px 22px; align-items: center; }
+.xr-leg { display: inline-flex; align-items: center; gap: 7px; font: 500 var(--fs-xs, 12px)/1 var(--sans); color: #6b6f75; white-space: nowrap; }
+.xr-leg .xr-lt { color: #44484f; margin-right: 3px; }
+.xr-bar { display: inline-block; width: 112px; height: 10px; border-radius: 2px; box-shadow: inset 0 0 0 1px rgba(29, 31, 34, .08); }
+.xr-legd { display: none; }
+.xr-legd.on { display: inline-flex; }
+.xr-leg.off-narrow { display: none; }
+.xr-layer { font: 600 var(--fs-xs, 12px)/1 var(--mono); letter-spacing: .1em; text-transform: uppercase; color: #44484f; }
+
+/* saliency legend with 10^k ticks under the bar */
+.xr-legh { align-items: flex-start; }
+.xr-legh .xr-lt { padding-top: 1px; }
+.xr-hbar { position: relative; display: inline-block; width: 150px; padding-bottom: 16px; }
+.xr-hbar .xr-bar { width: 100%; display: block; }
+.xr-hticks span { position: absolute; top: 14px; transform: translateX(-50%); font: 500 var(--fs-xs, 12px)/1 var(--sans); color: #6b6f75; font-variant-numeric: tabular-nums; }
+
+/* ---- plot ---- */
+.xr-plot { position: relative; width: 100%; border-radius: 8px; outline: none; -webkit-tap-highlight-color: transparent; }
+.xr-plot:focus-visible { box-shadow: 0 0 0 2px #2e6f95; }
+.xr-plot svg { display: block; overflow: visible; font-family: var(--sans); }
+/* vertical swipes scroll the page; taps and horizontal drags inspect */
+.xr-plot svg, .xr-ov { touch-action: pan-y pinch-zoom; }
+.xr-ov { cursor: crosshair; }
+.xr-plot.pre .xr-dots, .xr-plot.pre .xr-conns { opacity: 0; }
+.xr-dots, .xr-conns { transition: opacity .5s ease .9s; }
+@media (prefers-reduced-motion: reduce) { .xr-dots, .xr-conns { transition: none; } }
+
+.chart.xr .axis text { font-size: var(--fs-xs, 12px); }
+.chart.xr .axis-title { font: 600 var(--fs-xs, 12px) var(--mono); letter-spacing: .08em; text-transform: uppercase; fill: #6b6f75; }
+.xr .axis line { stroke: #c9c6c0; }
+
+/* Figure 5 */
+.xr-ptitle { font: 600 var(--fs-s, 13px) var(--sans); fill: #1d1f22; }
+.xr-ptitle.q { fill: #A13040; font-weight: 700; }
+.xr-psub { font: 500 var(--fs-xs, 12px) var(--sans); fill: #6b6f75; }
+.xr-frame { fill: none; stroke: rgba(29, 31, 34, .14); stroke-width: 1; shape-rendering: crispEdges; }
+.xr-sel { fill: none; stroke: #1d1f22; stroke-width: 1.6; pointer-events: none; transition: y .22s ease; }
+.xr-hrow { fill: none; stroke: rgba(29, 31, 34, .45); stroke-width: 1; pointer-events: none; opacity: 0; }
+.xr-hrow.on { opacity: 1; }
+.xr-cur { fill: none; stroke: #1d1f22; stroke-width: 1.5; pointer-events: none; opacity: 0; paint-order: stroke; }
+.xr-cur.on { opacity: 1; }
+.xr-lane { fill: #f3f2ee; }
+.xr-sgrid line { stroke: #e4e1da; stroke-width: 1; shape-rendering: crispEdges; }
+.xr-lvs { stroke: #3F4245; stroke-width: 1; stroke-dasharray: 3 2.5; opacity: .8; }
+.xr-lvq { stroke: #D1495B; stroke-width: 1.3; opacity: .9; }
+.xr-cs { stroke: #3F4245; stroke-width: 1.2; opacity: .5; }
+.xr-cq { stroke: #D1495B; stroke-width: 1.2; opacity: .75; }
+.xr-dot { stroke: #2E6F95; stroke-width: .7; }
+.xr-dot.out { display: none; }
+.xr-car { stroke: #2E6F95; stroke-width: .7; stroke-linejoin: round; }
+.xr-guide { stroke: #6b6f75; stroke-width: 1; stroke-dasharray: 2 3; opacity: 0; pointer-events: none; }
+.xr-ring { fill: none; stroke: #1d1f22; stroke-width: 1.5; opacity: 0; pointer-events: none; }
+.xr-guide.on, .xr-ring.on { opacity: 1; }
+.xr-slab { font: 500 var(--fs-xs, 12px) var(--sans); fill: #44484f; }
+.xr-slab.q { fill: #A13040; }
+.xr-yax text { font-variant-numeric: tabular-nums; }
+.xr-yt { font: italic 400 var(--fs-xs, 12px) var(--serif); fill: #6b6f75; }
+.xr-stitle { font: 500 var(--fs-xs, 12px) var(--sans); fill: #44484f; }
+.xr-ref { stroke: #3F4245; stroke-width: 1; stroke-dasharray: 3 3; }
+.xr-base { stroke: #c9c6c0; stroke-width: 1; shape-rendering: crispEdges; }
+.xr-sb { fill: #D1495B; opacity: .5; transition: opacity .15s ease; }
+.xr-sb.hv { opacity: .78; }
+.xr-sb.on { opacity: 1; }
+.xr-sv { font: 500 var(--fs-xs, 12px) var(--sans); fill: #A13040; font-variant-numeric: tabular-nums; }
+.xr-sv.on { font-weight: 700; }
+.xr-cbl { font: 500 var(--fs-xs, 12px) var(--sans); fill: #6b6f75; }
+
+/* key row */
+.xr-key { display: flex; flex-wrap: wrap; gap: 6px 18px; margin-top: 8px; font: 500 var(--fs-xs, 12px)/1.3 var(--sans); color: #44484f; }
+.xr-li { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
+.xr-li svg { width: 22px; height: 12px; max-width: none; flex: none; overflow: visible; }
+.xr-li.q { color: #A13040; font-weight: 600; }
+
+/* Figure 8 */
+.xr-img { image-rendering: pixelated; }
+.xr-grules line { stroke: rgba(255, 255, 255, .62); stroke-width: .7; }
+.xr-box { fill: none; stroke: #1d1f22; stroke-width: 1.4; }
+.xr-conn { fill: none; stroke: #8a8d92; stroke-width: .9; stroke-dasharray: 2 3; }
+.xr-ohov { fill: none; stroke: #1d1f22; stroke-width: 1.3; opacity: 0; pointer-events: none; }
+.xr-ohov.on { opacity: 1; }
+.xr-lrule { stroke: #fff; stroke-width: 1.4; }
+.xr-gsel { fill: none; stroke: #1d1f22; stroke-width: 1.5; pointer-events: none; }
+.xr-ghov { fill: none; stroke: #1d1f22; stroke-width: 1; stroke-dasharray: 3 2; opacity: 0; pointer-events: none; }
+.xr-ghov.on { opacity: .85; }
+.xr-lcur { fill: none; stroke: #fff; stroke-width: 1.4; opacity: 0; pointer-events: none; filter: drop-shadow(0 0 1px rgba(29, 31, 34, .9)); }
+.xr-lcur.on { opacity: 1; }
+.xr-b { fill: #2E6F95; }
+.xr-bgrid { stroke: #e6e3dc; stroke-width: 1; shape-rendering: crispEdges; }
+.xr-bgrid.minor { stroke: #f1efea; }
+.xr-bbase { stroke: #c9c6c0; stroke-width: 1; shape-rendering: crispEdges; }
+.xr-bmean { stroke: #1d1f22; stroke-width: 1; stroke-dasharray: 4 3; opacity: .7; }
+.xr-bmt { font: 500 var(--fs-xs, 12px) var(--sans); fill: #44484f; paint-order: stroke; stroke: #fdfdfd; stroke-width: 3.5px; stroke-linejoin: round; }
+.xr-bhov { fill: rgba(29, 31, 34, .1); opacity: 0; pointer-events: none; }
+.xr-bhov.on { opacity: 1; }
+.xr-big { font: 600 var(--fs-s, 13px) var(--sans); fill: #1d1f22; font-variant-numeric: tabular-nums; }
+.xr-big .xr-mt { font-weight: 400; }
+
+/* ---- tooltip ---- */
+.xr-tip { max-width: 320px; }
+.xr-tip .tt .xr-m { text-transform: none; letter-spacing: 0; }
+.xr-tip .xr-row { align-items: baseline; }
+.xr-tip .xr-row b, .xr-tip .xr-tg b { font-weight: 650; font-variant-numeric: tabular-nums; }
+.xr-tip .xr-n { color: #44484f; white-space: nowrap; }
+.xr-tip .xr-row.q .xr-n, .xr-tip .xr-n.q { color: #A13040; font-weight: 600; }
+.xr-tip .xr-tg { display: grid; grid-template-columns: auto auto auto; gap: 2px 14px; margin-top: 6px; padding-top: 6px; border-top: 1px solid #ece8e0; align-items: baseline; }
+.xr-tip .xr-tg b { text-align: right; }
+.xr-tip .xr-th { font: 500 var(--fs-xs, 12px)/1.3 var(--sans); color: #6b6f75; text-align: right; }
+.xr-tip .xr-k { display: inline-block; width: 12px; height: 3px; border-radius: 2px; margin-right: 7px; vertical-align: 3px; }
+
+/* fetch failure: neutral data label */
+.xr-fail { padding: 22px 0; text-align: center; font: 500 var(--fs-xs, 12px)/1.4 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: #6b6f75; }
+
+@media (max-width: 600px) {
+  .xr-head { gap: 8px 14px; }
+  .xr-ctl .pills button { padding: 7px 10px; }
+  .xr-bar { width: 84px; }
+  .xr-key { gap: 6px 14px; }
+}
+@media print {
+  .xr-plot.pre .xr-dots, .xr-plot.pre .xr-conns { opacity: 1; }
+}

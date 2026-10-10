@@ -1,0 +1,1232 @@
+<!doctype html>
+<html lang="en" class="no-js">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>QUASAR: Lowering the Loss Floor of Quantization-Aware Training with Loss-Aware Reconstruction</title>
+<meta name="description" content="We introduce QUASAR, a QAT method that brings lightweight, loss-aware reconstruction into the training loop. QUASAR consistently achieves lower training and evaluation loss than competitive QAT methods and outperforms QAT and PTQ baselines on downstream benchmarks.">
+<meta name="author" content="Vincent Counathe, Ben Athiwaratkun, Christopher De Sa, Tianyi Zhang">
+<meta name="robots" content="max-image-preview:large">
+<link rel="canonical" href="https://quasar-qat.github.io/">
+<link rel="alternate" type="application/pdf" href="https://quasar-qat.github.io/quasar.pdf" title="QUASAR (PDF, arXiv v2)">
+<link rel="alternate" type="text/markdown" href="https://quasar-qat.github.io/index.md" title="QUASAR (Markdown)">
+<link rel="describedby" type="text/markdown" href="https://quasar-qat.github.io/llms.txt">
+<meta name="theme-color" content="#f7f5f0" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#131416" media="(prefers-color-scheme: dark)">
+
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="QUASAR">
+<meta property="og:url" content="https://quasar-qat.github.io/">
+<meta property="og:title" content="QUASAR: Lowering the Loss Floor of Quantization-Aware Training with Loss-Aware Reconstruction">
+<meta property="og:description" content="We introduce QUASAR, a QAT method that brings lightweight, loss-aware reconstruction into the training loop. We evaluate QUASAR across four model families and across INT4, INT3, INT2, and NVFP4 quantization formats.">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://quasar-qat.github.io/assets/img/og.png">
+<meta property="og:image:type" content="image/png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="The structural mismatch of gradients in standard QAT versus QUASAR.">
+<meta property="article:published_time" content="2026-08-14T05:29:58Z">
+<meta property="article:modified_time" content="2026-10-05T21:37:32Z">
+<meta property="article:section" content="Machine Learning">
+<meta property="article:tag" content="Quantization-aware training">
+<meta property="article:tag" content="LLM quantization">
+<meta property="article:tag" content="NVFP4">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:creator" content="@counathe">
+<meta name="twitter:title" content="QUASAR: Lowering the Loss Floor of Quantization-Aware Training with Loss-Aware Reconstruction">
+<meta name="twitter:description" content="We introduce QUASAR, a QAT method that brings lightweight, loss-aware reconstruction into the training loop. We evaluate QUASAR across four model families and across INT4, INT3, INT2, and NVFP4 quantization formats.">
+<meta name="twitter:image" content="https://quasar-qat.github.io/assets/img/og.png">
+<meta name="twitter:label1" content="Paper">
+<meta name="twitter:data1" content="arXiv 2608.13966">
+<meta name="twitter:label2" content="Code">
+<meta name="twitter:data2" content="github.com/vincentcounathe/quasar-qat">
+<meta name="twitter:image:alt" content="The structural mismatch of gradients in standard QAT versus QUASAR.">
+
+<meta name="citation_title" content="QUASAR: Lowering the Loss Floor of Quantization-Aware Training with Loss-Aware Reconstruction">
+<meta name="citation_author" content="Counathe, Vincent">
+<meta name="citation_author_institution" content="Cornell University">
+<meta name="citation_author_institution" content="Together AI">
+<meta name="citation_author" content="Athiwaratkun, Ben">
+<meta name="citation_author_institution" content="Together AI">
+<meta name="citation_author" content="De Sa, Christopher">
+<meta name="citation_author_institution" content="Cornell University">
+<meta name="citation_author_institution" content="Together AI">
+<meta name="citation_author" content="Zhang, Tianyi">
+<meta name="citation_author_institution" content="Together AI">
+<meta name="citation_publication_date" content="2026/08/14">
+<meta name="citation_online_date" content="2026/10/05">
+<meta name="citation_arxiv_id" content="2608.13966">
+<meta name="citation_doi" content="10.48550/arXiv.2608.13966">
+<meta name="citation_language" content="en">
+<meta name="citation_keywords" content="quantization-aware training; QAT; LLM quantization; quantization-aware distillation; low-bit quantization; NVFP4; INT4; INT3; INT2">
+<meta name="citation_abstract" content="As large language model inference shifts toward lower precision, post-training quantization (PTQ) becomes increasingly brittle, making quantization-aware training (QAT) essential for preserving model quality. However, QAT has a structural mismatch: gradient updates are applied to latent full-precision weights, while the loss and gradients are computed on lossy reconstructions of those weights. This mismatch can lead to suboptimal training trajectories and a higher loss floor. Second-order PTQ methods address a similar problem by minimizing loss-aware reconstruction error, but applying such expensive reconstruction repeatedly during QAT as the weights evolve is impractical. We introduce QUASAR, a QAT method that brings lightweight, loss-aware reconstruction into the training loop. At each training step, QUASAR reconstructs the latent weights by searching over a small set of clipping ranges and fitting dequantization parameters through saliency-weighted least squares. We use an exponential moving average of squared gradients as the per-parameter saliency signal. Our theoretical analysis shows that optimizing QUASAR&#x27;s reconstruction objective tightens both the convergence and final-loss bounds of QAT. We evaluate QUASAR across four model families and across INT4, INT3, INT2, and NVFP4 quantization formats. QUASAR consistently achieves lower training and evaluation loss than competitive QAT methods and outperforms QAT and PTQ baselines on downstream benchmarks. At INT2, QUASAR improves average accuracy over the best QAT baseline by 13.3 points with quantization-aware distillation and by 10.9 points with QAT on mathematical reasoning data. Notably, after distillation on only ~600M tokens, QUASAR&#x27;s INT4 Gemma-4 E4B checkpoint outperforms the corresponding QAT checkpoint released by Google, with 66% lower KL divergence and 1.8 points higher average accuracy.">
+<meta name="citation_pdf_url" content="https://quasar-qat.github.io/quasar.pdf">
+
+<link rel="icon" href="assets/img/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="assets/img/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Newsreader:ital,opsz,wght@0,6..72,400..600;1,6..72,400..500&display=swap">
+<link rel="stylesheet" href="assets/css/site.css">
+<link rel="stylesheet" href="assets/css/widget.css">
+<link rel="stylesheet" href="assets/css/charts.css">
+<link rel="stylesheet" href="assets/css/results.css">
+<link rel="stylesheet" href="assets/css/fig-loop.css">
+<link rel="stylesheet" href="assets/css/ix-sandbox.css">
+<link rel="stylesheet" href="assets/css/ix-realw1.css">
+<link rel="stylesheet" href="assets/css/ix-realw2.css">
+<link rel="stylesheet" href="assets/css/ix-theory1.css">
+<link rel="stylesheet" href="assets/css/ix-theory2.css">
+<link rel="stylesheet" href="assets/css/ix-heal1.css">
+<link rel="stylesheet" href="assets/css/ix-heal2.css">
+<link rel="stylesheet" href="assets/css/ix-judge.css">
+<link rel="stylesheet" href="assets/css/ix-adapt.css">
+<link rel="stylesheet" href="assets/css/ix-nvfp4app.css">
+<link rel="preload" as="image" href="assets/video/hero.jpg" media="(min-width: 601px)">
+<link rel="preload" as="image" href="assets/video/hero-portrait.jpg" media="(max-width: 600px)">
+
+<script type="application/ld+json">
+{"@context":"https://schema.org","@graph":[{"@type":"WebPage","@id":"https://quasar-qat.github.io/#webpage","url":"https://quasar-qat.github.io/","name":"QUASAR: Lowering the Loss Floor of Quantization-Aware Training with Loss-Aware Reconstruction","inLanguage":"en","mainEntity":{"@id":"https://quasar-qat.github.io/#paper"},"primaryImageOfPage":{"@type":"ImageObject","url":"https://quasar-qat.github.io/assets/img/og.png","width":1200,"height":630},"isPartOf":{"@type":"WebSite","@id":"https://quasar-qat.github.io/#website","url":"https://quasar-qat.github.io/","name":"QUASAR"},"hasPart":[{"@id":"https://quasar-qat.github.io/#code"},{"@id":"https://quasar-qat.github.io/#models"}]},{"@type":"ScholarlyArticle","@id":"https://quasar-qat.github.io/#paper","headline":"QUASAR: Lowering the Loss Floor of Quantization-Aware Training with Loss-Aware Reconstruction","name":"QUASAR: Lowering the Loss Floor of Quantization-Aware Training with Loss-Aware Reconstruction","alternateName":"QUASAR","abstract":"As large language model inference shifts toward lower precision, post-training quantization (PTQ) becomes increasingly brittle, making quantization-aware training (QAT) essential for preserving model quality. However, QAT has a structural mismatch: gradient updates are applied to latent full-precision weights, while the loss and gradients are computed on lossy reconstructions of those weights. This mismatch can lead to suboptimal training trajectories and a higher loss floor. Second-order PTQ methods address a similar problem by minimizing loss-aware reconstruction error, but applying such expensive reconstruction repeatedly during QAT as the weights evolve is impractical. We introduce QUASAR, a QAT method that brings lightweight, loss-aware reconstruction into the training loop. At each training step, QUASAR reconstructs the latent weights by searching over a small set of clipping ranges and fitting dequantization parameters through saliency-weighted least squares. We use an exponential moving average of squared gradients as the per-parameter saliency signal. Our theoretical analysis shows that optimizing QUASAR's reconstruction objective tightens both the convergence and final-loss bounds of QAT. We evaluate QUASAR across four model families and across INT4, INT3, INT2, and NVFP4 quantization formats. QUASAR consistently achieves lower training and evaluation loss than competitive QAT methods and outperforms QAT and PTQ baselines on downstream benchmarks. At INT2, QUASAR improves average accuracy over the best QAT baseline by 13.3 points with quantization-aware distillation and by 10.9 points with QAT on mathematical reasoning data. Notably, after distillation on only ~600M tokens, QUASAR's INT4 Gemma-4 E4B checkpoint outperforms the corresponding QAT checkpoint released by Google, with 66% lower KL divergence and 1.8 points higher average accuracy.","author":[{"@id":"https://quasar-qat.github.io/#author-counathe"},{"@id":"https://quasar-qat.github.io/#author-athiwaratkun"},{"@id":"https://quasar-qat.github.io/#author-desa"},{"@id":"https://quasar-qat.github.io/#author-zhang"}],"datePublished":"2026-08-14T05:29:58+00:00","dateModified":"2026-10-05T21:37:32+00:00","inLanguage":"en","isAccessibleForFree":true,"license":"http://arxiv.org/licenses/nonexclusive-distrib/1.0/","publisher":{"@type":"Organization","name":"arXiv","url":"https://arxiv.org/"},"identifier":[{"@type":"PropertyValue","propertyID":"DOI","value":"10.48550/arXiv.2608.13966","url":"https://doi.org/10.48550/arXiv.2608.13966"},{"@type":"PropertyValue","propertyID":"arXiv","value":"2608.13966","url":"https://arxiv.org/abs/2608.13966"}],"sameAs":["https://arxiv.org/abs/2608.13966","https://doi.org/10.48550/arXiv.2608.13966","https://huggingface.co/papers/2608.13966","https://www.semanticscholar.org/paper/422f831f36a74485e8f4ec2dddb30b8c2eda4362","https://openalex.org/W7203650992"],"url":"https://quasar-qat.github.io/","mainEntityOfPage":{"@id":"https://quasar-qat.github.io/#webpage"},"image":["https://quasar-qat.github.io/assets/img/og-1x1.jpg","https://quasar-qat.github.io/assets/img/og-4x3.jpg","https://quasar-qat.github.io/assets/video/hero.jpg","https://quasar-qat.github.io/assets/img/og.png"],"encoding":[{"@type":"MediaObject","encodingFormat":"application/pdf","contentUrl":"https://quasar-qat.github.io/quasar.pdf"},{"@type":"MediaObject","encodingFormat":"application/pdf","contentUrl":"https://arxiv.org/pdf/2608.13966"}],"keywords":["quantization-aware training","QAT","LLM quantization","quantization-aware distillation","low-bit quantization","INT4","INT3","INT2","NVFP4","straight-through estimator","loss-aware reconstruction"],"about":[{"@type":"Thing","name":"Quantization-aware training"},{"@type":"Thing","name":"Quantization","sameAs":"https://www.wikidata.org/wiki/Q198099"},{"@type":"Thing","name":"Large language model","sameAs":"https://www.wikidata.org/wiki/Q115305900"},{"@type":"Thing","name":"Model compression","sameAs":"https://www.wikidata.org/wiki/Q131164003"},{"@type":"Thing","name":"Knowledge distillation","sameAs":"https://www.wikidata.org/wiki/Q74253442"}],"citation":[{"@type":"ScholarlyArticle","name":"Estimating or Propagating Gradients Through Stochastic Neurons for Conditional Computation","identifier":"https://doi.org/10.48550/arXiv.1308.3432","url":"https://arxiv.org/abs/1308.3432","alternateName":"STE"},{"@type":"ScholarlyArticle","name":"Learned Step Size Quantization","identifier":"https://doi.org/10.48550/arXiv.1902.08153","url":"https://arxiv.org/abs/1902.08153","alternateName":"LSQ"},{"@type":"ScholarlyArticle","name":"Robust Training of Neural Networks at Arbitrary Precision and Sparsity","identifier":"https://doi.org/10.48550/arXiv.2409.09245","url":"https://arxiv.org/abs/2409.09245","alternateName":"Denoising QAT"},{"@type":"ScholarlyArticle","name":"BitDistiller: Unleashing the Potential of Sub-4-Bit LLMs via Self-Distillation","identifier":"https://doi.org/10.48550/arXiv.2402.10631","url":"https://arxiv.org/abs/2402.10631"},{"@type":"ScholarlyArticle","name":"GPTQ: Accurate Post-Training Quantization for Generative Pre-trained Transformers","identifier":"https://doi.org/10.48550/arXiv.2210.17323","url":"https://arxiv.org/abs/2210.17323"},{"@type":"ScholarlyArticle","name":"AWQ: Activation-aware Weight Quantization for On-Device LLM Compression and Acceleration","identifier":"https://doi.org/10.48550/arXiv.2306.00978","url":"https://arxiv.org/abs/2306.00978"}]},{"@type":"Person","@id":"https://quasar-qat.github.io/#author-counathe","name":"Vincent Counathe","givenName":"Vincent","familyName":"Counathe","affiliation":[{"@type":"CollegeOrUniversity","@id":"https://quasar-qat.github.io/#org-cornell","name":"Cornell University","sameAs":["https://ror.org/05bnh6r87","https://www.wikidata.org/wiki/Q49115"]},{"@type":"Organization","@id":"https://quasar-qat.github.io/#org-together","name":"Together AI","url":"https://www.together.ai/","sameAs":["https://www.wikidata.org/wiki/Q124071418"]}],"sameAs":["https://github.com/vincentcounathe"],"url":"https://vincentcounathe.github.io/"},{"@type":"Person","@id":"https://quasar-qat.github.io/#author-athiwaratkun","name":"Ben Athiwaratkun","givenName":"Ben","familyName":"Athiwaratkun","affiliation":[{"@type":"Organization","@id":"https://quasar-qat.github.io/#org-together","name":"Together AI","url":"https://www.together.ai/","sameAs":["https://www.wikidata.org/wiki/Q124071418"]}],"url":"https://benathi.github.io/"},{"@type":"Person","@id":"https://quasar-qat.github.io/#author-desa","name":"Christopher De Sa","givenName":"Christopher","familyName":"De Sa","affiliation":[{"@type":"CollegeOrUniversity","@id":"https://quasar-qat.github.io/#org-cornell","name":"Cornell University","sameAs":["https://ror.org/05bnh6r87","https://www.wikidata.org/wiki/Q49115"]},{"@type":"Organization","@id":"https://quasar-qat.github.io/#org-together","name":"Together AI","url":"https://www.together.ai/","sameAs":["https://www.wikidata.org/wiki/Q124071418"]}],"url":"https://www.cs.cornell.edu/~cdesa/"},{"@type":"Person","@id":"https://quasar-qat.github.io/#author-zhang","name":"Tianyi Zhang","givenName":"Tianyi","familyName":"Zhang","affiliation":[{"@type":"Organization","@id":"https://quasar-qat.github.io/#org-together","name":"Together AI","url":"https://www.together.ai/","sameAs":["https://www.wikidata.org/wiki/Q124071418"]}],"url":"https://tonyzhang617.github.io/"},{"@type":"SoftwareSourceCode","@id":"https://quasar-qat.github.io/#code","name":"quasar-qat","codeRepository":"https://github.com/vincentcounathe/quasar-qat","programmingLanguage":"Python","license":"https://www.apache.org/licenses/LICENSE-2.0","author":[{"@id":"https://quasar-qat.github.io/#author-counathe"},{"@id":"https://quasar-qat.github.io/#author-athiwaratkun"},{"@id":"https://quasar-qat.github.io/#author-desa"},{"@id":"https://quasar-qat.github.io/#author-zhang"}],"citation":{"@id":"https://quasar-qat.github.io/#paper"}},{"@type":"Collection","@id":"https://quasar-qat.github.io/#models","name":"All QUASAR Models","url":"https://huggingface.co/collections/QUASAR-QAT/all-quasar-models-6aab09fd2913ec22df0d5f15","citation":{"@id":"https://quasar-qat.github.io/#paper"}}]}
+</script>
+<script>document.documentElement.classList.remove("no-js");</script>
+</head>
+<body>
+<a class="skip" href="#main" data-label>Skip to content</a>
+
+<header class="topbar">
+  <div class="inner">
+    <nav class="topnav" aria-label="Sections">
+      <a href="#problem">Motivation</a>
+      <a href="#method">Method</a>
+      <a href="#theory">Analysis</a>
+      <a href="#results">Results</a>
+      <a href="#nvfp4">NVFP4</a>
+      <a href="#ablations">Robustness &amp; Overhead</a>
+      <a href="#models">Checkpoints</a>
+      <a href="#code">Code</a>
+      <a href="#cite">Cite</a>
+      <a href="#appendix">Appendix</a>
+      <a href="https://arxiv.org/abs/2608.13966">Paper</a>
+    </nav>
+  </div>
+</header>
+
+<main id="main">
+
+<!-- ============ HERO ============ -->
+<section class="hero" aria-labelledby="title">
+  <div class="wide">
+    <h1 id="title"><span class="name">QUASAR</span><span class="sub">Lowering the Loss Floor of <span class="nw">Quantization-Aware</span> Training with <span class="nw">Loss-Aware</span> Reconstruction</span></h1>
+    <p class="authors" data-label>
+      <span class="a"><a href="https://vincentcounathe.github.io/">Vincent Counathe</a><sup>1,2</sup></span>
+      <span class="a"><a href="https://benathi.github.io/">Ben Athiwaratkun</a><sup>2</sup></span>
+      <span class="a"><a href="https://www.cs.cornell.edu/~cdesa/">Christopher De Sa</a><sup>1,2</sup></span>
+      <span class="a"><a href="https://tonyzhang617.github.io/">Tianyi Zhang</a><sup>2</sup></span>
+    </p>
+    <p class="affils" data-label><span><sup>1</sup>Cornell University</span><span><sup>2</sup>Together AI</span></p>
+    <nav class="links" aria-label="Paper links" data-label>
+      <a class="btn" href="https://arxiv.org/abs/2608.13966"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><path d="M4 1.5h5.5L13 5v9.5H4z"/><path d="M9.5 1.5V5H13M6.5 8h4M6.5 10.5h4"/></svg>Paper</a>
+      <a class="btn" href="https://arxiv.org/pdf/2608.13966"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><path d="M8 2v8M4.5 6.5 8 10l3.5-3.5M3 13.5h10"/></svg>PDF</a>
+      <a class="btn" href="https://github.com/vincentcounathe/quasar-qat"><svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 .2a8 8 0 0 0-2.53 15.59c.4.07.55-.17.55-.38v-1.33c-2.23.48-2.7-1.07-2.7-1.07-.36-.92-.89-1.17-.89-1.17-.73-.5.06-.49.06-.49.8.06 1.23.83 1.23.83.71 1.22 1.87.87 2.33.66.07-.52.28-.87.5-1.07-1.78-.2-3.65-.89-3.65-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.6 7.6 0 0 1 4 0c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.28.82 2.15 0 3.07-1.87 3.75-3.66 3.95.29.25.54.73.54 1.48v2.2c0 .21.15.46.55.38A8 8 0 0 0 8 .2"/></svg>Code</a>
+      <a class="btn" href="https://huggingface.co/collections/QUASAR-QAT/all-quasar-models-6aab09fd2913ec22df0d5f15"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><path d="M8 1.8 13.5 5v6L8 14.2 2.5 11V5z"/><path d="M2.5 5 8 8.2 13.5 5M8 8.2v6"/></svg>Models</a>
+      <a class="btn" href="#cite"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><path d="M3 4.5h4v4H5l-1.5 3M9 4.5h4v4h-2l-1.5 3"/></svg>BibTeX</a>
+    </nav>
+  </div>
+  <div class="fig">
+    <figure class="plate hero-media">
+      <div class="viz" id="hero-viz">
+        <video id="hero-video" muted loop playsinline preload="metadata" data-poster="assets/video/hero.jpg" data-poster-tall="assets/video/hero-portrait.jpg" width="1920" height="1080" aria-label="The structural mismatch of gradients in standard QAT versus QUASAR." aria-describedby="cap-hero">
+          <source src="assets/video/hero-portrait.mp4" type="video/mp4" media="(max-width: 600px)">
+          <source src="assets/video/hero.mp4" type="video/mp4">
+        </video>
+        <script>(function (v) { v.poster = matchMedia("(max-width: 600px)").matches ? v.dataset.posterTall : v.dataset.poster; })(document.getElementById("hero-video"));</script>
+      </div>
+      <figcaption id="cap-hero"><span class="tag" data-label>illustrative</span> <b>The structural mismatch of gradients in standard QAT versus QUASAR.</b> Under the STE, both methods evaluate the gradient at the reconstructed weights <i>r</i> and apply it to the latent weights <i>w</i>. QUASAR minimizes the loss-aware reconstruction error, making the gradient at <i>r</i> a more faithful proxy for the gradient at <i>w</i>.</figcaption>
+    </figure>
+  </div>
+  <div class="col">
+    <p class="lede">We introduce QUASAR, a QAT method that brings lightweight, <span class="nw">loss-aware</span> reconstruction into the training loop.</p>
+  </div>
+</section>
+
+<!-- ============ STATS ============ -->
+<section class="block" style="padding-top: clamp(44px, 6vw, 72px)" aria-label="Headline results">
+  <div class="wide">
+    <div class="stats reveal">
+      <div class="stat">
+        <div class="v" data-label><span data-count="13.3" data-prefix="+">+13.3</span><small>pts</small></div>
+        <p class="l">average accuracy over the best QAT baseline</p>
+        <div class="ctx" data-label><span>INT2</span><span>distillation</span><span>Qwen3-4B-Thinking</span></div>
+      </div>
+      <div class="stat">
+        <div class="v" data-label><span data-count="10.9" data-prefix="+">+10.9</span><small>pts</small></div>
+        <p class="l">average accuracy over the best QAT baseline</p>
+        <div class="ctx" data-label><span>INT2</span><span>math adaptation</span><span>Qwen3-4B-Base</span></div>
+      </div>
+      <div class="stat">
+        <div class="v" data-label><span data-count="66" data-suffix="%">66%</span></div>
+        <p class="l">lower KL divergence</p>
+        <div class="ctx" data-label><span>INT4</span><span>Gemma-4 E4B</span><span>vs Google QAT</span></div>
+      </div>
+      <div class="stat">
+        <div class="v" data-label><span data-count="1.4" data-suffix="%">1.4%</span></div>
+        <p class="l">latency overhead per training step</p>
+        <div class="ctx" data-label><span>no inference overhead</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="col" style="margin-top: 28px">
+    <details class="abstract">
+      <summary><span data-label>Abstract</span><span class="pm" aria-hidden="true">+</span></summary>
+      <div class="body">
+        <p>As large language model inference shifts toward lower precision, post-training quantization (PTQ) becomes increasingly brittle, making quantization-aware training (QAT) essential for preserving model quality. However, QAT has a structural mismatch: gradient updates are applied to latent full-precision weights, while the loss and gradients are computed on lossy reconstructions of those weights. This mismatch can lead to suboptimal training trajectories and a higher loss floor. Second-order PTQ methods address a similar problem by minimizing loss-aware reconstruction error, but applying such expensive reconstruction repeatedly during QAT as the weights evolve is impractical. We introduce QUASAR, a QAT method that brings lightweight, loss-aware reconstruction into the training loop. At each training step, QUASAR reconstructs the latent weights by searching over a small set of clipping ranges and fitting dequantization parameters through saliency-weighted least squares. We use an exponential moving average of squared gradients as the per-parameter saliency signal. Our theoretical analysis shows that optimizing QUASAR's reconstruction objective tightens both the convergence and final-loss bounds of QAT. We evaluate QUASAR across four model families and across INT4, INT3, INT2, and NVFP4 quantization formats. QUASAR consistently achieves lower training and evaluation loss than competitive QAT methods and outperforms QAT and PTQ baselines on downstream benchmarks. At INT2, QUASAR improves average accuracy over the best QAT baseline by 13.3 points with quantization-aware distillation and by 10.9 points with QAT on mathematical reasoning data. Notably, after distillation on only ~600M tokens, QUASAR's INT4 Gemma-4 E4B checkpoint outperforms the corresponding QAT checkpoint released by Google, with 66% lower KL divergence and 1.8 points higher average accuracy.</p>
+      </div>
+    </details>
+  </div>
+</section>
+
+<!-- ============ 1. RECONSTRUCTION IN QAT ============ -->
+<section class="block" id="problem" aria-labelledby="h-problem">
+  <div class="col sec-head">
+    <h2 id="h-problem"><span class="n" data-label>1.</span>Reconstruction in QAT</h2>
+  </div>
+  <div class="col prose">
+    <p class="big">QAT maintains and updates full-precision latent weights <i>w</i>, but computes the forward pass and loss using reconstructed weights <i>r</i>.</p>
+  </div>
+
+  <div class="fig">
+    <figure class="plate reveal">
+      <div class="viz">
+        <div class="viz-head"><span class="viz-kicker" data-label><b>the training loop</b></span></div>
+        <div class="viz-body"><div id="loop-diagram" class="loop-diagram" style="min-height:271px" data-mhp="552"></div></div>
+      </div>
+      <figcaption id="cap-loop"><b>The training loops for standard QAT and QUASAR differ only in the reconstruction <span class="math">w ↦ q ↦ r</span>.</b> Standard QAT determines the quantization grid from each group's extreme weights; QUASAR searches over code assignments and fits the dequantizer to minimize loss-aware reconstruction error.</figcaption>
+    </figure>
+  </div>
+
+  <div class="col prose">
+    <p>This surrogate is generally not the optimal descent direction for the latent weights, leading training along a suboptimal trajectory. The consequence is a loss-floor gap: given the same model and training data, QAT converges to a higher final training and evaluation loss than full-precision training.</p>
+  </div>
+
+  <div class="fig">
+    <div class="eq reveal">
+      <p>A second-order expansion of the loss around the full-precision weights <i>w</i>, assuming that the first-order term is negligible near an optimum, gives</p>
+      <div class="formulas" data-nocheck role="img" aria-label="L of r minus L of w is approximately one half S, where S equals r minus w transposed, times H, times r minus w">
+        <span><span class="up">ℒ(</span>r<span class="up">) − ℒ(</span>w<span class="up">) ≈</span> <span class="frac" aria-hidden="true"><span>1</span><span>2</span></span>S</span>
+        <span>S <span class="up">= (</span>r <span class="up">−</span> w<span class="up">)</span><sup class="up">⊤</sup> <span class="H">H</span> <span class="up">(</span>r <span class="up">−</span> w<span class="up">)</span></span>
+      </div>
+      <p>where <i>H</i>(<i>w</i>) is the Hessian evaluated at <i>w</i>. <b>We refer to <i>S</i> as the loss-aware reconstruction error.</b> It measures the local change in loss caused by reconstructing the latent weights.</p>
+    </div>
+  </div>
+  <div class="fig">
+      <figure class="plate reveal ix">
+        <div class="viz"><div class="viz-head"><span class="viz-kicker" data-label><b>the borrowed gradient</b></span></div><div class="viz-body"><div id="ix-sandbox" class="chart ix-mount" style="min-height:553px" data-mhp="821"></div></div></div>
+        <figcaption><span class="tag" data-label>illustrative</span> Under the STE, both methods evaluate the gradient at the reconstructed weights <i>r</i> and apply it to the latent weights <i>w</i>. QUASAR minimizes the loss-aware reconstruction error, making the gradient at <i>r</i> a more faithful proxy for the gradient at <i>w</i>.</figcaption>
+      </figure>
+  </div>
+
+</section>
+
+<!-- ============ 2. METHOD ============ -->
+<section class="block" id="method" aria-labelledby="h-method">
+  <div class="col sec-head">
+    <h2 id="h-method"><span class="n" data-label>2.</span>Optimizing Both Stages of Reconstruction</h2>
+  </div>
+  <div class="col prose">
+    <p class="big">At each training step, QUASAR reconstructs the latent weights by searching over a small set of clipping ranges and fitting dequantization parameters through saliency-weighted least squares.</p>
+  </div>
+
+  <div class="wide">
+    <figure class="plate reveal">
+      <div class="viz" id="group-widget-card">
+        <div class="viz-head"><span class="viz-kicker" data-label><b>real Qwen3-4B weight groups</b></span></div>
+        <div class="viz-body"><div id="group-widget" class="widget" style="min-height:701px" data-mhp="1230"><noscript><img src="assets/img/range_decomp.png" width="1600" height="726" alt="Scale search for Qwen3-4B weight groups at INT3."></noscript></div></div>
+      </div>
+      <figcaption><b>Scale search finds good code assignments.</b> The case <i>f</i>=1 is the full min–max range used by standard QAT. A factor <i>f</i>&lt;1 narrows the range and clips weights outside it, so the quantization levels cover a smaller interval with finer spacing. QUASAR prioritizes accurate reconstruction of high-saliency weights while tolerating more error on low-saliency weights.</figcaption>
+    </figure>
+  </div>
+
+  <div class="col prose">
+    <p>We use an exponential moving average of squared gradients as the per-parameter saliency signal. Adam and AdamW already maintain this quantity as the second-moment estimate <i>v<sub>t</sub></i>, allowing QUASAR to reuse it without additional memory overhead. QUASAR applies to affine and symmetric integer formats, NVFP4, and MXFP4.</p>
+  </div>
+  </section>
+
+<!-- ============ 3. THEORY ============ -->
+<section class="block" id="theory" aria-labelledby="h-theory">
+  <div class="col sec-head">
+    <h2 id="h-theory"><span class="n" data-label>3.</span>Reconstruction Error Bounds QAT Final Loss</h2>
+  </div>
+  <div class="col prose">
+    <p class="big">Our theoretical analysis shows that loss-aware reconstruction error directly controls QAT convergence and the quantized model's final loss, providing a principled foundation for QUASAR's objective.</p>
+  </div>
+  <div class="fig">
+    <div class="grid-2">
+      <figure class="plate reveal">
+        <div class="viz"><div class="viz-head"><span class="viz-kicker" data-label><b>after training</b> · INT2 · <span class="nw">1,000 steps</span></span></div><div class="viz-body"><div id="theory-dose" class="chart" style="min-height:416px" data-mhp="296"></div></div></div>
+        <!-- static-data:fig12 -->
+        <div class="sr-only" data-static-sr data-label>
+          <p id="sd-fig12-1">Fig. 12 · QUASAR · INT2 · 1,000 steps. Reconstruction error drives final loss.</p>
+          <table aria-labelledby="sd-fig12-1">
+          <thead>
+          <tr><th scope="col">scale-search factor f</th><th scope="col">end-of-training reconstruction error Ŝ<sub>T</sub></th><th scope="col">final held-out KL</th></tr>
+          </thead>
+          <tbody>
+          <tr><th scope="row">f ≥ 0.3 (unrestricted, ★)</th><td>3.90×10⁻⁴</td><td>0.152</td></tr>
+          <tr><th scope="row">f ≥ 0.5</th><td>4.03×10⁻⁴</td><td>0.152</td></tr>
+          <tr><th scope="row">f ≥ 0.7</th><td>4.57×10⁻⁴</td><td>0.161</td></tr>
+          <tr><th scope="row">f ≥ 0.85</th><td>5.50×10⁻⁴</td><td>0.189</td></tr>
+          <tr><th scope="row">f = 1</th><td>6.70×10⁻⁴</td><td>0.229</td></tr>
+          </tbody>
+          </table>
+          <p id="sd-fig12-2">Fig. 12 · log-log power-law fit</p>
+          <table aria-labelledby="sd-fig12-2">
+          <thead>
+          <tr><th scope="col">fit</th><th scope="col">slope</th><th scope="col">R²</th></tr>
+          </thead>
+          <tbody>
+          <tr><th scope="row">Ŝ<sub>T</sub> vs final held-out KL</th><td>0.77</td><td>0.976</td></tr>
+          </tbody>
+          </table>
+        </div>
+        <!-- /static-data:fig12 -->
+        <figcaption><b>Reconstruction error drives final loss.</b> Five QUASAR INT2 runs differ only in the lower bound imposed on the scale-search factor <i>f</i>. Restricting the search raises both the final reconstruction error <i>Ŝ<sub>T</sub></i> and held-out KL after 1,000 training steps. The star marks the unrestricted search.</figcaption>
+      </figure>
+      <figure class="plate reveal ix">
+        <div class="viz"><div class="viz-head"><span class="viz-kicker" data-label><b>end of training</b></span></div><div class="viz-body"><div id="ix-fig10" class="chart ix-mount" style="min-height:416px" data-mhp="424"></div></div></div>
+        <figcaption><b>Reconstruction error tracks final KL.</b> End-of-training loss-aware reconstruction error versus final held-out KL to the full-precision teacher, for Standard QAT, Denoising QAT, and QUASAR at INT4, INT3, and INT2.</figcaption>
+      </figure>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 4. RESULTS: HEALING + ADAPTATION ============ -->
+<section class="block" id="results" aria-labelledby="h-results">
+  <div class="col sec-head">
+    <h2 id="h-results"><span class="n" data-label>4.</span>Results on Healing and Adaptation</h2>
+  </div>
+  <div class="col prose">
+    <h3 data-label>Healing with QAD.</h3>
+    <p class="big">Across both models and all bit widths, QUASAR reaches the lowest training and evaluation loss (KL). At INT2, it reduces KL by about 30% over the strongest QAT baseline. On reasoning, coding, and long-context tasks, QUASAR improves average accuracy by 13.3 points for Qwen and 2.2 points for Llama.</p>
+  </div>
+
+  <div class="wide">
+    <figure class="plate reveal">
+      <div class="viz">
+        <div class="viz-head"><span class="viz-kicker" data-label><b>healing with QAD</b></span></div>
+        <div class="viz-body"><div id="healing-curves" class="chart" style="min-height:450px" data-mhp="487"></div></div>
+      </div>
+      <!-- static-data:fig3 -->
+      <!-- /static-data:fig3 -->
+      <figcaption><b>QUASAR gives the lowest held-out KL across both models and all bit widths.</b> For healing, we apply QAD to Qwen3-4B-Thinking-2507 and Llama-3.1-8B-Instruct at INT2, INT3, and INT4 using Open-PerfectBlend data and logits from the full-precision teachers. We show training loss over the full run, the final 1,000 steps, and held-out evaluation loss. All losses are forward KL to the full-precision model.</figcaption>
+    </figure>
+  </div>
+
+  <div class="wide">
+    <figure class="plate reveal">
+      <div class="viz">
+        <div class="viz-head"><span class="viz-kicker" data-label><b>downstream accuracy</b></span></div>
+        <div class="viz-body"><div id="heal-acc" class="chart" style="min-height:506px" data-mhp="816"></div></div>
+      </div>
+      <!-- static-data:table1 -->
+      <div class="sr-only" data-static-sr data-label>
+        <p id="sd-table1-1">Table 1 · Qwen3-4B-Thinking-2507 · INT2. Reasoning, coding, and long-context results for Qwen3-4B-Thinking-2507 and Llama-3.1-8B-Instruct at INT2, INT3, and INT4.</p>
+        <table aria-labelledby="sd-table1-1">
+        <thead>
+        <tr><th scope="col">Method</th><th scope="col">KL ↓</th><th scope="col">Top-1 ↑</th><th scope="col">HMMT '26</th><th scope="col">AIME '25</th><th scope="col">MATH-500</th><th scope="col">MMLU-Pro</th><th scope="col">SuperGPQA</th><th scope="col">LCB v6</th><th scope="col">LongBench-v2</th><th scope="col">RULER</th><th scope="col">Avg.</th></tr>
+        </thead>
+        <tbody>
+        <tr><th scope="row">Teacher (BF16)</th><td>–</td><td>–</td><td>43.1</td><td>77.9</td><td>98.2</td><td>72.7</td><td>48.1</td><td>74.6</td><td>44.5</td><td>87.9</td><td>68.4</td></tr>
+        <tr><th scope="row">RTN</th><td>11.166</td><td>0.5</td><td>0.0</td><td>0.0</td><td>1.9</td><td>0.0</td><td>10.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>1.5</td></tr>
+        <tr><th scope="row">GPTQ</th><td>1.140</td><td>67.7</td><td>0.0</td><td>0.0</td><td>2.6</td><td>3.2</td><td>8.4</td><td>0.0</td><td>0.0</td><td>0.3</td><td>1.8</td></tr>
+        <tr><th scope="row">AWQ</th><td>3.016</td><td>37.0</td><td>0.0</td><td>0.0</td><td>2.4</td><td>0.0</td><td>5.2</td><td>0.0</td><td>0.0</td><td>0.0</td><td>1.0</td></tr>
+        <tr><th scope="row">Standard QAT</th><td>0.186</td><td>89.9</td><td>1.0</td><td>1.7</td><td>49.5</td><td>26.6</td><td>17.4</td><td>8.2</td><td>20.5</td><td>39.3</td><td>20.5</td></tr>
+        <tr><th scope="row">LSQ</th><td>0.205</td><td>89.2</td><td>0.8</td><td>0.5</td><td>47.2</td><td>26.2</td><td>17.8</td><td>7.4</td><td>20.7</td><td>41.7</td><td>20.3</td></tr>
+        <tr><th scope="row">Denoising QAT</th><td>0.179</td><td>90.1</td><td>1.0</td><td>1.4</td><td>51.8</td><td>27.4</td><td>19.0</td><td>9.2</td><td>18.9</td><td>39.4</td><td>21.0</td></tr>
+        <tr><th scope="row">BitDistiller</th><td>0.209</td><td>89.1</td><td>0.6</td><td>1.1</td><td>51.4</td><td>29.3</td><td>16.8</td><td>9.4</td><td>18.7</td><td>44.9</td><td>21.5</td></tr>
+        <tr><th scope="row">QUASAR (ours)</th><td>0.126</td><td>92.0</td><td>6.2</td><td>14.4</td><td>77.4</td><td>45.8</td><td>25.4</td><td>23.4</td><td>26.6</td><td>59.6</td><td>34.8</td></tr>
+        </tbody>
+        </table>
+        <p id="sd-table1-2">Table 1 · Qwen3-4B-Thinking-2507 · INT3</p>
+        <table aria-labelledby="sd-table1-2">
+        <thead>
+        <tr><th scope="col">Method</th><th scope="col">KL ↓</th><th scope="col">Top-1 ↑</th><th scope="col">HMMT '26</th><th scope="col">AIME '25</th><th scope="col">MATH-500</th><th scope="col">MMLU-Pro</th><th scope="col">SuperGPQA</th><th scope="col">LCB v6</th><th scope="col">LongBench-v2</th><th scope="col">RULER</th><th scope="col">Avg.</th></tr>
+        </thead>
+        <tbody>
+        <tr><th scope="row">Teacher (BF16)</th><td>–</td><td>–</td><td>43.1</td><td>77.9</td><td>98.2</td><td>72.7</td><td>48.1</td><td>74.6</td><td>44.5</td><td>87.9</td><td>68.4</td></tr>
+        <tr><th scope="row">RTN</th><td>0.597</td><td>78.8</td><td>0.0</td><td>0.7</td><td>13.0</td><td>16.3</td><td>15.6</td><td>0.0</td><td>8.7</td><td>49.3</td><td>13.0</td></tr>
+        <tr><th scope="row">GPTQ</th><td>0.130</td><td>91.5</td><td>31.2</td><td>49.4</td><td>95.8</td><td>63.7</td><td>39.5</td><td>49.4</td><td>31.0</td><td>73.3</td><td>54.1</td></tr>
+        <tr><th scope="row">AWQ</th><td>0.240</td><td>88.1</td><td>22.7</td><td>31.0</td><td>90.6</td><td>61.5</td><td>37.0</td><td>35.7</td><td>30.2</td><td>76.0</td><td>48.1</td></tr>
+        <tr><th scope="row">Standard QAT</th><td>0.062</td><td>94.2</td><td>29.9</td><td>47.4</td><td>94.2</td><td>64.9</td><td>40.0</td><td>53.3</td><td>29.6</td><td>80.8</td><td>55.0</td></tr>
+        <tr><th scope="row">LSQ</th><td>0.070</td><td>93.8</td><td>28.3</td><td>45.5</td><td>93.3</td><td>64.1</td><td>38.2</td><td>52.2</td><td>32.8</td><td>80.5</td><td>54.4</td></tr>
+        <tr><th scope="row">Denoising QAT</th><td>0.060</td><td>94.3</td><td>29.3</td><td>49.3</td><td>94.7</td><td>64.5</td><td>39.7</td><td>52.3</td><td>32.8</td><td>79.0</td><td>55.2</td></tr>
+        <tr><th scope="row">BitDistiller</th><td>0.065</td><td>94.2</td><td>29.7</td><td>52.5</td><td>95.1</td><td>65.8</td><td>40.6</td><td>57.7</td><td>33.0</td><td>83.5</td><td>57.3</td></tr>
+        <tr><th scope="row">QUASAR (ours)</th><td>0.054</td><td>94.9</td><td>31.7</td><td>60.5</td><td>95.2</td><td>66.7</td><td>41.5</td><td>60.2</td><td>35.8</td><td>84.4</td><td>59.5</td></tr>
+        </tbody>
+        </table>
+        <p id="sd-table1-3">Table 1 · Qwen3-4B-Thinking-2507 · INT4</p>
+        <table aria-labelledby="sd-table1-3">
+        <thead>
+        <tr><th scope="col">Method</th><th scope="col">KL ↓</th><th scope="col">Top-1 ↑</th><th scope="col">HMMT '26</th><th scope="col">AIME '25</th><th scope="col">MATH-500</th><th scope="col">MMLU-Pro</th><th scope="col">SuperGPQA</th><th scope="col">LCB v6</th><th scope="col">LongBench-v2</th><th scope="col">RULER</th><th scope="col">Avg.</th></tr>
+        </thead>
+        <tbody>
+        <tr><th scope="row">Teacher (BF16)</th><td>–</td><td>–</td><td>43.1</td><td>77.9</td><td>98.2</td><td>72.7</td><td>48.1</td><td>74.6</td><td>44.5</td><td>87.9</td><td>68.4</td></tr>
+        <tr><th scope="row">RTN</th><td>0.108</td><td>92.2</td><td>35.7</td><td>62.1</td><td>96.8</td><td>69.7</td><td>44.4</td><td>65.2</td><td>38.8</td><td>83.3</td><td>62.0</td></tr>
+        <tr><th scope="row">GPTQ</th><td>0.027</td><td>96.2</td><td>38.8</td><td>74.8</td><td>97.8</td><td>71.4</td><td>46.5</td><td>70.6</td><td>38.2</td><td>87.4</td><td>65.7</td></tr>
+        <tr><th scope="row">AWQ</th><td>0.050</td><td>94.7</td><td>36.6</td><td>70.6</td><td>97.6</td><td>71.6</td><td>45.7</td><td>70.8</td><td>39.0</td><td>86.8</td><td>64.8</td></tr>
+        <tr><th scope="row">Standard QAT</th><td>0.019</td><td>96.9</td><td>36.8</td><td>72.1</td><td>97.7</td><td>71.4</td><td>46.5</td><td>70.9</td><td>39.0</td><td>87.1</td><td>65.2</td></tr>
+        <tr><th scope="row">LSQ</th><td>0.024</td><td>96.4</td><td>39.3</td><td>68.5</td><td>97.5</td><td>70.8</td><td>45.6</td><td>69.3</td><td>36.4</td><td>87.3</td><td>64.3</td></tr>
+        <tr><th scope="row">Denoising QAT</th><td>0.018</td><td>96.9</td><td>38.8</td><td>71.5</td><td>97.2</td><td>70.9</td><td>46.4</td><td>71.6</td><td>42.9</td><td>86.9</td><td>65.8</td></tr>
+        <tr><th scope="row">BitDistiller</th><td>0.018</td><td>96.9</td><td>38.5</td><td>73.9</td><td>97.3</td><td>71.4</td><td>46.5</td><td>71.1</td><td>40.4</td><td>86.8</td><td>65.7</td></tr>
+        <tr><th scope="row">QUASAR (ours)</th><td>0.016</td><td>97.1</td><td>38.5</td><td>73.8</td><td>97.5</td><td>71.7</td><td>46.2</td><td>72.2</td><td>41.0</td><td>88.0</td><td>66.1</td></tr>
+        </tbody>
+        </table>
+        <p id="sd-table1-4">Table 1 · Llama-3.1-8B-Instruct · INT2</p>
+        <table aria-labelledby="sd-table1-4">
+        <thead>
+        <tr><th scope="col">Method</th><th scope="col">KL ↓</th><th scope="col">Top-1 ↑</th><th scope="col">MATH-500</th><th scope="col">MMLU-Pro</th><th scope="col">SuperGPQA</th><th scope="col">LCB v6</th><th scope="col">LongBench-v2</th><th scope="col">RULER</th><th scope="col">Avg.</th></tr>
+        </thead>
+        <tbody>
+        <tr><th scope="row">Teacher (BF16)</th><td>–</td><td>–</td><td>49.6</td><td>42.3</td><td>22.4</td><td>17.0</td><td>30.0</td><td>89.6</td><td>41.8</td></tr>
+        <tr><th scope="row">RTN</th><td>10.810</td><td>0.5</td><td>0.0</td><td>0.0</td><td>10.2</td><td>0.0</td><td>0.0</td><td>0.0</td><td>1.7</td></tr>
+        <tr><th scope="row">GPTQ</th><td>2.380</td><td>51.8</td><td>2.9</td><td>1.8</td><td>8.7</td><td>0.0</td><td>0.0</td><td>0.1</td><td>2.3</td></tr>
+        <tr><th scope="row">AWQ</th><td>6.769</td><td>12.9</td><td>1.6</td><td>0.0</td><td>10.7</td><td>0.0</td><td>0.0</td><td>0.0</td><td>2.0</td></tr>
+        <tr><th scope="row">Standard QAT</th><td>0.163</td><td>90.1</td><td>21.6</td><td>16.8</td><td>11.8</td><td>4.0</td><td>15.1</td><td>5.5</td><td>12.5</td></tr>
+        <tr><th scope="row">LSQ</th><td>0.172</td><td>89.6</td><td>19.9</td><td>15.7</td><td>11.6</td><td>2.3</td><td>15.3</td><td>52.9</td><td>19.6</td></tr>
+        <tr><th scope="row">Denoising QAT</th><td>0.165</td><td>90.1</td><td>20.8</td><td>16.5</td><td>11.0</td><td>3.6</td><td>8.5</td><td>0.0</td><td>10.1</td></tr>
+        <tr><th scope="row">BitDistiller</th><td>0.151</td><td>90.2</td><td>21.7</td><td>19.0</td><td>11.8</td><td>5.5</td><td>20.5</td><td>63.5</td><td>23.7</td></tr>
+        <tr><th scope="row">QUASAR (ours)</th><td>0.105</td><td>92.0</td><td>30.0</td><td>22.6</td><td>13.7</td><td>7.0</td><td>15.9</td><td>66.4</td><td>25.9</td></tr>
+        </tbody>
+        </table>
+        <p id="sd-table1-5">Table 1 · Llama-3.1-8B-Instruct · INT3</p>
+        <table aria-labelledby="sd-table1-5">
+        <thead>
+        <tr><th scope="col">Method</th><th scope="col">KL ↓</th><th scope="col">Top-1 ↑</th><th scope="col">MATH-500</th><th scope="col">MMLU-Pro</th><th scope="col">SuperGPQA</th><th scope="col">LCB v6</th><th scope="col">LongBench-v2</th><th scope="col">RULER</th><th scope="col">Avg.</th></tr>
+        </thead>
+        <tbody>
+        <tr><th scope="row">Teacher (BF16)</th><td>–</td><td>–</td><td>49.6</td><td>42.3</td><td>22.4</td><td>17.0</td><td>30.0</td><td>89.6</td><td>41.8</td></tr>
+        <tr><th scope="row">RTN</th><td>0.276</td><td>85.6</td><td>8.2</td><td>17.2</td><td>12.5</td><td>0.7</td><td>21.1</td><td>49.0</td><td>18.1</td></tr>
+        <tr><th scope="row">GPTQ</th><td>0.076</td><td>92.8</td><td>38.6</td><td>31.9</td><td>18.4</td><td>10.4</td><td>27.6</td><td>80.9</td><td>34.6</td></tr>
+        <tr><th scope="row">AWQ</th><td>0.197</td><td>88.0</td><td>16.2</td><td>15.3</td><td>13.9</td><td>2.4</td><td>22.7</td><td>69.0</td><td>23.3</td></tr>
+        <tr><th scope="row">Standard QAT</th><td>0.046</td><td>94.7</td><td>39.5</td><td>34.8</td><td>18.6</td><td>12.7</td><td>30.2</td><td>81.7</td><td>36.3</td></tr>
+        <tr><th scope="row">LSQ</th><td>0.052</td><td>94.2</td><td>39.3</td><td>35.0</td><td>17.1</td><td>13.7</td><td>27.2</td><td>86.1</td><td>36.4</td></tr>
+        <tr><th scope="row">Denoising QAT</th><td>0.046</td><td>94.7</td><td>41.2</td><td>34.6</td><td>18.2</td><td>13.0</td><td>29.2</td><td>80.3</td><td>36.1</td></tr>
+        <tr><th scope="row">BitDistiller</th><td>0.041</td><td>94.8</td><td>42.5</td><td>35.9</td><td>19.3</td><td>13.1</td><td>31.2</td><td>84.4</td><td>37.7</td></tr>
+        <tr><th scope="row">QUASAR (ours)</th><td>0.036</td><td>95.2</td><td>43.4</td><td>36.4</td><td>19.7</td><td>16.2</td><td>26.0</td><td>85.8</td><td>37.9</td></tr>
+        </tbody>
+        </table>
+        <p id="sd-table1-6">Table 1 · Llama-3.1-8B-Instruct · INT4</p>
+        <table aria-labelledby="sd-table1-6">
+        <thead>
+        <tr><th scope="col">Method</th><th scope="col">KL ↓</th><th scope="col">Top-1 ↑</th><th scope="col">MATH-500</th><th scope="col">MMLU-Pro</th><th scope="col">SuperGPQA</th><th scope="col">LCB v6</th><th scope="col">LongBench-v2</th><th scope="col">RULER</th><th scope="col">Avg.</th></tr>
+        </thead>
+        <tbody>
+        <tr><th scope="row">Teacher (BF16)</th><td>–</td><td>–</td><td>49.6</td><td>42.3</td><td>22.4</td><td>17.0</td><td>30.0</td><td>89.6</td><td>41.8</td></tr>
+        <tr><th scope="row">RTN</th><td>0.044</td><td>94.4</td><td>44.5</td><td>35.5</td><td>20.1</td><td>14.2</td><td>29.6</td><td>89.0</td><td>38.8</td></tr>
+        <tr><th scope="row">GPTQ</th><td>0.015</td><td>96.8</td><td>47.9</td><td>40.0</td><td>20.6</td><td>16.5</td><td>31.2</td><td>88.5</td><td>40.8</td></tr>
+        <tr><th scope="row">AWQ</th><td>0.032</td><td>95.2</td><td>44.8</td><td>39.8</td><td>21.3</td><td>13.2</td><td>30.8</td><td>88.1</td><td>39.7</td></tr>
+        <tr><th scope="row">Standard QAT</th><td>0.014</td><td>97.0</td><td>47.7</td><td>42.1</td><td>21.1</td><td>15.8</td><td>31.0</td><td>89.0</td><td>41.1</td></tr>
+        <tr><th scope="row">LSQ</th><td>0.016</td><td>96.8</td><td>48.3</td><td>41.9</td><td>21.2</td><td>15.5</td><td>29.8</td><td>87.5</td><td>40.7</td></tr>
+        <tr><th scope="row">Denoising QAT</th><td>0.014</td><td>97.0</td><td>48.1</td><td>42.1</td><td>21.7</td><td>14.3</td><td>31.2</td><td>88.9</td><td>41.1</td></tr>
+        <tr><th scope="row">BitDistiller</th><td>0.013</td><td>97.0</td><td>48.4</td><td>41.0</td><td>21.0</td><td>15.7</td><td>31.0</td><td>88.9</td><td>41.0</td></tr>
+        <tr><th scope="row">QUASAR (ours)</th><td>0.012</td><td>97.3</td><td>47.6</td><td>42.2</td><td>20.8</td><td>16.4</td><td>30.0</td><td>89.0</td><td>41.0</td></tr>
+        </tbody>
+        </table>
+      </div>
+      <!-- /static-data:table1 -->
+      <figcaption><b>Reasoning, coding, and long-context results for Qwen3-4B-Thinking-2507 and Llama-3.1-8B-Instruct at INT2, INT3, and INT4.</b></figcaption>
+    </figure>
+  </div>
+
+  <div class="col prose">
+    <h3 data-label>Adaptation with QAT.</h3>
+    <p>QUASAR has the lowest held-out perplexity and the best or tied-best average accuracy at every bit width. It is also the only INT2 quantized model to outperform the original base model and score above zero on HMMT'25.</p>
+  </div>
+  <div class="fig">
+    <figure class="plate reveal">
+      <div class="viz">
+        <div class="viz-head"><span class="viz-kicker" data-label><b>adaptation on math reasoning</b></span></div>
+        <div class="viz-body"><div id="adapt-chart" class="chart" style="min-height:422px" data-mhp="432"></div></div>
+      </div>
+      <!-- static-data:table2 -->
+      <div class="sr-only" data-static-sr data-label>
+        <p id="sd-table2-1">Table 2 · Qwen3-4B-Base · INT2. Comparison of QAT and PTQ methods for adapting Qwen3-4B-Base on OpenMathReasoning at INT2, INT3, and INT4.</p>
+        <table aria-labelledby="sd-table2-1">
+        <thead>
+        <tr><th scope="col">Method</th><th scope="col">PPL ↓</th><th scope="col">MATH-500</th><th scope="col">GSM8K</th><th scope="col">AIME'24</th><th scope="col">AIME'25</th><th scope="col">HMMT'25</th><th scope="col">Avg.</th></tr>
+        </thead>
+        <tbody>
+        <tr><th scope="row">Base (no SFT)</th><td>–</td><td>41.0</td><td>66.4</td><td>9.6</td><td>3.3</td><td>0.8</td><td>24.2</td></tr>
+        <tr><th scope="row">FP-SFT</th><td>1.59</td><td>83.8</td><td>91.3</td><td>22.9</td><td>22.5</td><td>10.0</td><td>46.1</td></tr>
+        <tr><th scope="row">RTN</th><td>3.5×10⁵</td><td>0.9</td><td>0.3</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.2</td></tr>
+        <tr><th scope="row">GPTQ</th><td>3.12</td><td>2.1</td><td>1.1</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.6</td></tr>
+        <tr><th scope="row">AWQ</th><td>130</td><td>1.5</td><td>1.2</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.5</td></tr>
+        <tr><th scope="row">Standard QAT</th><td>1.79</td><td>38.7</td><td>51.9</td><td>2.1</td><td>0.8</td><td>0.0</td><td>18.7</td></tr>
+        <tr><th scope="row">LSQ</th><td>1.82</td><td>36.5</td><td>49.9</td><td>0.8</td><td>0.4</td><td>0.0</td><td>17.5</td></tr>
+        <tr><th scope="row">Denoising QAT</th><td>1.78</td><td>39.2</td><td>52.5</td><td>0.8</td><td>0.8</td><td>0.0</td><td>18.7</td></tr>
+        <tr><th scope="row">BitDistiller</th><td>1.87</td><td>33.6</td><td>57.0</td><td>1.2</td><td>0.4</td><td>0.0</td><td>18.4</td></tr>
+        <tr><th scope="row">QUASAR (ours)</th><td>1.71</td><td>60.7</td><td>75.4</td><td>4.0</td><td>6.5</td><td>1.5</td><td>29.6</td></tr>
+        </tbody>
+        </table>
+        <p id="sd-table2-2">Table 2 · Qwen3-4B-Base · INT3</p>
+        <table aria-labelledby="sd-table2-2">
+        <thead>
+        <tr><th scope="col">Method</th><th scope="col">PPL ↓</th><th scope="col">MATH-500</th><th scope="col">GSM8K</th><th scope="col">AIME'24</th><th scope="col">AIME'25</th><th scope="col">HMMT'25</th><th scope="col">Avg.</th></tr>
+        </thead>
+        <tbody>
+        <tr><th scope="row">Base (no SFT)</th><td>–</td><td>41.0</td><td>66.4</td><td>9.6</td><td>3.3</td><td>0.8</td><td>24.2</td></tr>
+        <tr><th scope="row">FP-SFT</th><td>1.59</td><td>83.8</td><td>91.3</td><td>22.9</td><td>22.5</td><td>10.0</td><td>46.1</td></tr>
+        <tr><th scope="row">RTN</th><td>2.24</td><td>12.8</td><td>7.6</td><td>0.0</td><td>1.7</td><td>0.0</td><td>4.4</td></tr>
+        <tr><th scope="row">GPTQ</th><td>1.68</td><td>71.0</td><td>85.0</td><td>11.2</td><td>11.2</td><td>4.2</td><td>36.5</td></tr>
+        <tr><th scope="row">AWQ</th><td>1.83</td><td>57.3</td><td>65.1</td><td>10.0</td><td>8.3</td><td>1.7</td><td>28.5</td></tr>
+        <tr><th scope="row">Standard QAT</th><td>1.64</td><td>75.8</td><td>87.5</td><td>15.0</td><td>16.2</td><td>4.6</td><td>39.8</td></tr>
+        <tr><th scope="row">LSQ</th><td>1.65</td><td>73.7</td><td>87.0</td><td>12.5</td><td>11.7</td><td>3.8</td><td>37.7</td></tr>
+        <tr><th scope="row">Denoising QAT</th><td>1.64</td><td>75.9</td><td>87.3</td><td>14.2</td><td>13.3</td><td>7.1</td><td>39.6</td></tr>
+        <tr><th scope="row">BitDistiller</th><td>1.64</td><td>75.7</td><td>87.8</td><td>16.2</td><td>15.4</td><td>5.0</td><td>40.0</td></tr>
+        <tr><th scope="row">QUASAR (ours)</th><td>1.62</td><td>78.5</td><td>88.6</td><td>15.9</td><td>16.2</td><td>6.0</td><td>41.1</td></tr>
+        </tbody>
+        </table>
+        <p id="sd-table2-3">Table 2 · Qwen3-4B-Base · INT4</p>
+        <table aria-labelledby="sd-table2-3">
+        <thead>
+        <tr><th scope="col">Method</th><th scope="col">PPL ↓</th><th scope="col">MATH-500</th><th scope="col">GSM8K</th><th scope="col">AIME'24</th><th scope="col">AIME'25</th><th scope="col">HMMT'25</th><th scope="col">Avg.</th></tr>
+        </thead>
+        <tbody>
+        <tr><th scope="row">Base (no SFT)</th><td>–</td><td>41.0</td><td>66.4</td><td>9.6</td><td>3.3</td><td>0.8</td><td>24.2</td></tr>
+        <tr><th scope="row">FP-SFT</th><td>1.59</td><td>83.8</td><td>91.3</td><td>22.9</td><td>22.5</td><td>10.0</td><td>46.1</td></tr>
+        <tr><th scope="row">RTN</th><td>1.66</td><td>78.2</td><td>90.0</td><td>15.0</td><td>13.3</td><td>7.5</td><td>40.8</td></tr>
+        <tr><th scope="row">GPTQ</th><td>1.61</td><td>81.7</td><td>90.6</td><td>19.1</td><td>20.5</td><td>8.5</td><td>44.1</td></tr>
+        <tr><th scope="row">AWQ</th><td>1.63</td><td>80.3</td><td>90.5</td><td>15.8</td><td>17.5</td><td>8.3</td><td>42.5</td></tr>
+        <tr><th scope="row">Standard QAT</th><td>1.60</td><td>82.1</td><td>90.8</td><td>21.2</td><td>20.6</td><td>10.7</td><td>45.1</td></tr>
+        <tr><th scope="row">LSQ</th><td>1.62</td><td>79.0</td><td>89.1</td><td>17.9</td><td>17.1</td><td>6.7</td><td>42.0</td></tr>
+        <tr><th scope="row">Denoising QAT</th><td>1.60</td><td>82.1</td><td>90.4</td><td>20.0</td><td>21.4</td><td>9.9</td><td>44.8</td></tr>
+        <tr><th scope="row">BitDistiller</th><td>1.60</td><td>82.7</td><td>90.6</td><td>20.3</td><td>20.8</td><td>9.3</td><td>44.7</td></tr>
+        <tr><th scope="row">QUASAR (ours)</th><td>1.60</td><td>82.8</td><td>90.9</td><td>20.8</td><td>19.8</td><td>11.2</td><td>45.1</td></tr>
+        </tbody>
+        </table>
+      </div>
+      <!-- /static-data:table2 -->
+      <figcaption><b>At INT2, QUASAR reaches 29.6 average accuracy, 10.9 points above the strongest QAT baseline and 29.0 points above full-precision fine-tuning followed by PTQ.</b> Comparison of QAT and PTQ methods for adapting Qwen3-4B-Base on OpenMathReasoning at INT2, INT3, and INT4.</figcaption>
+    </figure>
+  </div>
+  <div class="fig">
+      <figure class="plate reveal ix">
+        <div class="viz"><div class="viz-head"><span class="viz-kicker" data-label><b>adaptation perplexity</b></span></div><div class="viz-body"><div id="ix-fig30" class="chart ix-mount" style="min-height:326px" data-mhp="798"></div></div></div>
+        <figcaption><b>QUASAR reaches the lowest held-out perplexity at every bit width.</b> Training perplexity over the full run (left) and final 1,000 steps (center), and held-out perplexity (right), for QAT of Qwen3-4B-Base on OpenMathReasoning. FP-SFT is included as a full-precision reference.</figcaption>
+      </figure>
+  </div>
+  <div class="fig">
+    <div class="grid-2">
+      <figure class="plate reveal ix">
+        <div class="viz"><div class="viz-head"><span class="viz-kicker" data-label><b>answer outcomes</b> · INT2</span></div><div class="viz-body"><div id="ix-fig31" class="chart ix-mount" style="min-height:408px" data-mhp="446"></div></div></div>
+        <figcaption><b>Answer outcomes for the INT2 checkpoints.</b> Share of generated samples that produce a correct answer, an incorrect answer, or no final answer on MATH-500 and GSM8K. The base model and FP-SFT are included as references.</figcaption>
+      </figure>
+      <figure class="plate reveal ix">
+        <div class="viz"><div class="viz-head"><span class="viz-kicker" data-label><b>pass@8 / avg@1</b> · INT2</span></div><div class="viz-body"><div id="ix-fig32" class="chart ix-mount" style="min-height:392px" data-mhp="392"></div></div></div>
+        <figcaption><b>Variation across repeated INT2 samples.</b> Ratio of pass@8 to avg@1 on MATH-500 for Qwen3-4B-Base checkpoints, using eight samples per problem at temperature 0.6. A ratio of 1 means that the same problems are solved on every attempt; higher values indicate less consistent successes. The base model and FP-SFT are included as references.</figcaption>
+      </figure>
+    </div>
+  </div>
+  <div class="fig">
+      <figure class="plate reveal ix">
+        <div class="viz"><div class="viz-head"><span class="viz-kicker" data-label><b>divergence along traces</b></span></div><div class="viz-body"><div id="ix-fig33" class="chart ix-mount" style="min-height:342px" data-mhp="378"></div></div></div>
+        <figcaption><b>Divergence from FP-SFT along reasoning traces.</b> Forward KL to FP-SFT by trace decile for selected quantized checkpoints, averaged over 1,000 MATH-500 traces generated by FP-SFT. Every checkpoint is evaluated on the same token sequences.</figcaption>
+      </figure>
+  </div>
+</section>
+
+<!-- ============ 5. NVFP4 + CHECKPOINTS ============ -->
+<section class="block" id="nvfp4" aria-labelledby="h-nvfp4">
+  <div class="col sec-head">
+    <h2 id="h-nvfp4"><span class="n" data-label>5.</span>NVFP4 and Checkpoint Comparisons</h2>
+  </div>
+  <div class="col prose">
+    <p class="big">For Qwen3-8B and Qwen3.5-9B, QUASAR reduces held-out KL divergence by 12% and 15% relative to Standard QAT, respectively. Notably, QUASAR's INT4 Gemma-4 checkpoint outperforms Google's QAT checkpoint in KL divergence and benchmark accuracy.</p>
+  </div>
+
+  <div class="wide">
+    <figure class="plate reveal">
+      <div class="viz">
+        <div class="viz-head"><span class="viz-kicker" data-label><b>fidelity to BF16 and accuracy</b></span></div>
+        <div class="viz-body"><div id="ckpt-kl" class="chart" style="min-height:644px" data-mhp="964"></div></div>
+      </div>
+      <!-- static-data:table3 -->
+      <div class="sr-only" data-static-sr data-label>
+        <p id="sd-table3-1">Table 3 · Qwen3-8B. Comparison of QUASAR with QAT and PTQ baselines across NVFP4, INT4, and Q4_0 (llama.cpp GGUF format).</p>
+        <table aria-labelledby="sd-table3-1">
+        <thead>
+        <tr><th scope="col">Method</th><th scope="col">Format</th><th scope="col">bpw</th><th scope="col">Fidelity · KL ↓</th><th scope="col">Fidelity · Top-1 ↑</th><th scope="col">Accuracy (%) ↑ · Hard reasoning and coding · HMMT'26</th><th scope="col">Accuracy (%) ↑ · Hard reasoning and coding · AIME'25</th><th scope="col">Accuracy (%) ↑ · Hard reasoning and coding · SuperGPQA</th><th scope="col">Accuracy (%) ↑ · Hard reasoning and coding · OJBench</th><th scope="col">Accuracy (%) ↑ · Long horizon · MRCR</th><th scope="col">Accuracy (%) ↑ · Long horizon · MRCR ≥64k</th><th scope="col">Accuracy (%) ↑ · Long horizon · MRCR 8-needle</th><th scope="col">Accuracy (%) ↑ · Long horizon · LongProc</th><th scope="col">Accuracy (%) ↑ · Long horizon · LongBench-v2</th><th scope="col">Accuracy (%) ↑ · Long horizon · RULER</th><th scope="col">Accuracy (%) ↑ · Avg.</th></tr>
+        </thead>
+        <tbody>
+        <tr><th scope="row">BF16</th><td>BF16</td><td>16</td><td>–</td><td>–</td><td>44.6</td><td>68.4</td><td>48.8</td><td>22.4</td><td>25.8</td><td>19.2</td><td>16.2</td><td>48.9</td><td>38.4</td><td>80.5</td><td>41.3</td></tr>
+        <tr><th scope="row">RTN</th><td>NVFP4 W4A4</td><td>4.50</td><td>.053</td><td>93.0</td><td>37.4</td><td>64.6</td><td>45.6</td><td>14.7</td><td>22.4</td><td>15.2</td><td>14.1</td><td>39.3</td><td>36.0</td><td>76.6</td><td>36.6</td></tr>
+        <tr><th scope="row">GPTQ</th><td>NVFP4 W4A4</td><td>4.50</td><td>.039</td><td>94.0</td><td>40.3</td><td>64.0</td><td>46.2</td><td>16.8</td><td>23.6</td><td>14.6</td><td>15.2</td><td>39.5</td><td>36.0</td><td>78.5</td><td>37.5</td></tr>
+        <tr><th scope="row">Standard QAT</th><td>NVFP4 W4A4</td><td>4.50</td><td>.041</td><td>94.0</td><td>39.0</td><td>61.2</td><td>45.7</td><td>19.4</td><td>21.6</td><td>14.1</td><td>12.9</td><td>36.5</td><td>37.4</td><td>77.9</td><td>36.6</td></tr>
+        <tr><th scope="row">QUASAR (ours)</th><td>NVFP4 W4A4</td><td>4.50</td><td>.036</td><td>94.3</td><td>40.8</td><td>63.6</td><td>46.8</td><td>18.5</td><td>24.3</td><td>16.4</td><td>15.8</td><td>40.3</td><td>33.8</td><td>78.9</td><td>37.9</td></tr>
+        </tbody>
+        </table>
+        <p id="sd-table3-2">Table 3 · Qwen3.5-9B</p>
+        <table aria-labelledby="sd-table3-2">
+        <thead>
+        <tr><th scope="col">Method</th><th scope="col">Format</th><th scope="col">bpw</th><th scope="col">Fidelity · KL ↓</th><th scope="col">Fidelity · Top-1 ↑</th><th scope="col">Accuracy (%) ↑ · Hard reasoning and coding · HMMT'26</th><th scope="col">Accuracy (%) ↑ · Hard reasoning and coding · AIME'25</th><th scope="col">Accuracy (%) ↑ · Hard reasoning and coding · SuperGPQA</th><th scope="col">Accuracy (%) ↑ · Hard reasoning and coding · OJBench</th><th scope="col">Accuracy (%) ↑ · Long horizon · MRCR</th><th scope="col">Accuracy (%) ↑ · Long horizon · MRCR ≥64k</th><th scope="col">Accuracy (%) ↑ · Long horizon · MRCR 8-needle</th><th scope="col">Accuracy (%) ↑ · Long horizon · LongProc</th><th scope="col">Accuracy (%) ↑ · Long horizon · LongBench-v2</th><th scope="col">Accuracy (%) ↑ · Long horizon · RULER</th><th scope="col">Accuracy (%) ↑ · Avg.</th></tr>
+        </thead>
+        <tbody>
+        <tr><th scope="row">BF16</th><td>BF16</td><td>16</td><td>–</td><td>–</td><td>47.9</td><td>74.5</td><td>58.8</td><td>19.4</td><td>79.4</td><td>74.5</td><td>53.9</td><td>66.8</td><td>43.7</td><td>90.1</td><td>60.9</td></tr>
+        <tr><th scope="row">RTN</th><td>NVFP4 W4A4</td><td>4.50</td><td>.044</td><td>93.2</td><td>21.9</td><td>37.3</td><td>49.1</td><td>6.5</td><td>54.4</td><td>42.6</td><td>32.1</td><td>35.5</td><td>23.1</td><td>91.4</td><td>39.4</td></tr>
+        <tr><th scope="row">GPTQ</th><td>NVFP4 W4A4</td><td>4.50</td><td>.029</td><td>94.5</td><td>20.0</td><td>29.9</td><td>48.6</td><td>3.4</td><td>56.8</td><td>44.6</td><td>32.6</td><td>42.1</td><td>24.3</td><td>91.3</td><td>39.4</td></tr>
+        <tr><th scope="row">Standard QAT</th><td>NVFP4 W4A4</td><td>4.50</td><td>.033</td><td>94.2</td><td>43.1</td><td>65.3</td><td>55.5</td><td>13.4</td><td>63.7</td><td>52.3</td><td>39.7</td><td>59.0</td><td>43.9</td><td>89.8</td><td>52.6</td></tr>
+        <tr><th scope="row">QUASAR (ours)</th><td>NVFP4 W4A4</td><td>4.50</td><td>.028</td><td>94.6</td><td>43.8</td><td>68.8</td><td>56.0</td><td>13.4</td><td>71.7</td><td>63.8</td><td>45.0</td><td>59.7</td><td>44.1</td><td>90.5</td><td>55.7</td></tr>
+        </tbody>
+        </table>
+        <p id="sd-table3-3">Table 3 · Muse-Glimmer-30B</p>
+        <table aria-labelledby="sd-table3-3">
+        <thead>
+        <tr><th scope="col">Method</th><th scope="col">Format</th><th scope="col">bpw</th><th scope="col">Fidelity · KL ↓</th><th scope="col">Fidelity · Top-1 ↑</th><th scope="col">Accuracy (%) ↑ · Hard reasoning and coding · HMMT'26</th><th scope="col">Accuracy (%) ↑ · Hard reasoning and coding · AIME'25</th><th scope="col">Accuracy (%) ↑ · Hard reasoning and coding · SuperGPQA</th><th scope="col">Accuracy (%) ↑ · Hard reasoning and coding · OJBench</th><th scope="col">Accuracy (%) ↑ · Long horizon · MRCR</th><th scope="col">Accuracy (%) ↑ · Long horizon · MRCR ≥64k</th><th scope="col">Accuracy (%) ↑ · Long horizon · MRCR 8-needle</th><th scope="col">Accuracy (%) ↑ · Long horizon · LongProc</th><th scope="col">Accuracy (%) ↑ · Long horizon · LongBench-v2</th><th scope="col">Accuracy (%) ↑ · Long horizon · RULER</th><th scope="col">Accuracy (%) ↑ · Avg.</th></tr>
+        </thead>
+        <tbody>
+        <tr><th scope="row">BF16</th><td>BF16</td><td>16</td><td>–</td><td>–</td><td>71.7</td><td>92.2</td><td>60.1</td><td>25.0</td><td>46.1</td><td>38.0</td><td>24.9</td><td>67.0</td><td>60.4</td><td>88.4</td><td>57.4</td></tr>
+        <tr><th scope="row">RTN</th><td>NVFP4 W4A16</td><td>4.50</td><td>.054</td><td>93.2</td><td>69.5</td><td>87.7</td><td>58.9</td><td>25.0</td><td>44.3</td><td>35.6</td><td>26.2</td><td>55.7</td><td>59.4</td><td>88.3</td><td>55.1</td></tr>
+        <tr><th scope="row">GPTQ</th><td>NVFP4 W4A4</td><td>4.50</td><td>.066</td><td>92.4</td><td>66.4</td><td>90.3</td><td>58.5</td><td>25.4</td><td>43.1</td><td>40.7</td><td>25.5</td><td>60.1</td><td>57.3</td><td>84.7</td><td>55.2</td></tr>
+        <tr><th scope="row">QUASAR (ours)</th><td>NVFP4 W4A16</td><td>4.50</td><td>.018</td><td>96.1</td><td>72.3</td><td>90.8</td><td>59.3</td><td>27.2</td><td>48.5</td><td>40.0</td><td>28.5</td><td>67.3</td><td>58.4</td><td>90.2</td><td>58.2</td></tr>
+        <tr><th scope="row">QUASAR (ours)</th><td>NVFP4 W4A4</td><td>4.50</td><td>.053</td><td>93.2</td><td>68.3</td><td>88.0</td><td>58.9</td><td>26.3</td><td>44.1</td><td>35.4</td><td>25.5</td><td>62.8</td><td>54.5</td><td>89.7</td><td>55.3</td></tr>
+        </tbody>
+        </table>
+        <p id="sd-table3-4">Table 3 · Gemma-4 E4B</p>
+        <table aria-labelledby="sd-table3-4">
+        <thead>
+        <tr><th scope="col">Method</th><th scope="col">Format</th><th scope="col">bpw</th><th scope="col">Fidelity · KL ↓</th><th scope="col">Fidelity · Top-1 ↑</th><th scope="col">Accuracy (%) ↑ · Hard reasoning and coding · HMMT'26</th><th scope="col">Accuracy (%) ↑ · Hard reasoning and coding · AIME'25</th><th scope="col">Accuracy (%) ↑ · Hard reasoning and coding · SuperGPQA</th><th scope="col">Accuracy (%) ↑ · Hard reasoning and coding · OJBench</th><th scope="col">Accuracy (%) ↑ · Long horizon · MRCR</th><th scope="col">Accuracy (%) ↑ · Long horizon · MRCR ≥64k</th><th scope="col">Accuracy (%) ↑ · Long horizon · MRCR 8-needle</th><th scope="col">Accuracy (%) ↑ · Long horizon · LongProc</th><th scope="col">Accuracy (%) ↑ · Long horizon · LongBench-v2</th><th scope="col">Accuracy (%) ↑ · Long horizon · RULER</th><th scope="col">Accuracy (%) ↑ · Avg.</th></tr>
+        </thead>
+        <tbody>
+        <tr><th scope="row">BF16</th><td>BF16</td><td>16</td><td>–</td><td>–</td><td>32.8</td><td>40.9</td><td>42.1</td><td>21.6</td><td>26.7</td><td>15.4</td><td>12.6</td><td>56.7</td><td>42.9</td><td>89.7</td><td>38.1</td></tr>
+        <tr><th scope="row">RTN</th><td>INT4 g64</td><td>4.25</td><td>.079</td><td>91.5</td><td>24.4</td><td>31.8</td><td>39.0</td><td>16.4</td><td>22.0</td><td>9.3</td><td>11.8</td><td>35.1</td><td>41.7</td><td>87.5</td><td>31.9</td></tr>
+        <tr><th scope="row">Google QAT</th><td>INT4 g32</td><td>4.50</td><td>.064</td><td>92.6</td><td>28.6</td><td>33.3</td><td>39.7</td><td>17.7</td><td>21.0</td><td>8.0</td><td>11.5</td><td>51.1</td><td>39.8</td><td>89.6</td><td>34.0</td></tr>
+        <tr><th scope="row">QUASAR (ours)</th><td>INT4 g64</td><td>4.25</td><td>.022</td><td>95.5</td><td>29.0</td><td>37.5</td><td>40.5</td><td>18.1</td><td>24.4</td><td>12.0</td><td>12.7</td><td>53.6</td><td>40.4</td><td>89.5</td><td>35.8</td></tr>
+        </tbody>
+        <tbody>
+        <tr><th scope="row">RTN</th><td>GGUF Q4_0</td><td>4.50</td><td>.194</td><td>85.7</td><td>18.8</td><td>32.8</td><td>36.5</td><td>14.2</td><td>22.9</td><td>9.1</td><td>11.0</td><td>39.0</td><td>38.0</td><td>83.8</td><td>30.6</td></tr>
+        <tr><th scope="row">Google QAT</th><td>GGUF Q4_0</td><td>4.50</td><td>.088</td><td>90.6</td><td>29.0</td><td>35.9</td><td>40.8</td><td>19.4</td><td>22.9</td><td>9.4</td><td>12.8</td><td>57.8</td><td>39.0</td><td>89.3</td><td>35.6</td></tr>
+        <tr><th scope="row">imatrix (PTQ)</th><td>GGUF Q4_0</td><td>4.52</td><td>.067</td><td>91.1</td><td>28.3</td><td>40.1</td><td>40.9</td><td>19.0</td><td>24.7</td><td>11.7</td><td>13.0</td><td>46.2</td><td>39.0</td><td>88.9</td><td>35.2</td></tr>
+        <tr><th scope="row">QUASAR (ours)</th><td>GGUF Q4_0</td><td>4.50</td><td>.044</td><td>92.8</td><td>27.8</td><td>37.6</td><td>39.6</td><td>19.4</td><td>24.4</td><td>11.8</td><td>12.7</td><td>53.1</td><td>40.4</td><td>89.6</td><td>35.6</td></tr>
+        </tbody>
+        </table>
+      </div>
+      <!-- /static-data:table3 -->
+      <figcaption><b>Comparison of QUASAR with QAT and PTQ baselines across NVFP4, INT4, and Q4_0 (llama.cpp GGUF format).</b></figcaption>
+    </figure>
+  </div>
+
+  <div class="fig">
+    <div class="grid-2">
+      <figure class="plate reveal ix">
+        <div class="viz"><div class="viz-head"><span class="viz-kicker" data-label><b>long horizon</b> · NVFP4 · Qwen3.5-9B</span></div><div class="viz-body"><div id="ix-fig35" class="chart ix-mount" style="min-height:678px" data-mhp="668"></div></div></div>
+        <figcaption><b>QUASAR better preserves long-horizon behavior in NVFP4.</b> Expanded Qwen3.5-9B results. (a) OpenAI-MRCR score by context length; (b) share of long generations that terminate within the 32k-token output budget. Higher is better.</figcaption>
+      </figure>
+      <figure class="plate reveal ix">
+        <div class="viz"><div class="viz-head"><span class="viz-kicker" data-label><b>non-termination</b> · NVFP4</span></div><div class="viz-body"><div id="ix-tab10" class="chart ix-mount" style="min-height:640px" data-mhp="670"></div></div></div>
+        <!-- static-data:table10 -->
+        <div class="sr-only" data-static-sr data-label>
+          <p id="sd-table10-1">Table 10 · Qwen3-8B · NVFP4. QUASAR has the lowest or tied-lowest non-termination rate among the quantized checkpoints.</p>
+          <table aria-labelledby="sd-table10-1">
+          <thead>
+          <tr><th scope="col">Method</th><th scope="col">MATH-500</th><th scope="col">LiveCodeBench v6</th><th scope="col">OJBench (C++)</th><th scope="col">OJBench (Python)</th></tr>
+          </thead>
+          <tbody>
+          <tr><th scope="row">BF16</th><td>0.5</td><td>13.6</td><td>1.3</td><td>2.2</td></tr>
+          <tr><th scope="row">RTN</th><td>1.4</td><td>40.8</td><td>20.3</td><td>26.7</td></tr>
+          <tr><th scope="row">GPTQ</th><td>0.5</td><td>24.3</td><td>11.6</td><td>10.3</td></tr>
+          <tr><th scope="row">Standard QAT</th><td>0.5</td><td>21.6</td><td>4.7</td><td>5.6</td></tr>
+          <tr><th scope="row">QUASAR (ours)</th><td>0.5</td><td>18.4</td><td>3.0</td><td>2.2</td></tr>
+          </tbody>
+          </table>
+          <p id="sd-table10-2">Table 10 · Qwen3.5-9B · NVFP4</p>
+          <table aria-labelledby="sd-table10-2">
+          <thead>
+          <tr><th scope="col">Method</th><th scope="col">MATH-500</th><th scope="col">LiveCodeBench v6</th><th scope="col">OJBench (C++)</th><th scope="col">OJBench (Python)</th></tr>
+          </thead>
+          <tbody>
+          <tr><th scope="row">BF16</th><td>13.9</td><td>54.6</td><td>71.5</td><td>80.2</td></tr>
+          <tr><th scope="row">RTN</th><td>37.8</td><td>78.1</td><td>94.4</td><td>91.8</td></tr>
+          <tr><th scope="row">GPTQ</th><td>41.1</td><td>82.8</td><td>96.1</td><td>96.1</td></tr>
+          <tr><th scope="row">Standard QAT</th><td>16.0</td><td>59.2</td><td>82.8</td><td>81.9</td></tr>
+          <tr><th scope="row">QUASAR (ours)</th><td>14.8</td><td>52.9</td><td>79.7</td><td>79.3</td></tr>
+          </tbody>
+          </table>
+        </div>
+        <!-- /static-data:table10 -->
+        <figcaption><b>QUASAR has the lowest or tied-lowest non-termination rate among the quantized checkpoints.</b> Percentage of generations that reach the 32,768-token output budget without stopping. Lower is better.</figcaption>
+      </figure>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 6. ABLATIONS + OVERHEAD ============ -->
+<section class="block" id="ablations" aria-labelledby="h-abl">
+  <div class="col sec-head">
+    <h2 id="h-abl"><span class="n" data-label>6.</span><span data-label>Robustness and Training Overhead</span></h2>
+  </div>
+  <div class="fig">
+    <div class="grid-2 abl-row">
+      <figure class="plate reveal">
+        <div class="viz"><div class="viz-head"><span class="viz-kicker" data-label><b>learning-rate sweep</b> · INT2 · <span class="nw">1,000 steps</span></span></div><div class="viz-body"><div id="lr-chart" class="chart" style="min-height:300px" data-mhp="327"></div></div></div>
+        <!-- static-data:fig25 -->
+        <div class="sr-only" data-static-sr data-label>
+          <p id="sd-fig25-1">Fig. 25 · Qwen3-4B-Thinking-2507 · INT2 · final held-out KL after 1,000 steps. QUASAR is robust to learning rate.</p>
+          <table aria-labelledby="sd-fig25-1">
+          <thead>
+          <tr><th scope="col">Method</th><th scope="col">learning rate · 1×10⁻⁵</th><th scope="col">learning rate · 2×10⁻⁵</th><th scope="col">learning rate · 5×10⁻⁵</th><th scope="col">learning rate · 1×10⁻⁴</th><th scope="col">learning rate · 2×10⁻⁴</th><th scope="col">learning rate · 5×10⁻⁴</th></tr>
+          </thead>
+          <tbody>
+          <tr><th scope="row">QUASAR (ours)</th><td>0.2523</td><td>0.2013</td><td>0.1516</td><td>0.1403</td><td>0.1675</td><td>0.2604</td></tr>
+          <tr><th scope="row">Standard QAT</th><td>0.5007</td><td>0.3607</td><td>0.2533</td><td>0.2170</td><td>0.2399</td><td>1.5226</td></tr>
+          <tr><th scope="row">LSQ</th><td>0.4490</td><td>0.3489</td><td>0.2615</td><td>0.2293</td><td>0.2368</td><td>0.7611</td></tr>
+          <tr><th scope="row">Denoising QAT</th><td>0.4746</td><td>0.3497</td><td>0.2456</td><td>0.2128</td><td>0.2446</td><td>0.7311</td></tr>
+          <tr><th scope="row">BitDistiller</th><td>1.2288</td><td>0.5241</td><td>0.2451</td><td>0.1770</td><td>0.2020</td><td>0.2963</td></tr>
+          </tbody>
+          </table>
+        </div>
+        <!-- /static-data:fig25 -->
+        <figcaption><b>QUASAR is robust to learning rate.</b> Final held-out KL after 1,000 steps of INT2 QAD of Qwen3-4B-Thinking-2507 across a 50× learning-rate range. QUASAR attains the lowest KL at every tested rate; Standard QAT diverges at high rates, while BitDistiller degrades at low rates.</figcaption>
+      </figure>
+      <figure class="plate reveal" data-md-label="training step time · INT3 · 8× H100">
+        <div class="overhead" id="overhead" data-nocheck style="min-height:362px" data-mhp="331"></div>
+        <!-- static-data:table4 -->
+        <div class="sr-only" data-static-sr data-label>
+          <p id="sd-table4-1">Table 4. Wall-clock time of one training step, per component and in seconds: quantization-aware distillation of Qwen3-4B-Thinking-2507 at INT3 on 8x H100 GPUs.</p>
+          <table aria-labelledby="sd-table4-1">
+          <thead>
+          <tr><th scope="col">Component</th><th scope="col">Standard QAT</th><th scope="col">QUASAR</th></tr>
+          </thead>
+          <tbody>
+          <tr><th scope="row">Teacher forward</th><td>0.373</td><td>0.373</td></tr>
+          <tr><th scope="row">Student compute</th><td>0.366</td><td>0.366</td></tr>
+          <tr><th scope="row">Weight reconstruction</th><td>0.294</td><td>0.335</td></tr>
+          <tr><th scope="row">Loss computation</th><td>0.065</td><td>0.065</td></tr>
+          <tr><th scope="row">Backward</th><td>1.805</td><td>1.805</td></tr>
+          <tr><th scope="row">Optimizer update</th><td>0.021</td><td>0.022</td></tr>
+          <tr><th scope="row">Other + synchronization</th><td>0.006</td><td>0.006</td></tr>
+          <tr><th scope="row">Total step</th><td>2.930</td><td>2.972</td></tr>
+          <tr><th scope="row">% vs. Standard QAT</th><td>–</td><td>+1.4%</td></tr>
+          </tbody>
+          </table>
+        </div>
+        <!-- /static-data:table4 -->
+        <figcaption><b>Wall-clock time of one training step, per component and in seconds: quantization-aware distillation of Qwen3-4B-Thinking-2507 at INT3 on 8x H100 GPUs.</b> QUASAR differs from Standard QAT only in the weight reconstruction row. QUASAR only adds 1.4% wall-clock step time compared with Standard QAT (2.97 and 2.93 seconds per step, respectively), with the overhead only coming from the weight reconstruction. Compared with Standard QAT, QUASAR introduces no memory overhead.</figcaption>
+      </figure>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 7. MODELS ============ -->
+<section class="block" id="models" aria-labelledby="h-models">
+  <div class="col sec-head">
+    <h2 id="h-models" data-label><span class="n" data-label>7.</span>Checkpoints</h2>
+  </div>
+  <div class="col prose">
+    <p class="big">QUASAR checkpoints use standard layouts supported by vLLM's quantization backends.</p>
+    <p>In vLLM, Marlin and Machete serve INT4 weights, NVFP4 runs natively on Blackwell GPUs, and MXFP4 weight-only checkpoints are supported.</p>
+  </div>
+  <div class="wide">
+    <div id="models-grid" class="models" style="min-height:787px" data-mhp="2132"></div>
+    <!-- static-data:table11 -->
+    <div class="sr-only" data-static-sr data-label>
+      <p id="sd-table11-1">Table 11 · Qwen3.5-4B. Comparison with released 4-bit checkpoints across four model families.</p>
+      <table aria-labelledby="sd-table11-1">
+      <thead>
+      <tr><th scope="col">Model</th><th scope="col">Format</th><th scope="col">bpw</th><th scope="col">Fidelity · KL ↓</th><th scope="col">Fidelity · Top-1 ↑</th><th scope="col">Accuracy (%) ↑ · GSM8K-P</th><th scope="col">Accuracy (%) ↑ · MMLU-P</th><th scope="col">Accuracy (%) ↑ · IFEval</th><th scope="col">Accuracy (%) ↑ · MATH</th><th scope="col">Accuracy (%) ↑ · AIME25</th><th scope="col">Accuracy (%) ↑ · GPQA-D</th><th scope="col">Accuracy (%) ↑ · Avg.</th></tr>
+      </thead>
+      <tbody>
+      <tr><th scope="row">BF16</th><td>BF16</td><td>16</td><td>–</td><td>–</td><td>94.0</td><td>78.9</td><td>88.0</td><td>84.4</td><td>79.2</td><td>77.3</td><td>83.6</td></tr>
+      <tr><th scope="row">RTN</th><td>NVFP4 W4A16</td><td>4.50</td><td>.042</td><td>93.8</td><td>94.9</td><td>77.5</td><td>86.3</td><td>83.8</td><td>67.1</td><td>74.1</td><td>80.6</td></tr>
+      <tr><th scope="row">GPTQ</th><td>NVFP4 W4A16</td><td>4.50</td><td>.023</td><td>95.7</td><td>95.1</td><td>75.2</td><td>84.5</td><td>83.2</td><td>52.9</td><td>69.9</td><td>76.8</td></tr>
+      <tr><th scope="row">GPTQ</th><td>INT4 g128</td><td>7.49</td><td>.049</td><td>93.1</td><td>94.0</td><td>77.5</td><td>87.1</td><td>83.0</td><td>65.0</td><td>71.2</td><td>79.6</td></tr>
+      <tr><th scope="row">AWQ</th><td>INT4 g32</td><td>4.50</td><td>.042</td><td>93.9</td><td>93.9</td><td>77.6</td><td>87.6</td><td>84.2</td><td>72.5</td><td>74.6</td><td>81.7</td></tr>
+      <tr><th scope="row">ModelOpt PTQ</th><td>NVFP4 W4A4</td><td>4.50</td><td>.043</td><td>93.7</td><td>94.2</td><td>77.9</td><td>88.2</td><td>84.6</td><td>65.8</td><td>73.6</td><td>80.7</td></tr>
+      <tr><th scope="row">QUASAR (ours)</th><td>NVFP4 W4A16</td><td>4.50</td><td>.018</td><td>96.2</td><td>94.7</td><td>78.5</td><td>87.2</td><td>83.8</td><td>74.2</td><td>77.9</td><td>82.7</td></tr>
+      </tbody>
+      <tbody>
+      <tr><th scope="rowgroup">GGUF (llama.cpp)</th><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+      <tr><th scope="row">RTN</th><td>GGUF Q4_0</td><td>4.50</td><td>.372</td><td>89.0</td><td>94.3</td><td>77.2</td><td>90.6</td><td>84.2</td><td>64.2</td><td>73.7</td><td>80.7</td></tr>
+      <tr><th scope="row">KD-QAT g64</th><td>GGUF Q4_0</td><td>4.50</td><td>.363</td><td>88.4</td><td>94.9</td><td>77.4</td><td>84.5</td><td>84.4</td><td>64.6</td><td>73.9</td><td>80.0</td></tr>
+      <tr><th scope="row">imatrix (PTQ)</th><td>GGUF Q4_0</td><td>4.84</td><td>.284</td><td>90.4</td><td>94.3</td><td>78.0</td><td>90.6</td><td>86.0</td><td>70.8</td><td>76.1</td><td>82.6</td></tr>
+      <tr><th scope="row">QUASAR (ours)</th><td>GGUF Q4_0</td><td>4.50</td><td>.235</td><td>91.3</td><td>94.9</td><td>78.2</td><td>90.9</td><td>83.8</td><td>77.9</td><td>74.6</td><td>83.4</td></tr>
+      </tbody>
+      </table>
+      <p id="sd-table11-2">Table 11 · Muse-Glimmer-30B. ‡ denotes mixed NVFP4, FP8, and BF16 precision.</p>
+      <table aria-labelledby="sd-table11-2">
+      <thead>
+      <tr><th scope="col">Model</th><th scope="col">Format</th><th scope="col">bpw</th><th scope="col">Fidelity · KL ↓</th><th scope="col">Fidelity · Top-1 ↑</th><th scope="col">Accuracy (%) ↑ · GPQA-D</th><th scope="col">Accuracy (%) ↑ · MMLU-P</th><th scope="col">Accuracy (%) ↑ · AIME25</th><th scope="col">Accuracy (%) ↑ · LCB</th><th scope="col">Accuracy (%) ↑ · RUL32K</th><th scope="col">Accuracy (%) ↑ · RUL64K</th><th scope="col">Accuracy (%) ↑ · RUL128K</th><th scope="col">Accuracy (%) ↑ · Avg.</th></tr>
+      </thead>
+      <tbody>
+      <tr><th scope="row">BF16</th><td>BF16</td><td>16</td><td>–</td><td>–</td><td>62.1</td><td>83.1</td><td>86.7</td><td>53.4</td><td>86.6</td><td>85.2</td><td>81.0</td><td>76.9</td></tr>
+      <tr><th scope="row">RTN</th><td>NVFP4 W4A16</td><td>4.50</td><td>.054</td><td>93.2</td><td>63.6</td><td>82.9</td><td>83.3</td><td>48.1</td><td>84.5</td><td>84.0</td><td>83.6</td><td>75.7</td></tr>
+      <tr><th scope="row">GPTQ</th><td>NVFP4 W4A4</td><td>4.50</td><td>.066</td><td>92.4</td><td>63.1</td><td>83.0</td><td>86.7</td><td>54.2</td><td>86.2</td><td>82.4</td><td>80.6</td><td>76.6</td></tr>
+      <tr><th scope="row">AutoQuantize</th><td>NVFP4+FP8‡</td><td>5.52</td><td>.030</td><td>94.9</td><td>63.1</td><td>82.9</td><td>83.3</td><td>52.7</td><td>85.6</td><td>84.8</td><td>83.5</td><td>76.6</td></tr>
+      <tr><th scope="row">QUASAR (ours)</th><td>NVFP4 W4A16</td><td>4.50</td><td>.018</td><td>96.1</td><td>63.6</td><td>83.3</td><td>90.0</td><td>49.6</td><td>87.2</td><td>86.4</td><td>84.1</td><td>77.7</td></tr>
+      <tr><th scope="row">QUASAR (ours)</th><td>NVFP4 W4A4</td><td>4.50</td><td>.053</td><td>93.2</td><td>63.1</td><td>82.7</td><td>83.3</td><td>52.7</td><td>87.2</td><td>86.4</td><td>83.5</td><td>77.0</td></tr>
+      </tbody>
+      </table>
+      <p id="sd-table11-3">Table 11 · Gemma-4 12B</p>
+      <table aria-labelledby="sd-table11-3">
+      <thead>
+      <tr><th scope="col">Model</th><th scope="col">Format</th><th scope="col">bpw</th><th scope="col">Fidelity · KL ↓</th><th scope="col">Fidelity · Top-1 ↑</th><th scope="col">Accuracy (%) ↑ · MMLU</th><th scope="col">Accuracy (%) ↑ · IFEval</th><th scope="col">Accuracy (%) ↑ · ARC-C</th><th scope="col">Accuracy (%) ↑ · AGIEval</th><th scope="col">Accuracy (%) ↑ · MMLU-P</th><th scope="col">Accuracy (%) ↑ · TQA</th><th scope="col">Accuracy (%) ↑ · MATH-h</th><th scope="col">Accuracy (%) ↑ · Avg.</th></tr>
+      </thead>
+      <tbody>
+      <tr><th scope="row">BF16</th><td>BF16</td><td>16</td><td>–</td><td>–</td><td>72.8</td><td>88.0</td><td>50.2</td><td>24.3</td><td>49.9</td><td>62.1</td><td>74.7</td><td>60.3</td></tr>
+      <tr><th scope="row">RTN</th><td>INT4 g64</td><td>4.25</td><td>.194</td><td>89.2</td><td>60.6</td><td>79.7</td><td>46.4</td><td>19.4</td><td>39.0</td><td>60.6</td><td>50.5</td><td>50.9</td></tr>
+      <tr><th scope="row">GPTQ</th><td>INT4 g64</td><td>4.25</td><td>.041</td><td>95.2</td><td>68.5</td><td>86.9</td><td>47.8</td><td>22.7</td><td>48.2</td><td>62.1</td><td>70.9</td><td>58.2</td></tr>
+      <tr><th scope="row">Google QAT</th><td>INT4 g32</td><td>4.50</td><td>.044</td><td>94.8</td><td>67.8</td><td>87.2</td><td>50.1</td><td>22.6</td><td>47.9</td><td>60.0</td><td>73.2</td><td>58.4</td></tr>
+      <tr><th scope="row">QUASAR (ours)</th><td>INT4 g64</td><td>4.25</td><td>.034</td><td>95.5</td><td>70.4</td><td>87.6</td><td>51.3</td><td>24.2</td><td>45.8</td><td>59.2</td><td>71.9</td><td>58.6</td></tr>
+      </tbody>
+      <tbody>
+      <tr><th scope="rowgroup">GGUF (llama.cpp)</th><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+      <tr><th scope="row">RTN</th><td>GGUF Q4_0</td><td>4.50</td><td>.156</td><td>89.8</td><td>59.2</td><td>87.4</td><td>47.8</td><td>22.7</td><td>38.4</td><td>60.2</td><td>62.3</td><td>54.0</td></tr>
+      <tr><th scope="row">Google QAT</th><td>GGUF Q4_0</td><td>4.50</td><td>.069</td><td>93.5</td><td>71.0</td><td>89.1</td><td>48.9</td><td>22.8</td><td>45.6</td><td>61.3</td><td>74.8</td><td>59.1</td></tr>
+      <tr><th scope="row">imatrix (PTQ)</th><td>GGUF Q4_0</td><td>4.52</td><td>.108</td><td>91.6</td><td>64.9</td><td>87.1</td><td>48.6</td><td>23.5</td><td>43.4</td><td>60.3</td><td>66.8</td><td>56.4</td></tr>
+      <tr><th scope="row">QUASAR (ours)</th><td>GGUF Q4_0</td><td>4.50</td><td>.048</td><td>94.3</td><td>70.3</td><td>87.6</td><td>51.5</td><td>24.2</td><td>45.5</td><td>59.1</td><td>72.5</td><td>58.7</td></tr>
+      </tbody>
+      </table>
+      <p id="sd-table11-4">Table 11 · Gemma-4 E4B</p>
+      <table aria-labelledby="sd-table11-4">
+      <thead>
+      <tr><th scope="col">Model</th><th scope="col">Format</th><th scope="col">bpw</th><th scope="col">Fidelity · KL ↓</th><th scope="col">Fidelity · Top-1 ↑</th><th scope="col">Accuracy (%) ↑ · TrivQA</th><th scope="col">Accuracy (%) ↑ · NQ</th><th scope="col">Accuracy (%) ↑ · TQA</th><th scope="col">Accuracy (%) ↑ · ARC-E</th><th scope="col">Accuracy (%) ↑ · ARC-C</th><th scope="col">Accuracy (%) ↑ · GSM8K</th><th scope="col">Accuracy (%) ↑ · IFEval</th><th scope="col">Accuracy (%) ↑ · MATH-h</th><th scope="col">Accuracy (%) ↑ · Avg.</th></tr>
+      </thead>
+      <tbody>
+      <tr><th scope="row">BF16</th><td>BF16</td><td>16</td><td>–</td><td>–</td><td>23.6</td><td>3.9</td><td>59.1</td><td>79.7</td><td>56.5</td><td>84.1</td><td>85.2</td><td>63.4</td><td>56.9</td></tr>
+      <tr><th scope="row">RTN</th><td>INT4 g64</td><td>4.25</td><td>.079</td><td>91.5</td><td>25.2</td><td>3.0</td><td>59.3</td><td>78.3</td><td>55.2</td><td>79.7</td><td>83.0</td><td>56.1</td><td>55.0</td></tr>
+      <tr><th scope="row">GPTQ</th><td>INT4 g64</td><td>4.25</td><td>.031</td><td>94.7</td><td>21.3</td><td>3.3</td><td>56.1</td><td>78.2</td><td>54.9</td><td>83.5</td><td>83.4</td><td>59.4</td><td>55.0</td></tr>
+      <tr><th scope="row">Google QAT</th><td>INT4 g32</td><td>4.50</td><td>.064</td><td>92.6</td><td>20.1</td><td>2.4</td><td>55.4</td><td>78.3</td><td>56.0</td><td>81.5</td><td>81.9</td><td>59.4</td><td>54.4</td></tr>
+      <tr><th scope="row">QUASAR (ours)</th><td>INT4 g64</td><td>4.25</td><td>.022</td><td>95.5</td><td>23.8</td><td>4.7</td><td>58.2</td><td>79.8</td><td>56.2</td><td>82.0</td><td>82.6</td><td>60.7</td><td>56.0</td></tr>
+      </tbody>
+      <tbody>
+      <tr><th scope="rowgroup">GGUF (llama.cpp)</th><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+      <tr><th scope="row">RTN</th><td>GGUF Q4_0</td><td>4.50</td><td>.194</td><td>85.7</td><td>17.3</td><td>2.0</td><td>58.5</td><td>76.2</td><td>53.8</td><td>75.8</td><td>80.2</td><td>48.7</td><td>51.6</td></tr>
+      <tr><th scope="row">Google QAT</th><td>GGUF Q4_0</td><td>4.50</td><td>.088</td><td>90.6</td><td>18.5</td><td>2.3</td><td>55.5</td><td>78.7</td><td>56.1</td><td>81.4</td><td>81.7</td><td>58.7</td><td>54.1</td></tr>
+      <tr><th scope="row">Google QAT repack</th><td>GGUF Q4_0</td><td>4.50</td><td>.071</td><td>91.8</td><td>20.0</td><td>2.2</td><td>56.2</td><td>79.1</td><td>55.4</td><td>83.5</td><td>83.2</td><td>61.8</td><td>55.2</td></tr>
+      <tr><th scope="row">imatrix (PTQ)</th><td>GGUF Q4_0</td><td>4.52</td><td>.067</td><td>91.1</td><td>20.6</td><td>3.0</td><td>58.8</td><td>79.3</td><td>53.8</td><td>80.4</td><td>83.2</td><td>59.7</td><td>54.9</td></tr>
+      <tr><th scope="row">QUASAR (ours)</th><td>GGUF Q4_0</td><td>4.50</td><td>.044</td><td>92.8</td><td>24.0</td><td>4.7</td><td>58.2</td><td>79.7</td><td>56.1</td><td>81.8</td><td>82.4</td><td>60.5</td><td>55.9</td></tr>
+      </tbody>
+      </table>
+      <p id="sd-table11-5">QUASAR checkpoints · Hugging Face</p>
+      <table aria-labelledby="sd-table11-5">
+      <thead>
+      <tr><th scope="col">Model</th><th scope="col">Format</th><th scope="col">Runtime</th><th scope="col">Repository</th></tr>
+      </thead>
+      <tbody>
+      <tr><th scope="row">Qwen3.5-4B</th><td>NVFP4</td><td>vLLM</td><td><a href="https://huggingface.co/QUASAR-QAT/Qwen3.5-4B-QUASAR-NVFP4" tabindex="-1">QUASAR-QAT/Qwen3.5-4B-QUASAR-NVFP4</a></td></tr>
+      <tr><th scope="row">Qwen3.5-4B</th><td>NVFP4 W4A4</td><td>vLLM</td><td><a href="https://huggingface.co/QUASAR-QAT/Qwen3.5-4B-QUASAR-NVFP4-W4A4" tabindex="-1">QUASAR-QAT/Qwen3.5-4B-QUASAR-NVFP4-W4A4</a></td></tr>
+      <tr><th scope="row">Qwen3.5-4B</th><td>GGUF Q4_0</td><td>llama.cpp</td><td><a href="https://huggingface.co/QUASAR-QAT/Qwen3.5-4B-QUASAR-Q4_0-GGUF" tabindex="-1">QUASAR-QAT/Qwen3.5-4B-QUASAR-Q4_0-GGUF</a></td></tr>
+      <tr><th scope="row">Qwen3.8-27B</th><td>NVFP4</td><td>vLLM</td><td><a href="https://huggingface.co/QUASAR-QAT/Qwen3.8-27B-QUASAR-NVFP4" tabindex="-1">QUASAR-QAT/Qwen3.8-27B-QUASAR-NVFP4</a></td></tr>
+      <tr><th scope="row">Gemma-4 E4B</th><td>INT4 g64</td><td>vLLM</td><td><a href="https://huggingface.co/QUASAR-QAT/gemma-4-E4B-it-QUASAR-W4A16-G64" tabindex="-1">QUASAR-QAT/gemma-4-E4B-it-QUASAR-W4A16-G64</a></td></tr>
+      <tr><th scope="row">Gemma-4 E4B</th><td>GGUF Q4_0</td><td>llama.cpp</td><td><a href="https://huggingface.co/QUASAR-QAT/gemma-4-E4B-it-QUASAR-Q4_0-GGUF" tabindex="-1">QUASAR-QAT/gemma-4-E4B-it-QUASAR-Q4_0-GGUF</a></td></tr>
+      <tr><th scope="row">Gemma-4 12B</th><td>INT4 g64</td><td>vLLM</td><td><a href="https://huggingface.co/QUASAR-QAT/gemma-4-12B-it-QUASAR-W4A16-G64" tabindex="-1">QUASAR-QAT/gemma-4-12B-it-QUASAR-W4A16-G64</a></td></tr>
+      <tr><th scope="row">Gemma-4 12B</th><td>GGUF Q4_0</td><td>llama.cpp</td><td><a href="https://huggingface.co/QUASAR-QAT/gemma-4-12B-it-QUASAR-Q4_0-GGUF" tabindex="-1">QUASAR-QAT/gemma-4-12B-it-QUASAR-Q4_0-GGUF</a></td></tr>
+      <tr><th scope="row">Muse-Glimmer-30B</th><td>NVFP4</td><td>vLLM</td><td><a href="https://huggingface.co/QUASAR-QAT/Muse-Glimmer-30B-QUASAR-NVFP4" tabindex="-1">QUASAR-QAT/Muse-Glimmer-30B-QUASAR-NVFP4</a></td></tr>
+      <tr><th scope="row">Muse-Glimmer-30B</th><td>NVFP4 W4A4</td><td>vLLM</td><td><a href="https://huggingface.co/QUASAR-QAT/Muse-Glimmer-30B-QUASAR-NVFP4-W4A4" tabindex="-1">QUASAR-QAT/Muse-Glimmer-30B-QUASAR-NVFP4-W4A4</a></td></tr>
+      <tr><th scope="row">Muse-Glimmer-30B</th><td>GGUF Q4_0</td><td>llama.cpp</td><td><a href="https://huggingface.co/QUASAR-QAT/Muse-Glimmer-30B-QUASAR-Q4_0-GGUF" tabindex="-1">QUASAR-QAT/Muse-Glimmer-30B-QUASAR-Q4_0-GGUF</a></td></tr>
+      </tbody>
+      </table>
+      <p id="sd-table11-6">QUASAR collection · Hugging Face</p>
+      <table aria-labelledby="sd-table11-6">
+      <thead>
+      <tr><th scope="col">Hugging Face</th><th scope="col">Link</th></tr>
+      </thead>
+      <tbody>
+      <tr><th scope="row">All QUASAR Models</th><td><a href="https://huggingface.co/collections/QUASAR-QAT/all-quasar-models-6aab09fd2913ec22df0d5f15" tabindex="-1">huggingface.co/collections/QUASAR-QAT/all-quasar-models-6aab09fd2913ec22df0d5f15</a></td></tr>
+      <tr><th scope="row">QUASAR-QAT</th><td><a href="https://huggingface.co/QUASAR-QAT" tabindex="-1">huggingface.co/QUASAR-QAT</a></td></tr>
+      </tbody>
+      </table>
+      <p id="sd-table11-7">Qwen3.8-27B · NVFP4 · Hugging Face model card · public NVFP4 builds · https://huggingface.co/QUASAR-QAT/Qwen3.8-27B-QUASAR-NVFP4</p>
+      <table aria-labelledby="sd-table11-7">
+      <thead>
+      <tr><th scope="col">Model</th><th scope="col">Size</th><th scope="col">NVFP4 linears</th><th scope="col">GPQA-D</th><th scope="col">AIME'26</th></tr>
+      </thead>
+      <tbody>
+      <tr><th scope="row">QUASAR (this model)</th><td>19.7 GB</td><td>496/496</td><td>90.91</td><td>100.0</td></tr>
+      <tr><th scope="row">BF16 original</th><td>55.6 GB</td><td>—</td><td>91.41</td><td>100.0</td></tr>
+      <tr><th scope="row">Unsloth NVFP4</th><td>23.4 GB</td><td>168/496</td><td>89.39</td><td>97.78</td></tr>
+      <tr><th scope="row">Inferact NVFP4</th><td>26.4 GB</td><td>304/496</td><td>87.63</td><td>96.67</td></tr>
+      </tbody>
+      </table>
+      <p id="sd-table11-8">Qwen3.8-27B · NVFP4 · Hugging Face model card · LLM Compressor NVFP4</p>
+      <table aria-labelledby="sd-table11-8">
+      <thead>
+      <tr><th scope="col">Model</th><th scope="col">MRCR</th><th scope="col">MRCR 8-needle</th><th scope="col">HMMT'26</th><th scope="col">SuperGPQA</th><th scope="col">LiveCodeBench</th><th scope="col">RULER 32K</th><th scope="col">RULER 64K</th><th scope="col">RULER 128K</th></tr>
+      </thead>
+      <tbody>
+      <tr><th scope="row">QUASAR (this model)</th><td>79.1</td><td>52.7</td><td>73.4</td><td>62.4</td><td>79.2</td><td>96.3</td><td>96.2</td><td>95.8</td></tr>
+      <tr><th scope="row">BF16 original</th><td>83.4</td><td>58.5</td><td>75.8</td><td>63.0</td><td>81.0</td><td>96.7</td><td>96.6</td><td>95.9</td></tr>
+      <tr><th scope="row">GPTQ NVFP4 (LLM Compressor)</th><td>61.3</td><td>35.5</td><td>69.7</td><td>58.9</td><td>77.9</td><td>96.0</td><td>95.4</td><td>95.3</td></tr>
+      <tr><th scope="row">RTN NVFP4 (LLM Compressor)</th><td>57.3</td><td>32.8</td><td>66.9</td><td>58.6</td><td>77.9</td><td>96.2</td><td>96.1</td><td>95.3</td></tr>
+      </tbody>
+      </table>
+    </div>
+    <!-- /static-data:table11 -->
+    <p class="small models-foot">GGUF KL values are comparable only within each block.</p>
+    <p class="small models-foot" data-label><a href="https://huggingface.co/QUASAR-QAT">huggingface.co/QUASAR-QAT</a></p>
+  </div>
+</section>
+
+<!-- ============ 8. CODE ============ -->
+<section class="block" id="code" aria-labelledby="h-code">
+  <div class="col sec-head">
+    <h2 id="h-code" data-label><span class="n" data-label>8.</span>Code</h2>
+  </div>
+  <div class="fig">
+    <figure class="plate reveal">
+      <div class="code">
+        <div class="bar"><span data-label>python</span><button class="copy" type="button" data-copy="#quickstart">Copy</button></div>
+<pre id="quickstart" data-nocheck><code><span class="k">import</span> torch
+<span class="k">from</span> transformers <span class="k">import</span> AutoModelForCausalLM
+<span class="k">from</span> quasar.export <span class="k">import</span> save_materialized
+<span class="k">from</span> quasar.quant <span class="k">import</span> QuantConfig, quantize_model, snapshot_saliency
+
+path = <span class="s">"Qwen/Qwen3-4B-Thinking-2507"</span>
+model = AutoModelForCausalLM.<span class="f">from_pretrained</span>(path, dtype=torch.bfloat16, device_map=<span class="s">"cuda"</span>)
+<span class="hl">quantize_model</span>(model, <span class="f">QuantConfig</span>(<span class="s">"quasar"</span>, bits=<span class="n">2</span>))  <span class="c"># INT2, groups of 128</span>
+optimizer = torch.optim.<span class="f">AdamW</span>(model.parameters(), lr=<span class="n">5e-5</span>)
+
+<span class="k">for</span> batch <span class="k">in</span> batches:
+    model(**batch).loss.<span class="f">backward</span>()
+    optimizer.<span class="f">step</span>()
+    <span class="hl">snapshot_saliency</span>(model, optimizer)
+    optimizer.<span class="f">zero_grad</span>()
+
+<span class="f">save_materialized</span>(model, <span class="s">"qwen3-4b-w2"</span>, model_path=path)</code></pre>
+      </div>
+    </figure>
+    <div class="code" style="margin-top:20px">
+      <div class="bar"><span data-label>shell</span><button class="copy" type="button" data-copy="#install">Copy</button></div>
+<pre id="install" data-nocheck><code>git clone https://github.com/vincentcounathe/quasar-qat && cd quasar-qat
+pip install -e .            <span class="c"># quantizer and trainer</span>
+pip install flash-attn --no-build-isolation   <span class="c"># FlashAttention-2, used by the training recipes</span>
+pip install -e ".[eval]"    <span class="c"># + evaluation (vLLM, lm-eval, math-verify)</span></code></pre>
+    </div>
+    <div class="links" style="justify-content:flex-start" data-label>
+      <a class="btn" href="https://github.com/vincentcounathe/quasar-qat"><svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 .2a8 8 0 0 0-2.53 15.59c.4.07.55-.17.55-.38v-1.33c-2.23.48-2.7-1.07-2.7-1.07-.36-.92-.89-1.17-.89-1.17-.73-.5.06-.49.06-.49.8.06 1.23.83 1.23.83.71 1.22 1.87.87 2.33.66.07-.52.28-.87.5-1.07-1.78-.2-3.65-.89-3.65-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.6 7.6 0 0 1 4 0c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.28.82 2.15 0 3.07-1.87 3.75-3.66 3.95.29.25.54.73.54 1.48v2.2c0 .21.15.46.55.38A8 8 0 0 0 8 .2"/></svg>vincentcounathe/quasar-qat</a>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 9. CITE ============ -->
+<section class="block" id="cite" aria-labelledby="h-cite">
+  <div class="col sec-head">
+    <h2 id="h-cite" data-label><span class="n" data-label>9.</span>Citation</h2>
+  </div>
+  <div class="fig cite">
+    <div class="code">
+      <div class="bar"><span data-label>bibtex</span><button class="copy" type="button" data-copy="#bibtex">Copy</button></div>
+<pre id="bibtex" data-nocheck><code>@article{counathe2026quasar,
+  title   = {{QUASAR}: Lowering the Loss Floor of Quantization-Aware Training with Loss-Aware Reconstruction},
+  author  = {Counathe, Vincent and Athiwaratkun, Ben and De Sa, Christopher and Zhang, Tianyi},
+  journal = {arXiv preprint arXiv:2608.13966},
+  year    = {2026}
+}</code></pre>
+    </div>
+  </div>
+</section>
+
+<!-- ============ APPENDIX ============ -->
+<section class="block" id="appendix" aria-labelledby="h-appendix">
+  <div class="col sec-head">
+    <h2 id="h-appendix" data-label>Appendix</h2>
+  </div>
+  <div class="col app-head"><h3 data-label>Method Details</h3></div>
+  <div class="wide">
+    <figure class="plate reveal ix">
+        <div class="viz"><div class="viz-head"><span class="viz-kicker" data-label><b>per-weight loss-aware reconstruction error</b> · INT3</span></div><div class="viz-body"><div id="ix-fig5" class="chart ix-mount" style="min-height:594px" data-mhp="989"></div></div></div>
+        <figcaption><b>Per-weight loss-aware reconstruction error for 14 Qwen3-4B weight groups at INT3.</b> Color shows |√<i>h</i> (<i>r</i>−<i>w</i>)| under (a) Standard QAT with min–max reconstruction and (b) QUASAR. Each row contains 128 weights ordered by saliency <i>h</i>.</figcaption>
+      </figure>
+  </div>
+  <div class="wide">
+    <figure class="plate reveal ix">
+        <div class="viz"><div class="viz-head"><span class="viz-kicker" data-label><b>scale search</b> · INT3</span></div><div class="viz-body"><div id="ix-fig6" class="chart ix-mount" style="min-height:478px" data-mhp="827"></div></div></div>
+        <figcaption><b>Scale search for Qwen3-4B weight groups at INT3.</b> (a) One extreme weight sets the min–max range. (b) QUASAR clips the outlier and covers the bulk. (c) Distribution of selected range factors <i>f</i><span class="star">⋆</span> across 28.4M groups; 99.6% use a range narrower than min–max.</figcaption>
+      </figure>
+  </div>
+  <div class="fig">
+    <div class="grid-2">
+      <figure class="plate reveal ix">
+        <div class="viz"><div class="viz-head"><span class="viz-kicker" data-label><b>selected clipping-range factors</b></span></div><div class="viz-body"><div id="ix-fig7" class="chart ix-mount" style="min-height:587px" data-mhp="386"></div></div></div>
+        <figcaption><b>Distribution of selected clipping-range factors <i>f</i><span class="star">⋆</span> across weight groups after QAD at INT4, INT3, and INT2 for Qwen3-4B-Thinking-2507 and Llama-3.1-8B-Instruct.</b> Lower bit widths favor narrower ranges.</figcaption>
+      </figure>
+      <figure class="plate reveal ix">
+        <div class="viz"><div class="viz-head"><span class="viz-kicker" data-label><b>saliency in one layer</b></span></div><div class="viz-body"><div id="ix-fig8" class="chart ix-mount" style="min-height:588px" data-mhp="560"></div></div></div>
+        <figcaption><b>Saliency <i>h</i> in one Qwen3-4B layer.</b> Weight groups span 128 weights along the input dimension. The large variation within each group lets QUASAR prioritize the most salient weights.</figcaption>
+      </figure>
+    </div>
+  </div>
+  <div class="col app-head"><h3 data-label>Empirical Validation of the Theory</h3></div>
+  <div class="fig">
+    <figure class="plate reveal ix">
+        <div class="viz"><div class="viz-head"><span class="viz-kicker" data-label><b>reduction across projection types</b></span></div><div class="viz-body"><div id="ix-fig11" class="chart ix-mount" style="min-height:368px" data-mhp="618"></div></div></div>
+        <figcaption><b>QUASAR reduces reconstruction error across projection types.</b> Median reduction in loss-aware reconstruction error relative to Standard QAT across Qwen3-4B-Thinking-2507 modules at INT4, INT3, and INT2, measured at initialization (left) and after training (right). Error is measured against the full-precision weights.</figcaption>
+      </figure>
+  </div>
+  <div class="fig">
+    <div class="grid-2">
+      <figure class="plate reveal">
+        <div class="viz"><div class="viz-head"><span class="viz-kicker" data-label><b>before training</b> · <span class="nw">4,096 steps</span></span></div><div class="viz-body"><div id="theory-init" class="chart" style="min-height:391px" data-mhp="296"></div></div></div>
+        <!-- static-data:fig13 -->
+        <div class="sr-only" data-static-sr data-label>
+          <p id="sd-fig13-1">Fig. 13 · Qwen3-4B-Thinking-2507 · 4,096 steps. Reconstruction error predicts final loss before training.</p>
+          <table aria-labelledby="sd-fig13-1">
+          <thead>
+          <tr><th scope="col">Method</th><th scope="col">bits</th><th scope="col">init-time reconstruction error Ŝ₀</th><th scope="col">KL to BF16 (Table 1)</th></tr>
+          </thead>
+          <tbody>
+          <tr><th scope="row">QUASAR (ours)</th><td>INT4</td><td>6.26×10⁻⁵</td><td>0.016</td></tr>
+          <tr><th scope="row">QUASAR (ours)</th><td>INT3</td><td>2.27×10⁻⁴</td><td>0.054</td></tr>
+          <tr><th scope="row">QUASAR (ours)</th><td>INT2</td><td>7.27×10⁻⁴</td><td>0.126</td></tr>
+          <tr><th scope="row">Denoising QAT</th><td>INT4</td><td>6.93×10⁻⁵</td><td>0.018</td></tr>
+          <tr><th scope="row">Denoising QAT</th><td>INT3</td><td>3.02×10⁻⁴</td><td>0.060</td></tr>
+          <tr><th scope="row">Denoising QAT</th><td>INT2</td><td>1.29×10⁻³</td><td>0.179</td></tr>
+          <tr><th scope="row">Standard QAT</th><td>INT4</td><td>7.10×10⁻⁵</td><td>0.019</td></tr>
+          <tr><th scope="row">Standard QAT</th><td>INT3</td><td>3.33×10⁻⁴</td><td>0.062</td></tr>
+          <tr><th scope="row">Standard QAT</th><td>INT2</td><td>2.18×10⁻³</td><td>0.186</td></tr>
+          </tbody>
+          </table>
+          <p id="sd-fig13-2">Fig. 13 · log-log power-law fit</p>
+          <table aria-labelledby="sd-fig13-2">
+          <thead>
+          <tr><th scope="col">fit</th><th scope="col">R²</th></tr>
+          </thead>
+          <tbody>
+          <tr><th scope="row">Ŝ₀ vs KL to BF16</th><td>0.98</td></tr>
+          </tbody>
+          </table>
+        </div>
+        <!-- /static-data:fig13 -->
+        <figcaption><b>Reconstruction error predicts final loss before training.</b> Across Standard QAT, Denoising QAT, and QUASAR at INT4, INT3, and INT2, reconstruction error at initialization predicts held-out KL to the full-precision model after 4,096 steps (R²=0.98). Results use Qwen3-4B-Thinking-2507.</figcaption>
+      </figure>
+      <figure class="plate reveal ix">
+        <div class="viz"><div class="viz-head"><span class="viz-kicker" data-label><b>gradient mismatch</b></span></div><div class="viz-body"><div id="ix-fig14" class="chart ix-mount" style="min-height:392px" data-mhp="481"></div></div></div>
+        <figcaption><b>Reconstruction error controls gradient mismatch.</b> Across INT4, INT3, and INT2, the squared gradient mismatch rises with the loss-aware reconstruction error Ŝ, supporting Assumption 3. Circles, triangles, and squares show fixed clipping factors for INT4, INT3, and INT2, respectively; stars show QUASAR's per-group scale-search solutions.</figcaption>
+      </figure>
+    </div>
+  </div>
+  <div class="fig">
+    <div class="grid-2">
+      <figure class="plate reveal ix">
+        <div class="viz"><div class="viz-head"><span class="viz-kicker" data-label><b>saliency and curvature</b></span></div><div class="viz-body"><div id="ix-fig15" class="chart ix-mount" style="min-height:404px" data-mhp="401"></div></div></div>
+        <figcaption><b>QUASAR's saliency tracks curvature.</b> Each point represents one weight matrix from a trained INT2 Qwen3-4B-Thinking checkpoint and compares its mean saliency <i>h</i> (Adam's second moment) with a 32-sample Hutchinson estimate of its mean Hessian diagonal. The log-scale correlation is <i>r</i>=0.81.</figcaption>
+      </figure>
+      <figure class="plate reveal ix">
+        <div class="viz"><div class="viz-head"><span class="viz-kicker" data-label><b>PL relation</b> · INT2</span></div><div class="viz-body"><div id="ix-fig16" class="chart ix-mount" style="min-height:391px" data-mhp="396"></div></div></div>
+        <figcaption><b>Training trajectories support a PL relation.</b> Each point is one step of an INT2 Qwen3-4B-Thinking run, with loss and gradient measured at the reconstruction <i>r</i>. For all three methods, the squared gradient norm scales with the gap above the trajectory minimum. QUASAR's estimated μ̂=1.72 is about 2.5× the baseline values. In Theorem 1(ii), a larger μ gives faster geometric convergence and smaller floor terms, which scale with <span class="nw">1/μ</span> or <span class="nw">1/μ²</span>. This provides an optimization-side view of the healing curves. QUASAR's reconstruction adds less loss, so more of the remaining gap produces useful gradient, enabling faster healing and a lower loss floor.</figcaption>
+      </figure>
+    </div>
+  </div>
+  <div class="fig">
+    <div class="grid-2">
+      <figure class="plate reveal ix">
+        <div class="viz"><div class="viz-head"><span class="viz-kicker" data-label><b>bound terms</b> · INT2 · SGD</span></div><div class="viz-body"><div id="ix-fig17" class="chart ix-mount" style="min-height:447px" data-mhp="369"></div></div></div>
+        <figcaption><b>Reconstruction error dominates the measured bound.</b> We evaluate each term of Theorem 1(i) on an INT2 QUASAR run with plain SGD and learning rate 10⁻³. We measure λ<sub>max</sub> by power iteration (approximating <i>L</i>), σ² from per-batch gradients, and <i>C</i>. The resulting bound is within 3.1× of the observed average squared gradient norm, and reconstruction error is its largest term.</figcaption>
+      </figure>
+      <figure class="plate reveal ix">
+        <div class="viz"><div class="viz-head"><span class="viz-kicker" data-label><b>plain SGD</b> · INT2</span></div><div class="viz-body"><div id="ix-fig18" class="chart ix-mount" style="min-height:448px" data-mhp="428"></div></div></div>
+        <figcaption><b>QUASAR retains its advantage under plain SGD.</b> Training (top) and held-out (bottom) loss for Standard QAT and QUASAR at INT2 across three constant learning rates. QUASAR reaches lower loss floors at every stable learning rate.</figcaption>
+      </figure>
+    </div>
+  </div>
+  <div class="col app-head"><h3 data-label>Additional Healing Results</h3></div>
+  <div class="col app-sub"><h4 data-label>Standard Tasks and Fidelity</h4></div>
+  <div class="fig">
+    <div class="grid-2">
+      <figure class="plate reveal ix">
+        <div class="viz"><div class="viz-head"><span class="viz-kicker" data-label><b>held-out KL</b></span></div><div class="viz-body"><div id="ix-fig19" class="chart ix-mount" style="min-height:366px" data-mhp="640"></div></div></div>
+        <!-- static-data:table6 -->
+        <div class="sr-only" data-static-sr data-label>
+          <p id="sd-table6-1">Table 6 · Qwen3-4B-Thinking-2507 · INT2. QUASAR gives the highest fidelity in all six model–bit-width settings.</p>
+          <table aria-labelledby="sd-table6-1">
+          <thead>
+          <tr><th scope="col">Method</th><th scope="col">KL ↓</th><th scope="col">Top-1 ↑</th><th scope="col">GSM8K</th><th scope="col">MMLU</th><th scope="col">ARC-C</th><th scope="col">ARC-E</th><th scope="col">HellaSwag</th><th scope="col">WinoGrande</th><th scope="col">TruthfulQA</th><th scope="col">IFEval</th><th scope="col">Avg.</th></tr>
+          </thead>
+          <tbody>
+          <tr><th scope="row">Teacher (FP16)</th><td>–</td><td>–</td><td>87.0</td><td>68.7</td><td>53.1</td><td>76.7</td><td>65.7</td><td>66.1</td><td>57.5</td><td>54.3</td><td>66.1</td></tr>
+          <tr><th scope="row">RTN</th><td>11.166</td><td>0.5</td><td>0.0</td><td>25.4</td><td>25.6</td><td>25.9</td><td>26.0</td><td>52.0</td><td>46.8</td><td>8.3</td><td>26.3</td></tr>
+          <tr><th scope="row">GPTQ</th><td>1.140</td><td>67.7</td><td>0.2</td><td>23.4</td><td>25.1</td><td>30.0</td><td>30.1</td><td>49.3</td><td>52.9</td><td>8.9</td><td>27.5</td></tr>
+          <tr><th scope="row">AWQ</th><td>3.016</td><td>37.0</td><td>0.0</td><td>23.4</td><td>23.2</td><td>31.6</td><td>29.1</td><td>51.1</td><td>52.8</td><td>9.6</td><td>27.6</td></tr>
+          <tr><th scope="row">Standard QAT</th><td>0.186</td><td>89.9</td><td>47.4</td><td>34.5</td><td>31.2</td><td>44.8</td><td>46.9</td><td>54.5</td><td>51.1</td><td>33.5</td><td>43.0</td></tr>
+          <tr><th scope="row">LSQ</th><td>0.205</td><td>89.2</td><td>42.6</td><td>34.6</td><td>30.6</td><td>44.9</td><td>47.6</td><td>55.2</td><td>47.2</td><td>35.1</td><td>42.2</td></tr>
+          <tr><th scope="row">Denoising QAT</th><td>0.179</td><td>90.1</td><td>45.6</td><td>36.0</td><td>30.1</td><td>47.9</td><td>46.7</td><td>56.1</td><td>49.9</td><td>34.9</td><td>43.4</td></tr>
+          <tr><th scope="row">BitDistiller</th><td>0.209</td><td>89.1</td><td>49.0</td><td>43.2</td><td>38.0</td><td>60.1</td><td>52.6</td><td>57.9</td><td>52.6</td><td>37.7</td><td>48.9</td></tr>
+          <tr><th scope="row">QUASAR (ours)</th><td>0.126</td><td>92.0</td><td>68.8</td><td>48.9</td><td>38.8</td><td>55.9</td><td>56.4</td><td>59.2</td><td>50.5</td><td>47.5</td><td>53.2</td></tr>
+          </tbody>
+          </table>
+          <p id="sd-table6-2">Table 6 · Qwen3-4B-Thinking-2507 · INT3</p>
+          <table aria-labelledby="sd-table6-2">
+          <thead>
+          <tr><th scope="col">Method</th><th scope="col">KL ↓</th><th scope="col">Top-1 ↑</th><th scope="col">GSM8K</th><th scope="col">MMLU</th><th scope="col">ARC-C</th><th scope="col">ARC-E</th><th scope="col">HellaSwag</th><th scope="col">WinoGrande</th><th scope="col">TruthfulQA</th><th scope="col">IFEval</th><th scope="col">Avg.</th></tr>
+          </thead>
+          <tbody>
+          <tr><th scope="row">Teacher (FP16)</th><td>–</td><td>–</td><td>87.0</td><td>68.7</td><td>53.1</td><td>76.7</td><td>65.7</td><td>66.1</td><td>57.5</td><td>54.3</td><td>66.1</td></tr>
+          <tr><th scope="row">RTN</th><td>0.597</td><td>78.8</td><td>20.5</td><td>53.6</td><td>39.4</td><td>56.1</td><td>54.1</td><td>58.1</td><td>51.4</td><td>18.9</td><td>44.0</td></tr>
+          <tr><th scope="row">GPTQ</th><td>0.130</td><td>91.5</td><td>77.3</td><td>61.0</td><td>48.0</td><td>75.5</td><td>61.0</td><td>61.8</td><td>54.0</td><td>49.2</td><td>61.0</td></tr>
+          <tr><th scope="row">AWQ</th><td>0.240</td><td>88.1</td><td>73.2</td><td>60.1</td><td>46.4</td><td>72.3</td><td>60.7</td><td>62.7</td><td>49.2</td><td>41.8</td><td>58.3</td></tr>
+          <tr><th scope="row">Standard QAT</th><td>0.062</td><td>94.2</td><td>78.5</td><td>62.0</td><td>46.8</td><td>74.1</td><td>61.9</td><td>64.4</td><td>56.1</td><td>53.2</td><td>62.1</td></tr>
+          <tr><th scope="row">LSQ</th><td>0.070</td><td>93.8</td><td>83.0</td><td>62.3</td><td>49.4</td><td>75.8</td><td>62.7</td><td>65.6</td><td>55.4</td><td>52.9</td><td>63.4</td></tr>
+          <tr><th scope="row">Denoising QAT</th><td>0.060</td><td>94.3</td><td>80.4</td><td>62.7</td><td>46.2</td><td>73.5</td><td>61.6</td><td>64.2</td><td>56.1</td><td>51.0</td><td>62.0</td></tr>
+          <tr><th scope="row">BitDistiller</th><td>0.065</td><td>94.2</td><td>81.0</td><td>63.7</td><td>47.0</td><td>69.0</td><td>63.0</td><td>63.5</td><td>56.3</td><td>53.4</td><td>62.1</td></tr>
+          <tr><th scope="row">QUASAR (ours)</th><td>0.054</td><td>94.9</td><td>81.7</td><td>64.5</td><td>48.3</td><td>72.9</td><td>63.2</td><td>64.7</td><td>55.5</td><td>50.6</td><td>62.7</td></tr>
+          </tbody>
+          </table>
+          <p id="sd-table6-3">Table 6 · Qwen3-4B-Thinking-2507 · INT4</p>
+          <table aria-labelledby="sd-table6-3">
+          <thead>
+          <tr><th scope="col">Method</th><th scope="col">KL ↓</th><th scope="col">Top-1 ↑</th><th scope="col">GSM8K</th><th scope="col">MMLU</th><th scope="col">ARC-C</th><th scope="col">ARC-E</th><th scope="col">HellaSwag</th><th scope="col">WinoGrande</th><th scope="col">TruthfulQA</th><th scope="col">IFEval</th><th scope="col">Avg.</th></tr>
+          </thead>
+          <tbody>
+          <tr><th scope="row">Teacher (FP16)</th><td>–</td><td>–</td><td>87.0</td><td>68.7</td><td>53.1</td><td>76.7</td><td>65.7</td><td>66.1</td><td>57.5</td><td>54.3</td><td>66.1</td></tr>
+          <tr><th scope="row">RTN</th><td>0.108</td><td>92.2</td><td>80.2</td><td>66.1</td><td>48.8</td><td>69.7</td><td>63.5</td><td>65.4</td><td>58.4</td><td>54.2</td><td>63.3</td></tr>
+          <tr><th scope="row">GPTQ</th><td>0.027</td><td>96.2</td><td>84.9</td><td>67.1</td><td>51.4</td><td>75.0</td><td>64.7</td><td>65.4</td><td>56.5</td><td>51.4</td><td>64.6</td></tr>
+          <tr><th scope="row">AWQ</th><td>0.050</td><td>94.7</td><td>84.6</td><td>67.6</td><td>51.5</td><td>74.9</td><td>65.2</td><td>66.6</td><td>56.7</td><td>56.6</td><td>65.5</td></tr>
+          <tr><th scope="row">Standard QAT</th><td>0.019</td><td>96.9</td><td>84.9</td><td>67.0</td><td>49.7</td><td>73.5</td><td>65.1</td><td>65.2</td><td>56.7</td><td>54.3</td><td>64.6</td></tr>
+          <tr><th scope="row">LSQ</th><td>0.024</td><td>96.4</td><td>86.0</td><td>66.8</td><td>50.6</td><td>75.0</td><td>65.2</td><td>65.6</td><td>57.1</td><td>56.4</td><td>65.3</td></tr>
+          <tr><th scope="row">Denoising QAT</th><td>0.018</td><td>96.9</td><td>85.0</td><td>67.1</td><td>49.2</td><td>72.9</td><td>64.7</td><td>65.7</td><td>57.3</td><td>56.9</td><td>64.9</td></tr>
+          <tr><th scope="row">BitDistiller</th><td>0.018</td><td>96.9</td><td>84.8</td><td>67.7</td><td>52.6</td><td>76.0</td><td>64.8</td><td>65.9</td><td>57.3</td><td>54.3</td><td>65.4</td></tr>
+          <tr><th scope="row">QUASAR (ours)</th><td>0.016</td><td>97.1</td><td>86.4</td><td>68.0</td><td>50.6</td><td>76.0</td><td>65.1</td><td>65.2</td><td>57.7</td><td>55.8</td><td>65.6</td></tr>
+          </tbody>
+          </table>
+          <p id="sd-table6-4">Table 6 · Llama-3.1-8B-Instruct · INT2</p>
+          <table aria-labelledby="sd-table6-4">
+          <thead>
+          <tr><th scope="col">Method</th><th scope="col">KL ↓</th><th scope="col">Top-1 ↑</th><th scope="col">GSM8K</th><th scope="col">MMLU</th><th scope="col">ARC-C</th><th scope="col">ARC-E</th><th scope="col">HellaSwag</th><th scope="col">WinoGrande</th><th scope="col">TruthfulQA</th><th scope="col">IFEval</th><th scope="col">Avg.</th></tr>
+          </thead>
+          <tbody>
+          <tr><th scope="row">Teacher (FP16)</th><td>–</td><td>–</td><td>70.1</td><td>68.3</td><td>55.6</td><td>79.9</td><td>79.5</td><td>73.6</td><td>54.5</td><td>73.9</td><td>69.4</td></tr>
+          <tr><th scope="row">RTN</th><td>10.810</td><td>0.5</td><td>0.0</td><td>25.5</td><td>26.2</td><td>26.1</td><td>26.1</td><td>51.8</td><td>47.6</td><td>11.8</td><td>26.9</td></tr>
+          <tr><th scope="row">GPTQ</th><td>2.380</td><td>51.8</td><td>0.0</td><td>24.9</td><td>23.3</td><td>28.9</td><td>30.0</td><td>48.0</td><td>49.0</td><td>9.1</td><td>26.7</td></tr>
+          <tr><th scope="row">AWQ</th><td>6.769</td><td>12.9</td><td>0.0</td><td>23.6</td><td>23.3</td><td>25.9</td><td>27.2</td><td>48.2</td><td>48.8</td><td>7.9</td><td>25.6</td></tr>
+          <tr><th scope="row">Standard QAT</th><td>0.163</td><td>90.1</td><td>1.8</td><td>23.4</td><td>22.9</td><td>30.9</td><td>34.8</td><td>49.3</td><td>46.8</td><td>44.4</td><td>31.8</td></tr>
+          <tr><th scope="row">LSQ</th><td>0.172</td><td>89.6</td><td>42.2</td><td>39.7</td><td>32.8</td><td>52.8</td><td>55.7</td><td>53.5</td><td>47.4</td><td>42.1</td><td>45.8</td></tr>
+          <tr><th scope="row">Denoising QAT</th><td>0.165</td><td>90.1</td><td>0.0</td><td>24.6</td><td>26.2</td><td>25.6</td><td>26.9</td><td>50.0</td><td>49.1</td><td>40.9</td><td>30.4</td></tr>
+          <tr><th scope="row">BitDistiller</th><td>0.151</td><td>90.2</td><td>53.1</td><td>49.3</td><td>43.5</td><td>69.9</td><td>66.6</td><td>66.3</td><td>47.7</td><td>51.8</td><td>56.0</td></tr>
+          <tr><th scope="row">QUASAR (ours)</th><td>0.105</td><td>92.0</td><td>66.4</td><td>52.5</td><td>43.8</td><td>73.1</td><td>68.1</td><td>66.8</td><td>49.5</td><td>56.0</td><td>59.5</td></tr>
+          </tbody>
+          </table>
+          <p id="sd-table6-5">Table 6 · Llama-3.1-8B-Instruct · INT3</p>
+          <table aria-labelledby="sd-table6-5">
+          <thead>
+          <tr><th scope="col">Method</th><th scope="col">KL ↓</th><th scope="col">Top-1 ↑</th><th scope="col">GSM8K</th><th scope="col">MMLU</th><th scope="col">ARC-C</th><th scope="col">ARC-E</th><th scope="col">HellaSwag</th><th scope="col">WinoGrande</th><th scope="col">TruthfulQA</th><th scope="col">IFEval</th><th scope="col">Avg.</th></tr>
+          </thead>
+          <tbody>
+          <tr><th scope="row">Teacher (FP16)</th><td>–</td><td>–</td><td>70.1</td><td>68.3</td><td>55.6</td><td>79.9</td><td>79.5</td><td>73.6</td><td>54.5</td><td>73.9</td><td>69.4</td></tr>
+          <tr><th scope="row">RTN</th><td>0.276</td><td>85.6</td><td>19.0</td><td>44.8</td><td>40.2</td><td>64.6</td><td>69.5</td><td>66.9</td><td>47.0</td><td>52.9</td><td>50.6</td></tr>
+          <tr><th scope="row">GPTQ</th><td>0.076</td><td>92.8</td><td>61.4</td><td>59.2</td><td>49.1</td><td>71.6</td><td>75.7</td><td>71.0</td><td>53.1</td><td>69.1</td><td>63.8</td></tr>
+          <tr><th scope="row">AWQ</th><td>0.197</td><td>88.0</td><td>23.9</td><td>53.2</td><td>43.0</td><td>67.6</td><td>72.2</td><td>67.6</td><td>42.1</td><td>58.6</td><td>53.5</td></tr>
+          <tr><th scope="row">Standard QAT</th><td>0.046</td><td>94.7</td><td>70.7</td><td>59.7</td><td>47.4</td><td>72.8</td><td>75.2</td><td>72.9</td><td>52.1</td><td>69.9</td><td>65.1</td></tr>
+          <tr><th scope="row">LSQ</th><td>0.052</td><td>94.2</td><td>76.8</td><td>62.3</td><td>51.8</td><td>76.9</td><td>75.8</td><td>71.6</td><td>50.9</td><td>67.5</td><td>66.7</td></tr>
+          <tr><th scope="row">Denoising QAT</th><td>0.046</td><td>94.7</td><td>68.8</td><td>59.8</td><td>48.0</td><td>74.5</td><td>75.0</td><td>72.2</td><td>51.0</td><td>70.2</td><td>64.9</td></tr>
+          <tr><th scope="row">BitDistiller</th><td>0.041</td><td>94.8</td><td>74.2</td><td>61.6</td><td>53.1</td><td>79.0</td><td>76.4</td><td>71.9</td><td>52.2</td><td>68.6</td><td>67.1</td></tr>
+          <tr><th scope="row">QUASAR (ours)</th><td>0.036</td><td>95.2</td><td>74.1</td><td>63.3</td><td>54.9</td><td>79.1</td><td>77.1</td><td>71.0</td><td>51.6</td><td>71.5</td><td>67.9</td></tr>
+          </tbody>
+          </table>
+          <p id="sd-table6-6">Table 6 · Llama-3.1-8B-Instruct · INT4</p>
+          <table aria-labelledby="sd-table6-6">
+          <thead>
+          <tr><th scope="col">Method</th><th scope="col">KL ↓</th><th scope="col">Top-1 ↑</th><th scope="col">GSM8K</th><th scope="col">MMLU</th><th scope="col">ARC-C</th><th scope="col">ARC-E</th><th scope="col">HellaSwag</th><th scope="col">WinoGrande</th><th scope="col">TruthfulQA</th><th scope="col">IFEval</th><th scope="col">Avg.</th></tr>
+          </thead>
+          <tbody>
+          <tr><th scope="row">Teacher (FP16)</th><td>–</td><td>–</td><td>70.1</td><td>68.3</td><td>55.6</td><td>79.9</td><td>79.5</td><td>73.6</td><td>54.5</td><td>73.9</td><td>69.4</td></tr>
+          <tr><th scope="row">RTN</th><td>0.044</td><td>94.4</td><td>70.7</td><td>64.1</td><td>53.3</td><td>76.9</td><td>78.0</td><td>73.9</td><td>50.7</td><td>72.1</td><td>67.5</td></tr>
+          <tr><th scope="row">GPTQ</th><td>0.015</td><td>96.8</td><td>69.0</td><td>67.3</td><td>52.0</td><td>77.3</td><td>78.7</td><td>73.2</td><td>55.1</td><td>73.6</td><td>68.3</td></tr>
+          <tr><th scope="row">AWQ</th><td>0.032</td><td>95.2</td><td>65.6</td><td>66.6</td><td>53.7</td><td>78.3</td><td>78.7</td><td>72.4</td><td>53.7</td><td>73.4</td><td>67.8</td></tr>
+          <tr><th scope="row">Standard QAT</th><td>0.014</td><td>97.0</td><td>76.3</td><td>66.3</td><td>54.4</td><td>77.7</td><td>78.4</td><td>73.8</td><td>53.9</td><td>73.0</td><td>69.2</td></tr>
+          <tr><th scope="row">LSQ</th><td>0.016</td><td>96.8</td><td>73.2</td><td>66.5</td><td>54.6</td><td>80.1</td><td>78.7</td><td>74.1</td><td>53.2</td><td>74.1</td><td>69.3</td></tr>
+          <tr><th scope="row">Denoising QAT</th><td>0.014</td><td>97.0</td><td>77.0</td><td>66.2</td><td>55.7</td><td>77.8</td><td>78.6</td><td>73.9</td><td>53.6</td><td>72.1</td><td>69.3</td></tr>
+          <tr><th scope="row">BitDistiller</th><td>0.013</td><td>97.0</td><td>70.4</td><td>67.0</td><td>55.1</td><td>79.7</td><td>78.8</td><td>73.3</td><td>53.8</td><td>74.1</td><td>69.0</td></tr>
+          <tr><th scope="row">QUASAR (ours)</th><td>0.012</td><td>97.3</td><td>74.6</td><td>66.5</td><td>55.5</td><td>78.9</td><td>78.8</td><td>74.2</td><td>54.2</td><td>72.5</td><td>69.4</td></tr>
+          </tbody>
+          </table>
+        </div>
+        <!-- /static-data:table6 -->
+        <figcaption><b>QUASAR gives the lowest held-out KL across both models and all bit widths.</b> Forward KL to the full-precision model after QAD of Qwen3-4B-Thinking-2507 (left) and Llama-3.1-8B-Instruct (right). Lower is better.</figcaption>
+      </figure>
+      <figure class="plate reveal ix">
+        <div class="viz"><div class="viz-head"><span class="viz-kicker" data-label><b>accuracy vs bit width</b></span></div><div class="viz-body"><div id="ix-fig20" class="chart ix-mount" style="min-height:400px" data-mhp="642"></div></div></div>
+        <figcaption><b>QUASAR attains the highest INT2 average accuracy on both models.</b> Average accuracy over the eight benchmarks. Gray circles mark the full-precision models.</figcaption>
+      </figure>
+    </div>
+  </div>
+  <div class="fig">
+    <figure class="plate reveal ix">
+        <div class="viz"><div class="viz-head"><span class="viz-kicker" data-label><b>per-task accuracy</b> · INT2</span></div><div class="viz-body"><div id="ix-fig22" class="chart ix-mount" style="min-height:393px" data-mhp="616"></div></div></div>
+        <figcaption><b>QUASAR preserves INT2 accuracy broadly across tasks.</b> Per-task accuracy normalized by the full-precision model for Qwen3-4B-Thinking-2507 (left) and Llama-3.1-8B-Instruct (right) on the eight benchmarks.</figcaption>
+      </figure>
+  </div>
+  <div class="col app-sub"><h4 data-label>LLM-as-a-Judge Preference at 2 Bits</h4></div>
+  <div class="fig">
+    <div class="grid-2">
+      <figure class="plate reveal ix">
+        <div class="viz"><div class="viz-head"><span class="viz-kicker" data-label><b>LLM judge</b> · INT2</span></div><div class="viz-body"><div id="ix-fig27" class="chart ix-mount" style="min-height:424px" data-mhp="407"></div></div></div>
+        <!-- static-data:table7 -->
+        <div class="sr-only" data-static-sr="partial" data-label>
+          <p id="sd-table7-1">Table 7 · INT2 · judge Llama-3.3-70B-Instruct. QUASAR wins all 14 comparisons with quantized baselines.</p>
+          <table aria-labelledby="sd-table7-1">
+          <thead>
+          <tr><th scope="col">vs. QUASAR</th><th scope="col">Qwen3-4B-Thinking-2507 · mean</th><th scope="col">Qwen3-4B-Thinking-2507 · 95% CI</th><th scope="col">Llama-3.1-8B-Instruct · mean</th><th scope="col">Llama-3.1-8B-Instruct · 95% CI</th></tr>
+          </thead>
+          <tbody>
+          <tr><th scope="row">RTN</th><td>+1.00</td><td>[+1.00, +1.00]</td><td>+0.98</td><td>[+0.96, +1.00]</td></tr>
+          <tr><th scope="row">GPTQ</th><td>+1.00</td><td>[+1.00, +1.00]</td><td>+0.97</td><td>[+0.94, +0.99]</td></tr>
+          <tr><th scope="row">AWQ</th><td>+1.00</td><td>[+1.00, +1.00]</td><td>+0.99</td><td>[+0.97, +1.00]</td></tr>
+          <tr><th scope="row">Standard QAT</th><td>+0.32</td><td>[+0.21, +0.42]</td><td>+0.97</td><td>[+0.94, +0.99]</td></tr>
+          <tr><th scope="row">LSQ</th><td>+0.27</td><td>[+0.15, +0.38]</td><td>+0.37</td><td>[+0.25, +0.49]</td></tr>
+          <tr><th scope="row">Denoising QAT</th><td>+0.31</td><td>[+0.21, +0.41]</td><td>+0.98</td><td>[+0.95, +1.00]</td></tr>
+          <tr><th scope="row">BitDistiller</th><td>+0.24</td><td>[+0.12, +0.35]</td><td>+0.29</td><td>[+0.17, +0.41]</td></tr>
+          <tr><th scope="row">FP16</th><td>−0.30</td><td>[−0.40, −0.20]</td><td>−0.46</td><td>[−0.56, −0.37]</td></tr>
+          </tbody>
+          </table>
+        </div>
+        <!-- /static-data:table7 -->
+        <figcaption><b>The judge prefers QUASAR to every INT2 quantized baseline.</b> Pairwise win, tie, and loss rates on responses to 128 WildChat prompts for Qwen3-4B-Thinking-2507 and Llama-3.1-8B-Instruct. Llama-3.3-70B-Instruct serves as the judge. QUASAR wins all 14 comparisons with quantized baselines. Mean per-prompt preference in [−1,1], with 95% bootstrap confidence intervals over 128 prompts. Positive values favor QUASAR. The final row compares QUASAR with the full-precision model.</figcaption>
+      </figure>
+      <figure class="plate reveal ix">
+        <div class="viz"><div class="viz-head"><span class="viz-kicker" data-label><b>response stability</b> · INT2</span></div><div class="viz-body"><div id="ix-fig28" class="chart ix-mount" style="min-height:426px" data-mhp="702"></div></div></div>
+        <figcaption><b>QUASAR matches the full-precision models' response stability at INT2.</b> Mean word-repetition ratio over 128 WildChat prompts for Qwen3-4B-Thinking-2507 (left) and Llama-3.1-8B-Instruct (right), with greedy decoding. Dashed lines mark the full-precision models; counts show responses that close the reasoning block for Qwen or stop before the token cap for Llama.</figcaption>
+      </figure>
+    </div>
+  </div>
+  <div class="fig">
+    <figure class="plate reveal ix">
+        <div class="viz"><div class="viz-head"><span class="viz-kicker" data-label><b>responses</b></span></div><div class="viz-body"><div id="ix-fig29" class="chart ix-mount" style="min-height:644px" data-mhp="1251"></div></div></div>
+        <figcaption><b>The beginning of each method's response to one held-out prompt, for Qwen3-4B-Thinking-2507 at INT2, INT3, and INT4 with greedy decoding.</b></figcaption>
+      </figure>
+  </div>
+</section>
+
+
+</main>
+
+<footer class="site">
+  <div class="inner" data-label>
+    <div>QUASAR · Cornell University · Together AI</div>
+    <div class="links-f">
+      <a href="https://arxiv.org/abs/2608.13966">arXiv</a>
+      <a href="https://huggingface.co/QUASAR-QAT">Hugging Face</a>
+      <a href="https://github.com/vincentcounathe/quasar-qat">GitHub</a>
+      <a href="#top">Back to top ↑</a>
+    </div>
+  </div>
+</footer>
+
+<script src="assets/js/viz.js" defer></script>
+<script src="assets/js/quasar-core.js" defer></script>
+<script src="assets/js/site.js" defer></script>
+<script src="assets/js/fig-loop.js" defer></script>
+<script src="assets/js/ix-sandbox.js" defer></script>
+<script src="assets/js/ix-realw1.js" defer></script>
+<script src="assets/js/ix-realw2.js" defer></script>
+<script src="assets/js/ix-theory1.js" defer></script>
+<script src="assets/js/ix-theory2.js" defer></script>
+<script src="assets/js/ix-heal1.js" defer></script>
+<script src="assets/js/ix-heal2.js" defer></script>
+<script src="assets/js/ix-judge.js" defer></script>
+<script src="assets/js/ix-adapt.js" defer></script>
+<script src="assets/js/ix-nvfp4app.js" defer></script>
+<script src="assets/js/widget-group.js" defer></script>
+<script src="assets/js/charts-curves.js" defer></script>
+<script src="assets/js/charts-results.js" defer></script>
+</body>
+</html>

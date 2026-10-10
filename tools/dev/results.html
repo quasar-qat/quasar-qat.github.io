@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="en" class="no-js">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex, nofollow">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Results dev</title>
+<script>
+  // ?theme=dark|light  ?only=heal|adapt|ckpt|overhead|models  ?reduce=1 (not real RM, just skips nothing)
+  (function () {
+    var q = new URLSearchParams(location.search);
+    // ?phone=390&h=1400: render this page inside a 390px iframe (headless Chrome's window is >= 500px wide)
+    if (q.get("phone")) {
+      var w = q.get("phone"), h = q.get("h") || 1600; q.delete("phone"); q.delete("h");
+      document.write('<body style="margin:0;background:#888"><iframe id="ph" src="results.html?' + q.toString() + '" style="border:0;display:block;width:' + w + 'px;height:' + h + 'px"></iframe>' +
+        '<script>setTimeout(function(){var d=document.getElementById("ph").contentDocument;document.body.setAttribute("data-inner-w",d.documentElement.scrollWidth+"/"+d.documentElement.clientWidth);},5000)<\/script></body>');
+      document.close();
+      return;
+    }
+    if (q.get("theme")) document.documentElement.setAttribute("data-theme", q.get("theme"));
+    window.__errs = [];
+    window.onerror = function (m, s, l, c) { window.__errs.push(m + " @" + l + ":" + c); var n = document.getElementById("errs"); if (n) n.textContent = window.__errs.join("\n"); };
+    window.addEventListener("unhandledrejection", function (e) { window.onerror("unhandled: " + (e.reason && e.reason.message || e.reason), "", 0, 0); });
+  })();
+  document.documentElement.classList.remove("no-js");
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Newsreader:ital,opsz,wght@0,6..72,400..600;1,6..72,400..500&display=swap">
+<link rel="stylesheet" href="../../assets/css/site.css">
+<link rel="stylesheet" href="../../assets/css/results.css">
+<style>
+  pre#errs { color: #c00; font: 12px monospace; white-space: pre-wrap; margin: 0 16px; }
+  body[data-only] section.block > * { display: none; }
+  body[data-only] section.block > .keep { display: block; }
+  body[data-only] section.block { padding-top: 24px; }
+</style>
+</head>
+<body>
+<pre id="errs"></pre>
+<main id="main">
+
+<section class="block" id="results">
+  <div class="wide keep" data-k="heal">
+    <figure class="plate reveal in">
+      <div class="viz">
+        <div class="viz-head"><span class="viz-kicker" data-label>Table 1 · <b>downstream accuracy</b></span><span class="viz-hint" data-label>switch model and bits · hover for values</span></div>
+        <div class="viz-body"><div id="heal-acc" class="chart" style="min-height:420px"></div></div>
+      </div>
+      <figcaption><b>On reasoning, coding, and long-context tasks, QUASAR improves average accuracy by 13.3 points for Qwen and 2.2 points for Llama.</b> Baselines in each experiment use the same data, objective, training budget, and tuned learning rate, with matched inference formats.</figcaption>
+    </figure>
+  </div>
+
+  <div class="fig keep" data-k="adapt" style="margin-top:32px">
+    <figure class="plate reveal in">
+      <div class="viz">
+        <div class="viz-head"><span class="viz-kicker" data-label>Table 2 · <b>adaptation on math reasoning</b></span><span class="viz-hint" data-label>switch bits · hover for values</span></div>
+        <div class="viz-body"><div id="adapt-chart" class="chart" style="min-height:360px"></div></div>
+      </div>
+      <figcaption>For adaptation, we train all weights of Qwen3-4B-Base on OpenMathReasoning using cross-entropy. <b>At INT2, QUASAR reaches 29.6 average accuracy, 10.9 points above the strongest QAT baseline and 29.0 points above full-precision fine-tuning followed by PTQ.</b></figcaption>
+    </figure>
+  </div>
+</section>
+
+<section class="block" id="nvfp4">
+  <div class="wide keep" data-k="ckpt">
+    <figure class="plate reveal in">
+      <div class="viz">
+        <div class="viz-head"><span class="viz-kicker" data-label>Table 3 · <b>fidelity to BF16 and accuracy</b></span><span class="viz-hint" data-label>lower KL is better · hover for values</span></div>
+        <div class="viz-body"><div id="ckpt-kl" class="chart" style="min-height:440px"></div></div>
+      </div>
+      <figcaption><b>Comparison of QUASAR with QAT and PTQ baselines across NVFP4, INT4, and Q4_0 (llama.cpp GGUF format).</b> We report fidelity to BF16 and accuracy on ten reasoning, coding, and long-horizon benchmarks.</figcaption>
+    </figure>
+  </div>
+</section>
+
+<section class="block" id="ablations">
+  <div class="fig keep" data-k="overhead">
+    <div class="overhead reveal in" id="overhead" data-nocheck></div>
+    <p class="small" style="margin-top:14px">QUASAR only adds 1.4% wall-clock step time compared with Standard QAT (2.97 and 2.93 seconds per step, respectively), with the overhead only coming from the weight reconstruction.</p>
+  </div>
+</section>
+
+<section class="block" id="models">
+  <div class="wide keep" data-k="models">
+    <div id="models-grid" class="models"></div>
+    <p class="small" style="margin-top:16px; text-align:center" data-label><a href="https://huggingface.co/QUASAR-QAT">huggingface.co/QUASAR-QAT</a></p>
+  </div>
+</section>
+
+</main>
+<script>
+  (function () {
+    var only = new URLSearchParams(location.search).get("only");
+    if (!only) return;
+    document.body.setAttribute("data-only", only);
+    document.querySelectorAll("section.block").forEach(function (s) {
+      var hit = s.querySelector('[data-k="' + only + '"]');
+      if (!hit) s.style.display = "none";
+      s.querySelectorAll("[data-k]").forEach(function (k) { if (k.getAttribute("data-k") !== only) k.classList.remove("keep"); });
+    });
+  })();
+</script>
+<script src="../../assets/js/viz.js" defer></script>
+<script src="../../assets/js/charts-results.js" defer></script>
+<script>
+  window.addEventListener("load", function () {
+    // ?pill=Llama-3.1-8B,INT4 clicks those toggle buttons (by label) after the charts render
+    var pills = new URLSearchParams(location.search).get("pill");
+    if (pills) setTimeout(function () {
+      pills.split(",").forEach(function (lab, i) {
+        setTimeout(function () {
+          var b = Array.prototype.find.call(document.querySelectorAll(".pills button"), function (x) { return x.textContent.trim() === lab && x.offsetParent !== null; });
+          if (b) b.click();
+        }, i * 50);
+      });
+    }, 1200);
+    // ?hover=#id:x,y dispatches a mouse pointermove at element-relative coords (to screenshot tooltips)
+    var hv = new URLSearchParams(location.search).get("hover");
+    if (hv) setTimeout(function () {
+      var m = hv.split(":"), n = document.querySelector(m[0]), xy = m[1].split(",").map(Number);
+      var r = n.getBoundingClientRect(), x = r.left + xy[0], y = r.top + xy[1];
+      var t = document.elementFromPoint(x, y);
+      if (t) t.dispatchEvent(new PointerEvent("pointermove", { bubbles: true, clientX: x, clientY: y, pointerType: "mouse" }));
+    }, 2600);
+    setTimeout(function () {
+      var pr = new URLSearchParams(location.search).get("probe");
+      if (pr) { var pn = document.querySelector(pr); if (pn) { var cs = getComputedStyle(pn); document.body.setAttribute("data-probe", [cs.stroke, cs.strokeWidth, cs.paintOrder, cs.fill].join("|")); } }
+      document.body.setAttribute("data-w", document.documentElement.scrollWidth + "/" + innerWidth);
+      var n = document.getElementById("errs"); if (n && window.__errs.length) n.textContent = window.__errs.join("\n");
+    }, 3000);
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,135 @@
+/* ix-adapt.css — adaptation-appendix figures (assets/js/ix-adapt.js): Figs. 30–33.
+   Figure content sits on the light card, so every color here is a fixed light-theme value.
+   Type: 12px for ticks, labels, axis titles, legends and controls; 14px for tooltip body text.
+   Inter for labels, JetBrains Mono (uppercase) for axis titles / tooltip headers. */
+
+.ia { color: #1d1f22; }
+.chart.ia .axis text { font-size: var(--fs-xs, 12px); }
+.chart.ia .axis-title { font: 600 var(--fs-xs, 12px) var(--mono); letter-spacing: .08em; text-transform: uppercase; fill: #6b6f75; }
+.ia .pills button { font-size: var(--fs-xs, 12px); }
+.ia .vtip { font: 400 var(--fs-s, 13px)/1.45 var(--sans); max-width: 300px; }
+.ia .vtip .tt { font: 600 var(--fs-xs, 12px)/1.3 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: #6b6f75; }
+
+/* ---- controls ---- */
+.ia-controls { gap: 10px 22px; margin: 2px 0 10px; }
+.ia-ctl { display: inline-flex; align-items: center; gap: 9px; }
+.ia-ctl .lab { font: 600 var(--fs-xs, 12px)/1 var(--mono); letter-spacing: .1em; text-transform: uppercase; color: #6b6f75; }
+
+/* series chips: legend + highlight (Fig. 30, narrow) or show / hide (Fig. 33) */
+.ia-chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 10px; }
+.ia-chips.ia-narrow { display: none; }
+.ia-chips.ia-narrow.on { display: flex; }
+.ia-chip {
+  appearance: none; display: inline-flex; align-items: center; gap: 7px; min-height: 32px; padding: 6px 11px 6px 9px;
+  border: 1px solid #e3e0da; border-radius: 999px; background: #fdfdfd; color: #44484f; cursor: pointer;
+  font: 500 var(--fs-xs, 12px)/1 var(--sans); white-space: nowrap; transition: background .15s ease, border-color .15s ease, opacity .15s ease;
+}
+.ia-chip svg { width: 18px; height: 10px; flex: none; overflow: visible; }
+.ia-chip.q { color: #a13040; font-weight: 600; }
+.ia-chip:hover { background: #f4f2ee; }
+.ia30 .ia-chip[aria-pressed="true"] { border-color: #1d1f22; background: #f4f2ee; }
+.ia33 .ia-chip[aria-pressed="false"] { opacity: .45; background: #f7f6f3; }
+.ia33 .ia-chip[aria-pressed="false"] svg { filter: grayscale(1); }
+.ia-chip:focus-visible { outline: 2px solid #2e6f95; outline-offset: 2px; }
+
+/* ---- plot ---- */
+.ia-plot { position: relative; width: 100%; border-radius: 8px; outline: none; -webkit-tap-highlight-color: transparent; }
+.ia-plot:focus-visible { box-shadow: 0 0 0 2px #2e6f95; }
+.ia-svg { display: block; overflow: visible; font-family: var(--sans); }
+/* vertical swipes scroll the page; taps and horizontal drags read values */
+.ia-plot svg, .ia-overlay { touch-action: pan-y pinch-zoom; }
+.ia-overlay { cursor: crosshair; }
+.ia-overlay.rows { cursor: default; }
+.ia-line { transition: opacity .2s ease; }
+
+/* crosshair + hover dots */
+.ia-xh { stroke: #8a8d92; stroke-width: 1; stroke-dasharray: 2 3; shape-rendering: crispEdges; }
+.ia-hd { stroke: #fdfdfd; stroke-width: 1.6; }
+
+/* Fig. 30: zoom window (left panel) and the zoomed panel's frame */
+.ia-zr { fill: none; stroke: #8f9297; stroke-width: 1; stroke-dasharray: 3 2; shape-rendering: crispEdges; }
+.ia-zf { fill: none; stroke: #b7b4ae; stroke-width: 1; stroke-dasharray: 3 2; shape-rendering: crispEdges; }
+
+/* Fig. 30: direct end labels (also highlight toggles) */
+.ia-end { cursor: pointer; transition: opacity .2s ease; outline: none; }
+.ia-endt { font: 500 var(--fs-xs, 12px) var(--sans); }
+.ia-endt.q { font-weight: 700; }
+.ia-end:focus-visible .ia-endt { text-decoration: underline; text-decoration-color: #2e6f95; text-decoration-thickness: 2px; text-underline-offset: 3px; }
+.ia-end[aria-pressed="true"] .ia-endt { text-decoration: underline; text-underline-offset: 3px; }
+
+/* ---- row charts (Figs. 31, 32) ---- */
+.ia-band { fill: transparent; transition: fill .15s ease; }
+.ia-band.hot { fill: #f1eee8; }
+.ia-rl { font: 500 var(--fs-xs, 12px) var(--sans); }
+.ia-rl.q { font-weight: 700; }
+.ia-seg { transition: opacity .25s ease; }
+.ia-sep { stroke: #c9c6c0; stroke-width: 1; stroke-dasharray: 2 3; shape-rendering: crispEdges; }
+.ia-bv { font: 600 var(--fs-xs, 12px) var(--sans); font-variant-numeric: tabular-nums; pointer-events: none; }
+.ia-bv.on { fill: #fdfdfd; }
+.ia-bv.in { fill: #1d1f22; }
+.ia-bv.out { fill: #44484f; paint-order: stroke; stroke: #fdfdfd; stroke-width: 3.5px; stroke-linejoin: round; }
+.ia-bv.out.q { fill: #a13040; font-weight: 700; }
+
+/* outcome key = alignment control (Fig. 31) */
+.ia-key { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+.ia-kb {
+  appearance: none; display: inline-flex; align-items: center; gap: 7px; min-height: 32px; padding: 6px 11px 6px 9px;
+  border: 1px solid #e3e0da; border-radius: 999px; background: #fdfdfd; color: #44484f; cursor: pointer;
+  font: 500 var(--fs-xs, 12px)/1 var(--sans); white-space: nowrap;
+}
+.ia-kb:hover { background: #f4f2ee; }
+.ia-kb[aria-checked="true"] { border-color: #1d1f22; color: #1d1f22; background: #f4f2ee; }
+.ia-kb:focus-visible { outline: 2px solid #2e6f95; outline-offset: 2px; }
+.ia-sw { display: inline-block; width: 12px; height: 12px; border-radius: 3px; flex: none; }
+
+/* Fig. 32: ratio bars <-> avg@1 · pass@8 dumbbells */
+.ia-bar { shape-rendering: geometricPrecision; }
+.ia-da { fill: #fdfdfd; stroke-width: 2; }
+.ia-dp { stroke: #fdfdfd; stroke-width: 1.2; }
+.ia-sv { font: 500 var(--fs-xs, 12px) var(--sans); fill: #6b6f75; font-variant-numeric: tabular-nums; pointer-events: none; paint-order: stroke; stroke: #fdfdfd; stroke-width: 3px; stroke-linejoin: round; }
+.ia-sv.q { fill: #a13040; font-weight: 600; }
+.ia-one { stroke: #1d1f22; stroke-width: 1; shape-rendering: crispEdges; opacity: .6; }
+.ia-fpl { stroke: #c9a227; stroke-width: 1.6; stroke-dasharray: 4 3; }
+.ia-refs { pointer-events: none; }
+.ia-dkey { display: flex; margin-top: 8px; font: 500 var(--fs-xs, 12px)/1.3 var(--sans); color: #44484f; }
+.ia-kset { display: inline-flex; flex-wrap: wrap; gap: 4px 16px; }
+.ia-dkey .ia-kset.s, .ia-dkey.split .ia-kset.r { display: none; }
+.ia-dkey.split .ia-kset.s { display: inline-flex; }
+.ia-ki { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
+.ia-ki .g { color: #7d6310; }
+.ia-vl { display: inline-block; width: 0; height: 14px; border-left: 1.5px solid #1d1f22; }
+.ia-vl.one { opacity: .6; }
+.ia-vl.fp { border-left: 2px dashed #c9a227; }
+.ia-dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; background: #6b6f75; }
+.ia-dot.hollow { background: #fdfdfd; box-shadow: inset 0 0 0 2px #6b6f75; }
+
+/* Fig. 33 */
+.ia-s { transition: opacity .25s ease; }
+.ia-dband { fill: #f3f1ec; opacity: 0; transition: opacity .15s ease; pointer-events: none; }
+
+/* ---- tooltip rows ---- */
+.vtip .ia-row { align-items: baseline; padding: 0 4px; margin: 0 -4px; border-radius: 4px; }
+.vtip .ia-row b { font-weight: 650; font-variant-numeric: tabular-nums; }
+.vtip .ia-row.q .ia-n { color: #a13040; font-weight: 600; }
+.vtip .ia-row.hot { background: #f1eee8; }
+.vtip .ia-n { color: #44484f; white-space: nowrap; }
+.vtip .ia-k { display: inline-block; width: 12px; height: 3px; border-radius: 2px; margin-right: 7px; vertical-align: 3px; }
+.vtip .ia-k.sw { width: 10px; height: 10px; border-radius: 2px; vertical-align: -1px; }
+.vtip .ia-sub { font-weight: 600; color: #1d1f22; margin-bottom: 2px; }
+.vtip .ia-sub.q { color: #a13040; }
+
+/* fetch failure: neutral data label in place of the chart */
+.ia-fail { padding: 22px 0; text-align: center; font: 500 var(--fs-xs, 12px)/1.4 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: #6b6f75; }
+
+@media (max-width: 600px) {
+  .ia-controls { gap: 8px 14px; }
+  .ia-ctl { gap: 7px; }
+  .ia-ctl .pills button { padding: 7px 10px; }
+  .ia-chip, .ia-kb { padding: 6px 9px 6px 8px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ia-line, .ia-seg, .ia-s, .ia-end, .ia-band, .ia-dband, .ia-chip { transition: none; }
+}
+@media print {
+  .ia-plot:focus-visible { box-shadow: none; }
+}

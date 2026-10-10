@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex, nofollow">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Curves dev</title>
+<script>
+  window.__errors = [];
+  window.onerror = function (msg, src, line, col) { window.__errors.push(msg + " @" + line + ":" + col); var e = document.getElementById("errs"); if (e) e.textContent = window.__errors.join("\n"); };
+  window.addEventListener("unhandledrejection", function (ev) { window.__errors.push("rejection: " + ev.reason); var e = document.getElementById("errs"); if (e) e.textContent = window.__errors.join("\n"); });
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Newsreader:ital,opsz,wght@0,6..72,400..600;1,6..72,400..500&display=swap">
+<link rel="stylesheet" href="../../assets/css/site.css">
+<link rel="stylesheet" href="../../assets/css/charts.css">
+<style>pre#errs{color:#b00;font:12px monospace;white-space:pre-wrap;margin:0 20px}</style>
+</head>
+<body>
+<pre id="errs"></pre>
+<main id="main">
+<section class="block" id="theory" style="padding-top:24px">
+  <div class="fig">
+    <div class="grid-2">
+      <figure class="plate">
+        <div class="viz"><div class="viz-head"><span class="viz-kicker" data-label>Before training</span><span class="viz-hint" data-label>hover for values</span></div><div class="viz-body"><div id="theory-init" class="chart" style="min-height:300px"></div></div></div>
+        <figcaption><b>Reconstruction error predicts final loss before training.</b></figcaption>
+      </figure>
+      <figure class="plate">
+        <div class="viz"><div class="viz-head"><span class="viz-kicker" data-label>After training · INT2</span><span class="viz-hint" data-label>hover for values</span></div><div class="viz-body"><div id="theory-dose" class="chart" style="min-height:300px"></div></div></div>
+        <figcaption><b>Reconstruction error drives final loss.</b> Five QUASAR INT2 runs differ only in the lower bound imposed on the scale-search factor <i>f</i>. The star marks the unrestricted search.</figcaption>
+      </figure>
+    </div>
+  </div>
+</section>
+
+<section class="block" id="results" style="padding-top:40px">
+  <div class="wide">
+    <figure class="plate">
+      <div class="viz">
+        <div class="viz-head"><span class="viz-kicker" data-label>Fig. 3 · <b>healing with QAD</b></span><span class="viz-hint" data-label>switch model, bits and loss · hover for values</span></div>
+        <div class="viz-body"><div id="healing-curves" class="chart" style="min-height:420px"></div></div>
+      </div>
+      <figcaption>For healing, we apply QAD to Qwen3-4B-Thinking-2507 and Llama-3.1-8B-Instruct at INT2, INT3, and INT4 using Open-PerfectBlend data and logits from the full-precision teachers. All losses are forward KL to the full-precision model.</figcaption>
+    </figure>
+  </div>
+</section>
+
+<section class="block" id="ablations" style="padding-top:40px">
+  <div class="fig">
+    <div class="grid-2">
+      <figure class="plate">
+        <div class="viz"><div class="viz-head"><span class="viz-kicker" data-label>Fig. 4 · <b>ablation</b> · INT2</span><span class="viz-hint" data-label>hover for values</span></div><div class="viz-body"><div id="ablation-chart" class="chart" style="min-height:320px"></div></div></div>
+        <figcaption><b>QUASAR achieves the lowest training and evaluation loss across ablations.</b> Removing both recovers Standard QAT.</figcaption>
+      </figure>
+      <figure class="plate">
+        <div class="viz"><div class="viz-head"><span class="viz-kicker" data-label>Learning-rate sweep · INT2</span><span class="viz-hint" data-label>hover for values</span></div><div class="viz-body"><div id="lr-chart" class="chart" style="min-height:320px"></div></div></div>
+        <figcaption><b>QUASAR is robust to learning rate.</b> QUASAR attains the lowest KL at every tested rate; Standard QAT diverges at high rates, while BitDistiller degrades at low rates.</figcaption>
+      </figure>
+    </div>
+  </div>
+</section>
+</main>
+<script>
+  // dev only: headless Chrome stalls rAF under --virtual-time-budget; ?raf drives it from timers instead
+  if (new URLSearchParams(location.search).has("raf")) window.requestAnimationFrame = function (cb) { return setTimeout(function () { cb(performance.now()); }, 16); };
+</script>
+<script src="../../assets/js/viz.js"></script>
+<script src="../../assets/js/charts-curves.js"></script>
+<script>
+  // dev only: ?h=Train,Llama-3.1-8B clicks pills in #healing-curves; ?a=Train in #ablation-chart; ?hover=heal|lr|init|dose|abl
+  (function () {
+    var q = new URLSearchParams(location.search);
+    function clickAll(id, labels) {
+      var root = document.getElementById(id); if (!root || !labels) return;
+      labels.split(",").forEach(function (lab, i) {
+        setTimeout(function () {
+          Array.from(root.querySelectorAll(".pills button")).forEach(function (b) { if (b.textContent === lab) b.click(); });
+        }, (+q.get("t0") || 1800) + i * (+q.get("dt") || 900));
+      });
+    }
+    clickAll("healing-curves", q.get("h"));
+    clickAll("ablation-chart", q.get("a"));
+    var rh = q.get("rowhi");
+    if (rh) setTimeout(function () {
+      Array.from(document.querySelectorAll("#ablation-chart tbody tr")).forEach(function (tr) { if (tr.cells[0].textContent === rh) tr.dispatchEvent(new PointerEvent("pointerenter")); });
+    }, 5000);
+    var hv = q.get("hover");
+    if (hv) setTimeout(function () {
+      var map = { heal: "healing-curves", lr: "lr-chart", init: "theory-init", dose: "theory-dose", abl: "ablation-chart" };
+      var root = document.getElementById(map[hv]); var ov = root && root.querySelector(".cc-overlay"); if (!ov) return;
+      var r = ov.getBoundingClientRect(); var fx = parseFloat(q.get("fx") || "0.4"), fy = parseFloat(q.get("fy") || "0.5");
+      ov.dispatchEvent(new PointerEvent("pointermove", { bubbles: true, clientX: r.left + r.width * fx, clientY: r.top + r.height * fy, pointerType: "mouse" }));
+    }, +q.get("ht") || 5200);
+  })();
+</script>
+</body>
+</html>

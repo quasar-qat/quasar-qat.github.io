@@ -1,0 +1,95 @@
+/* charts.css — line charts + theory scatters (assets/js/charts-curves.js).
+   Figure content always sits on the light card, so every color here is a fixed light-theme value.
+   Type: 12px (--fs-xs) for every in-chart label, 14px (--fs-s) for tooltip body text; nothing else.
+   Inter for chart text, JetBrains Mono (uppercase) for axis titles / small kickers only. */
+
+.cc { color: #1d1f22; }
+
+/* shared chart classes (site.css), pinned to the scale inside these four charts */
+.chart.cc .axis text { font-size: var(--fs-xs, 12px); }
+.chart.cc .axis-title { font: 600 var(--fs-xs, 12px) var(--mono); letter-spacing: .08em; text-transform: uppercase; }
+.chart.cc .end-label { font-size: var(--fs-xs, 12px); }
+.cc .cc-ctl .lab { font: 600 var(--fs-xs, 12px)/1 var(--mono); letter-spacing: .1em; text-transform: uppercase; }
+.cc .pills button { font-size: var(--fs-xs, 12px); }
+.cc .vtip { font: 400 var(--fs-s, 13px)/1.45 var(--sans); }
+.cc .vtip .tt { font: 600 var(--fs-xs, 12px)/1.3 var(--mono); letter-spacing: .08em; text-transform: uppercase; }
+
+/* ---- controls row ---- */
+.cc-controls { gap: 10px 22px; margin: 2px 0 10px; }
+.cc-ctl { display: inline-flex; align-items: center; gap: 9px; }
+.cc-ctl .lab { min-width: 0; }
+
+/* ---- plot ---- */
+.cc-plot { position: relative; width: 100%; border-radius: 8px; outline: none; -webkit-tap-highlight-color: transparent; }
+.cc-plot:focus-visible { box-shadow: 0 0 0 2px #2e6f95; }
+.cc-plot svg { display: block; overflow: visible; font-family: var(--sans); }
+/* vertical swipes scroll the page; horizontal drags scrub the crosshair (touch-action must sit on a box, not on an SVG shape) */
+.cc-plot svg, .cc-overlay { touch-action: pan-y pinch-zoom; }
+.cc-overlay { cursor: crosshair; }
+.cc-overlay.pts { cursor: default; }
+.cc-line { transition: stroke-opacity .2s ease, opacity .2s ease; }
+.cc-dots { opacity: .5; }
+.cc-lab { transition: opacity .2s ease; }
+
+/* crosshair + hover dots */
+.cc-xh { stroke: #8a8d92; stroke-width: 1; stroke-dasharray: 2 3; shape-rendering: crispEdges; }
+.cc-hd { stroke: #fdfdfd; stroke-width: 1.6; }
+.cc-ring { fill: none; stroke-width: 1.6; opacity: .55; }
+
+/* zoom inset (final steps of training) */
+.cc-zr { fill: none; stroke: #9a9da3; stroke-width: 1; shape-rendering: crispEdges; }
+.cc-zc { stroke: #a9acb1; stroke-width: 1; stroke-dasharray: 3 3; }
+.cc-ibg { fill: #fdfdfd; }
+.cc-ib { fill: none; stroke: #b7b4ae; stroke-width: 1; shape-rendering: crispEdges; }
+.cc-ilab { fill: #6b6f75; font: 500 var(--fs-xs, 12px) var(--mono); letter-spacing: .08em; stroke: #fdfdfd; stroke-width: 3.5px; stroke-linejoin: round; paint-order: stroke; }
+
+/* best-baseline reference line (held-out view): label only, no value */
+.cc-refl { stroke: #7d8187; stroke-width: 1; stroke-dasharray: 5 4; shape-rendering: crispEdges; }
+.cc-reft { fill: #6b6f75; font: 500 var(--fs-xs, 12px) var(--sans); stroke: #fdfdfd; stroke-width: 3.5px; stroke-linejoin: round; paint-order: stroke; }
+
+/* small data labels */
+.cc-val { fill: #6b6f75; font: 500 var(--fs-xs, 12px) var(--sans); font-variant-numeric: tabular-nums; }
+.cc-ann { fill: #44484f; font: 500 var(--fs-xs, 12px) var(--sans); font-variant-numeric: tabular-nums; }
+.cc-clab { fill: #6b6f75; font: 600 var(--fs-xs, 12px) var(--mono); letter-spacing: .08em; }
+.cc-plab { fill: #44484f; font: 500 var(--fs-xs, 12px) var(--sans); font-variant-numeric: tabular-nums; }
+.cc-clab, .cc-plab { paint-order: stroke; stroke: #fdfdfd; stroke-width: 4px; stroke-linejoin: round; }
+/* math symbols (f, Ŝ) are never uppercased, even inside uppercase headers; same size as the text around them */
+.cc-f { font-family: var(--serif); font-style: italic; text-transform: none; letter-spacing: 0; }
+.cc-fit { fill: none; stroke-width: 1.3; stroke-dasharray: 5 4; }
+
+/* scatter points pop in once */
+.cc-pt { opacity: 0; transform: scale(.25); transform-box: fill-box; transform-origin: center;
+  transition: opacity .3s ease, transform .55s cubic-bezier(.3, 1.45, .5, 1); }
+.in > .cc-pt { opacity: 1; transform: none; }
+@media (prefers-reduced-motion: reduce) { .cc-pt { transition: none; } }
+
+/* ---- tooltip rows ---- */
+.vtip .cc-row { align-items: baseline; }
+.vtip .cc-row b { font-weight: 650; font-variant-numeric: tabular-nums; }
+.vtip .cc-row.q .cc-n { color: #A13040; font-weight: 600; }
+.vtip .cc-n { color: #44484f; white-space: nowrap; }
+.vtip .cc-k { display: inline-block; width: 12px; height: 3px; border-radius: 2px; margin-right: 7px; vertical-align: 3px; }
+.vtip .tt .cc-k { vertical-align: 2px; }
+.vtip sub { font-size: var(--fs-xs, 12px); line-height: 0; }
+.vtip .tt .cc-f, .vtip .tt .m { text-transform: none; letter-spacing: 0; }
+
+/* ---- inline key row ---- */
+.cc-legend { display: flex; flex-wrap: wrap; gap: 6px 14px; margin-top: 10px; font: 500 var(--fs-xs, 12px)/1.3 var(--sans); color: #44484f; }
+.cc-legend.cc-narrow-only { display: none; }
+.cc-legend.cc-narrow-only.on { display: flex; }
+.cc-li { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
+.cc-li svg { width: 18px; height: 10px; max-width: none; flex: none; overflow: visible; }
+.cc-li.q { color: #A13040; font-weight: 700; }
+.cc-legend.cc-key { margin-top: 8px; }
+.cc-legend.cc-refkey { display: none; margin-top: 8px; color: #6b6f75; }
+.cc-legend.cc-refkey.on { display: flex; }
+.cc-legend.cc-refkey + .cc-legend.on { margin-top: 4px; }
+
+/* fetch failure: neutral data label in place of the chart */
+.cc-fail { padding: 22px 0; text-align: center; font: 500 var(--fs-xs, 12px)/1.4 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: #6b6f75; }
+
+@media (max-width: 600px) {
+  .cc-controls { gap: 8px 14px; }
+  .cc-ctl { gap: 7px; }
+  .cc-ctl .pills button { padding: 7px 10px; }
+}

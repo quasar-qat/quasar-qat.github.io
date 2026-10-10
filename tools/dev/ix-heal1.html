@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex, nofollow">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ix-heal1 dev</title>
+<script>
+  window.__errors = [];
+  window.onerror = function (msg, src, line, col) { window.__errors.push(msg + " @" + line + ":" + col); var e = document.getElementById("errs"); if (e) e.textContent = window.__errors.join("\n"); };
+  window.addEventListener("unhandledrejection", function (ev) { window.__errors.push("rejection: " + ev.reason); var e = document.getElementById("errs"); if (e) e.textContent = window.__errors.join("\n"); });
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Newsreader:ital,opsz,wght@0,6..72,400..600;1,6..72,400..500&display=swap">
+<link rel="stylesheet" href="../../assets/css/site.css">
+<link rel="stylesheet" href="../../assets/css/ix-heal1.css">
+<style>pre#errs{color:#b00;font:12px monospace;white-space:pre-wrap;margin:0 20px}</style>
+</head>
+<body>
+<pre id="errs"></pre>
+<main id="main">
+<section class="block" id="results" style="padding-top:24px">
+  <div class="fig">
+    <div class="grid-2">
+      <figure class="plate ix">
+        <div class="viz"><div class="viz-head"><span class="viz-kicker" data-label><b>held-out KL</b></span></div><div class="viz-body"><div id="ix-fig19" class="chart ix-mount" style="min-height:366px"></div></div></div>
+        <figcaption><b>QUASAR gives the lowest held-out KL across both models and all bit widths.</b> Forward KL to the full-precision model after QAD of Qwen3-4B-Thinking-2507 (left) and Llama-3.1-8B-Instruct (right). Lower is better.</figcaption>
+      </figure>
+      <figure class="plate ix">
+        <div class="viz"><div class="viz-head"><span class="viz-kicker" data-label><b>accuracy vs bit width</b></span></div><div class="viz-body"><div id="ix-fig20" class="chart ix-mount" style="min-height:400px"></div></div></div>
+        <figcaption><b>QUASAR attains the highest INT2 average accuracy on both models.</b> Average accuracy over the eight benchmarks. Gray circles mark the full-precision models.</figcaption>
+      </figure>
+    </div>
+  </div>
+</section>
+</main>
+<script src="../../assets/js/viz.js" defer></script>
+<script src="../../assets/js/ix-heal1.js" defer></script>
+</body>
+</html>

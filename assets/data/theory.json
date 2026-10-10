@@ -1,0 +1,213 @@
+{
+ "source": "arXiv v2 (2608.13966), appendix_theory_validation.tex",
+ "generator": "tools/extract_theory.py",
+ "note": "Two separate KL bases: init_predictor uses the Table-1 fidelity KL after 4,096 steps; dose_trained uses held-out KL after 1,000 steps. Never plot them on one axis.",
+ "init_predictor": {
+  "figure": "init_predictor.pdf (Figure 13, label fig:init-predictor)",
+  "caption_title": "Reconstruction error predicts final loss before training.",
+  "model": "Qwen3-4B-Thinking-2507",
+  "basis": "y = forward KL from the separate fidelity evaluation (Table 1 basis; e.g. QUASAR INT2 0.126, Standard QAT INT2 0.186, Denoising QAT INT2 0.179); x = loss-aware reconstruction error of the deployed reconstruction at step 0. Not the in-loop curve basis.",
+  "sources": {
+   "figure": "Figure 13",
+   "x": "plot data of Figure 13 (S_0 of each run at step 0)",
+   "y": "Table 1 KL (fidelity evaluation, unrounded)",
+   "r2_crosscheck": "Figure 13 caption (R^2=0.98); reference trio fit r2_loglog 0.9804"
+  },
+  "x_label": "Init-time loss-aware reconstruction error",
+  "y_label": "Final healed held-out KL to full-precision model",
+  "points": [
+   {
+    "method": "QUASAR",
+    "key": "quasar",
+    "bits": "INT4",
+    "S0": 6.263191817268421e-05,
+    "kl": 0.01629
+   },
+   {
+    "method": "QUASAR",
+    "key": "quasar",
+    "bits": "INT3",
+    "S0": 0.0002269996107902017,
+    "kl": 0.05375
+   },
+   {
+    "method": "QUASAR",
+    "key": "quasar",
+    "bits": "INT2",
+    "S0": 0.0007266557829552767,
+    "kl": 0.12615
+   },
+   {
+    "method": "Denoising QAT",
+    "key": "denoising_qat",
+    "bits": "INT4",
+    "S0": 6.929766810959137e-05,
+    "kl": 0.01839
+   },
+   {
+    "method": "Denoising QAT",
+    "key": "denoising_qat",
+    "bits": "INT3",
+    "S0": 0.0003020050763780091,
+    "kl": 0.06022
+   },
+   {
+    "method": "Denoising QAT",
+    "key": "denoising_qat",
+    "bits": "INT2",
+    "S0": 0.001291820071784855,
+    "kl": 0.17905
+   },
+   {
+    "method": "Standard QAT",
+    "key": "standard_qat",
+    "bits": "INT4",
+    "S0": 7.102942331993489e-05,
+    "kl": 0.01858
+   },
+   {
+    "method": "Standard QAT",
+    "key": "standard_qat",
+    "bits": "INT3",
+    "S0": 0.0003328787658158916,
+    "kl": 0.06203
+   },
+   {
+    "method": "Standard QAT",
+    "key": "standard_qat",
+    "bits": "INT2",
+    "S0": 0.0021797094667661554,
+    "kl": 0.1864
+   }
+  ],
+  "fit": {
+   "kind": "OLS power law (log10-log10)",
+   "slope": 0.733248,
+   "intercept": 1.335611,
+   "r2": 0.981124,
+   "display": {
+    "r2": "0.98"
+   },
+   "x_range": [
+    4.434000243824404e-05,
+    0.003078921458176838
+   ]
+  },
+  "axes": {
+   "ylim": [
+    0.013,
+    0.3
+   ],
+   "yticks": [
+    0.02,
+    0.05,
+    0.1,
+    0.2
+   ],
+   "xticks": [
+    0.0001,
+    0.0003,
+    0.001,
+    0.003
+   ]
+  }
+ },
+ "dose_trained": {
+  "figure": "dose_trained.pdf (Figure 12, label fig:dose-trained)",
+  "caption_title": "Reconstruction error drives final loss.",
+  "model": "Qwen3-4B-Thinking-2507",
+  "setting": "QUASAR INT2, 1,000 steps, LR 5e-5; runs differ only in the scale-search candidate grid",
+  "basis": "y = final held-out KL to the FP16 teacher after 1,000 steps (screen eval of each dose run); x = end-of-training loss-aware reconstruction error.",
+  "sources": {
+   "figure": "Figure 12",
+   "x": "plot data of Figure 12 (S_T of each rung at the end of training)",
+   "y": "plot data of Figure 12 (final held-out KL per rung), cross-checked against each rung's eval series"
+  },
+  "x_label": "End-of-training reconstruction error",
+  "y_label": "Final held-out KL to FP16 teacher",
+  "points": [
+   {
+    "rung": "full",
+    "label": "f ≥ 0.3",
+    "f_min": 0.3,
+    "unrestricted": true,
+    "ST": 0.0003899911230398345,
+    "ST_source": "final",
+    "kl": 0.1524
+   },
+   {
+    "rung": "floor50",
+    "label": "f ≥ 0.5",
+    "f_min": 0.5,
+    "unrestricted": false,
+    "ST": 0.000403076866554386,
+    "ST_source": "final",
+    "kl": 0.1522
+   },
+   {
+    "rung": "floor70",
+    "label": "f ≥ 0.7",
+    "f_min": 0.7,
+    "unrestricted": false,
+    "ST": 0.00045665316548948454,
+    "ST_source": "final",
+    "kl": 0.161
+   },
+   {
+    "rung": "floor85",
+    "label": "f ≥ 0.85",
+    "f_min": 0.85,
+    "unrestricted": false,
+    "ST": 0.0005496035285261769,
+    "ST_source": "final",
+    "kl": 0.1889
+   },
+   {
+    "rung": "minmax",
+    "label": "f = 1",
+    "f_min": 1.0,
+    "unrestricted": false,
+    "ST": 0.000669964922884958,
+    "ST_source": "step768 (final snapshot missing; generator fallback)",
+    "kl": 0.2289
+   }
+  ],
+  "fit": {
+   "kind": "OLS power law (log10-log10)",
+   "slope": 0.765716,
+   "intercept": 1.780408,
+   "r2": 0.975457,
+   "display": {
+    "slope": "0.77",
+    "r2": "0.976"
+   },
+   "display_note": "display = the annotation printed in the v2 figure; recomputed from the 4-decimal KLs R^2 = 0.9755 (0.9756 with unrounded series KLs)",
+   "x_range": [
+    0.0003556761314649134,
+    0.000734601930124107
+   ]
+  },
+  "axes": {
+   "xlim": [
+    0.000355,
+    0.00077
+   ],
+   "ylim": [
+    0.142,
+    0.25
+   ],
+   "xticks": [
+    0.0004,
+    0.0005,
+    0.0006,
+    0.0007
+   ],
+   "yticks": [
+    0.15,
+    0.18,
+    0.21,
+    0.24
+   ]
+  }
+ }
+}

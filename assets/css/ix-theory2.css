@@ -1,0 +1,155 @@
+/* ix-theory2.css — appendix Figs. 16, 17, 18 (assets/js/ix-theory2.js).
+   Figure content always sits on the light card: every color here is a fixed light-theme value.
+   Type: 12px for ticks, labels, axis titles, legends, pills; 14px for tooltip body + emphasized labels.
+   Inter for labels, JetBrains Mono (uppercase, .08em) for axis titles / tiny labels, Newsreader italic for math. */
+
+.t2 { color: #1d1f22; }
+.t2 svg { display: block; overflow: visible; font-family: var(--sans); font-size: 12px; }
+.chart.t2 .axis text { font-size: 12px; fill: #6b6f75; }
+.chart.t2 .axis-title { font: 500 12px var(--mono); letter-spacing: .08em; text-transform: uppercase; fill: #6b6f75; }
+.t2 .t2-m { font-family: var(--serif); font-style: italic; text-transform: none; letter-spacing: 0; }
+.t2 svg .t2-m { font-size: var(--fs-s, 13px); }
+.t2 .pills button { font-size: 12px; }
+
+/* ---- controls ---- */
+.t2-ctl { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 18px; margin: 2px 0 10px; }
+.t2-cg { display: inline-flex; align-items: center; gap: 9px; }
+.t2-lab { font: 500 12px/1 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: #6b6f75; white-space: nowrap; }
+.t2-lab .t2-m { font-size: var(--fs-s, 13px); }
+
+/* method toggles (Fig. 16): they are the legend */
+.t2-chips { display: flex; flex-wrap: wrap; gap: 4px 10px; }
+.t2-chip {
+  appearance: none; display: inline-flex; align-items: center; gap: 7px; min-height: 24px; padding: 2px 6px;
+  border: 0; border-radius: 6px; background: none; color: #44484f; cursor: pointer;
+  font: 500 12px/1 var(--sans); transition: opacity .18s ease, background .18s ease;
+}
+.t2-chip:hover, .t2-chip.hl { background: #f4f2ee; }
+.t2-chip.q { color: #a13040; font-weight: 600; }
+.t2-chip[aria-pressed="false"] { opacity: .45; text-decoration: line-through; }
+.t2-chip[aria-pressed="false"] .t2-dot { background: transparent !important; box-shadow: inset 0 0 0 1.5px currentColor; }
+.t2-dot { width: 9px; height: 9px; border-radius: 999px; flex: none; }
+.t2-chip:focus-visible, .t2-play:focus-visible, .t2-term:focus-visible, .t2-plot:focus-visible { outline: 2px solid #2e6f95; outline-offset: 2px; }
+
+/* ---- plot ---- */
+.t2-plot { position: relative; width: 100%; border-radius: 8px; outline: none; -webkit-tap-highlight-color: transparent; }
+.t2-plot svg, .t2-ov { touch-action: pan-y pinch-zoom; }
+.t2-ov { cursor: crosshair; }
+.t2-ov.pts { cursor: default; }
+
+/* Fig. 16 points + fits */
+.t2-p { fill-opacity: .42; transition: fill-opacity .25s ease; }
+.t2-p.g { fill-opacity: .06; }
+.t2-p.r { fill-opacity: .95; }
+.t2-arm, .t2-fit, .t2-mu { transition: opacity .2s ease; }
+.t2-arm.dim, .t2-fit.dim, .t2-mu.dim { opacity: .1; }
+.t2-fit { stroke-width: 1.5; stroke-dasharray: 6 4; stroke-linecap: round; }
+.t2-fit.q { stroke-width: 1.9; }
+.t2-fitkey { stroke: #6b6f75; stroke-width: 1.5; stroke-dasharray: 5 3; }
+.t2-key text { fill: #44484f; paint-order: stroke; stroke: #fdfdfd; stroke-width: 4px; stroke-linejoin: round; }
+.t2-mu { font-weight: 500; font-variant-numeric: tabular-nums; paint-order: stroke; stroke: #fdfdfd; stroke-width: 4px; stroke-linejoin: round; }
+.t2-mu.q { font-weight: 700; }
+.t2-ring { fill: none; stroke-width: 1.8; }
+
+/* step scrubber */
+.t2-scrub { display: flex; align-items: center; gap: 10px; margin-top: 6px; }
+.t2-play {
+  appearance: none; flex: none; width: 32px; height: 32px; display: grid; place-items: center; padding: 0;
+  border: 1px solid #d8d4cc; border-radius: 999px; background: #fdfdfd; color: #1d1f22; cursor: pointer;
+}
+.t2-play:hover { background: #f1efea; }
+.t2-play svg { width: 13px; height: 13px; }
+.t2-read { flex: none; min-width: 42px; text-align: right; font: 500 12px/1 var(--sans); font-variant-numeric: tabular-nums; color: #1d1f22; }
+.t2-slider { position: relative; flex: 1 1 auto; min-width: 80px; height: 32px; cursor: pointer; touch-action: pan-y; outline: none; border-radius: 8px; }
+.t2-slider:focus-visible { outline: 2px solid #2e6f95; outline-offset: 2px; }
+.t2-track { position: absolute; left: 8px; right: 8px; top: 50%; height: 4px; margin-top: -2px; border-radius: 4px; background: #e6e3dd; }
+.t2-fill { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 4px; background: #9a9da3; }
+.t2-thumb {
+  position: absolute; top: 50%; width: 16px; height: 16px; margin: -8px 0 0 -8px; border-radius: 999px;
+  background: #fdfdfd; border: 1.5px solid #1d1f22; box-shadow: 0 1px 3px rgba(29,31,34,.18);
+}
+.t2-slider:hover .t2-thumb { box-shadow: 0 0 0 5px rgba(29,31,34,.07), 0 1px 3px rgba(29,31,34,.18); }
+
+/* Fig. 17 bars */
+.t2-rowlab { fill: #1d1f22; font: 600 12px var(--sans); }
+.t2-seg { transition: opacity .2s ease; }
+.t2-seg.dim, .t2-slab.dim, .t2-tot.dim { opacity: .28; }
+.t2-slab { fill: #fdfdfd; font: 600 12px var(--sans); font-variant-numeric: tabular-nums; pointer-events: none; transition: opacity .2s ease; }
+.t2-slab.dk, .t2-slab.out { fill: #1d1f22; }
+.t2-tot { fill: #1d1f22; font: 650 var(--fs-s, 13px) var(--sans); font-variant-numeric: tabular-nums; transition: opacity .2s ease; }
+.t2-ratio { fill: #44484f; font: 600 var(--fs-s, 13px) var(--sans); font-variant-numeric: tabular-nums; }
+.t2-ratio-br { stroke: #9a9ea5; fill: none; stroke-width: 1; shape-rendering: crispEdges; }
+
+/* Fig. 17 Theorem 1(i) terms (legend + formula + value) */
+.t2-eq { display: flex; align-items: stretch; justify-content: space-between; gap: 4px; margin-top: 10px; padding-top: 14px; border-top: 1px solid #ecebe7; }
+.t2-term {
+  flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 6px 4px 8px;
+  border-radius: 8px; cursor: default; transition: background .18s ease, opacity .18s ease; outline: none;
+}
+.t2-eq.hl .t2-term:not(.on) { opacity: .45; }
+.t2-term.on { background: #f4f2ee; }
+.t2-tn { display: inline-flex; align-items: center; gap: 6px; font: 500 12px/1.2 var(--sans); color: #44484f; white-space: nowrap; }
+.t2-term.q .t2-tn { color: #a13040; font-weight: 600; }
+.t2-sw { width: 10px; height: 10px; border-radius: 2px; flex: none; }
+.t2-tx { display: inline-flex; align-items: center; min-height: 36px; font: 400 var(--fs-s, 13px)/1.2 var(--serif); color: #1d1f22; white-space: nowrap; }
+.t2-tx sub { font-size: 12px; line-height: 0; }
+.t2-tv { font: 650 12px/1 var(--sans); font-variant-numeric: tabular-nums; color: #1d1f22; }
+.t2-term.q .t2-tv { color: #a13040; }
+.t2-op { align-self: center; margin-top: 10px; font: 400 var(--fs-s, 13px)/1 var(--serif); color: #6b6f75; }
+.t2-frac { display: inline-flex; flex-direction: column; vertical-align: middle; text-align: center; line-height: 1.12; margin: 0 2px; }
+.t2-frac > span + span { border-top: 1px solid currentColor; padding-top: 1px; }
+.t2-frac.sm { font-size: 12px; }
+
+/* line charts (Fig. 18) */
+.t2-line { stroke-width: 1.3; transition: opacity .2s ease; }
+.t2-line.q { stroke-width: 2.2; }
+.t2-mk { transition: opacity .2s ease; }
+.t2-line.dim, .t2-mk.dim, .t2-end.dim { opacity: .14; }
+.t2-end { font: 500 12px var(--sans); font-variant-numeric: tabular-nums; transition: opacity .2s ease; }
+.t2-end.q { font-weight: 700; }
+.t2-xh { stroke: #8a8d92; stroke-width: 1; stroke-dasharray: 2 3; shape-rendering: crispEdges; }
+.t2-xh.faint { opacity: .45; }
+.t2-hd { stroke: #fdfdfd; stroke-width: 1.6; }
+
+/* legends (Fig. 18): hover highlights a series everywhere */
+.t2-legend { display: flex; flex-wrap: wrap; gap: 6px 16px; margin: 0 0 8px; font: 500 12px/1.3 var(--sans); color: #44484f; }
+.t2-li { display: inline-flex; align-items: center; gap: 7px; white-space: nowrap; padding: 3px 0; cursor: default; transition: opacity .18s ease; }
+.t2-li svg { width: 22px; height: 10px; max-width: none; flex: none; overflow: visible; }
+.t2-li.q { color: #a13040; font-weight: 700; }
+.t2-legend:has(.t2-li.hl) .t2-li:not(.hl) { opacity: .45; }
+.t2-lm { font-weight: 500; }
+.t2-lm .t2-m { font-size: var(--fs-s, 13px); }
+
+/* ---- tooltip ---- */
+.t2 .vtip { font: 400 var(--fs-s, 13px)/1.45 var(--sans); max-width: 300px; }
+.t2 .vtip .tt { font: 500 12px/1.3 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: #6b6f75; margin-bottom: 4px; }
+.t2 .vtip .tt .t2-m { font-size: var(--fs-s, 13px); color: #44484f; }
+.t2 .vtip .t2-row { align-items: baseline; }
+.t2 .vtip .t2-row b { font-weight: 650; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.t2 .vtip .t2-row.s b { color: #1d1f22; }
+.t2 .vtip .t2-row.q .t2-n, .t2 .vtip .t2-row.q b { color: #a13040; }
+.t2 .vtip .t2-row.q .t2-n { font-weight: 600; }
+.t2 .vtip .t2-n { color: #44484f; white-space: nowrap; }
+.t2 .vtip .t2-n sub { font-size: 12px; line-height: 0; }
+.t2 .vtip .t2-k { display: inline-block; width: 12px; height: 3px; border-radius: 2px; margin-right: 7px; vertical-align: 3px; }
+.t2 .vtip .tt .t2-k { vertical-align: 2px; }
+.t2 .vtip .t2-frac { font-size: 12px; line-height: 1.05; }
+
+/* fetch failure: neutral data label in place of the chart */
+.t2-fail { padding: 22px 0; text-align: center; font: 500 12px/1.4 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: #6b6f75; }
+
+@media (max-width: 600px) {
+  .t2-ctl { gap: 8px 12px; }
+  .t2-cg .pills button { padding: 7px 10px; }
+  .t2-chip { padding: 4px 6px; }
+  .t2-tx { font-size: var(--fs-s, 13px); }
+}
+
+@media print {
+  .t2-scrub .t2-play { display: none; }
+}
+.t2 .sr-only table { font: 400 12px var(--sans); }
+.t2-keyrow { display: none; margin: 4px 0 0; }
+.t2-keyrow.on { display: flex; }
+.t2-keyrow .t2-li { color: #44484f; }
+@media (max-width: 420px) { .t2-long { display: none; } }

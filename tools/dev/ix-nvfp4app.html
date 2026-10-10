@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex, nofollow">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NVFP4 appendix dev</title>
+<script>
+  window.__errors = [];
+  window.onerror = function (msg, src, line, col) { window.__errors.push(msg + " @" + line + ":" + col); var e = document.getElementById("errs"); if (e) e.textContent = window.__errors.join("\n"); };
+  window.addEventListener("unhandledrejection", function (ev) { window.__errors.push("rejection: " + ev.reason); var e = document.getElementById("errs"); if (e) e.textContent = window.__errors.join("\n"); });
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Newsreader:ital,opsz,wght@0,6..72,400..600;1,6..72,400..500&display=swap">
+<link rel="stylesheet" href="../../assets/css/site.css">
+<link rel="stylesheet" href="../../assets/css/ix-nvfp4app.css">
+<style>pre#errs{color:#b00;font:12px monospace;white-space:pre-wrap;margin:0 20px}</style>
+</head>
+<body>
+<pre id="errs"></pre>
+<main id="main">
+<section class="block" id="nvfp4" style="padding-top:24px">
+  <div class="fig">
+    <div class="grid-2">
+      <figure class="plate ix">
+        <div class="viz"><div class="viz-head"><span class="viz-kicker" data-label><b>long horizon</b> · NVFP4 · Qwen3.5-9B</span></div><div class="viz-body"><div id="ix-fig35" class="chart ix-mount" style="min-height:678px"></div></div></div>
+        <figcaption><b>QUASAR better preserves long-horizon behavior in NVFP4.</b> Expanded Qwen3.5-9B results. (a) OpenAI-MRCR score by context length; (b) share of long generations that terminate within the 32k-token output budget. Higher is better.</figcaption>
+      </figure>
+      <figure class="plate ix">
+        <div class="viz"><div class="viz-head"><span class="viz-kicker" data-label><b>non-termination</b> · NVFP4</span></div><div class="viz-body"><div id="ix-tab10" class="chart ix-mount" style="min-height:640px"></div></div></div>
+        <figcaption><b>QUASAR has the lowest or tied-lowest non-termination rate among the quantized checkpoints.</b> Percentage of generations that reach the 32,768-token output budget without stopping. Lower is better.</figcaption>
+      </figure>
+    </div>
+  </div>
+</section>
+</main>
+<script>
+  // dev only: headless Chrome stalls rAF under --virtual-time-budget; ?raf drives it from timers instead
+  if (new URLSearchParams(location.search).has("raf")) window.requestAnimationFrame = function (cb) { return setTimeout(function () { cb(performance.now()); }, 16); };
+  // dev only: ?fail makes the data fetch fail (checks the "data unavailable" fallback)
+  if (new URLSearchParams(location.search).has("fail")) { var f0 = window.fetch; window.fetch = function (u, o) { return String(u).indexOf("ix-nvfp4app") >= 0 ? Promise.reject(new Error("dev: forced failure")) : f0(u, o); }; }
+</script>
+<script src="../../assets/js/viz.js"></script>
+<script src="../../assets/js/ix-nvfp4app.js"></script>
+</body>
+</html>

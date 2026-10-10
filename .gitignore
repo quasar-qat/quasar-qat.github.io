@@ -1,0 +1,5 @@
+.DS_Store
+tools/dev/*.png
+__pycache__/
+*.pyc
+tools/_private/
